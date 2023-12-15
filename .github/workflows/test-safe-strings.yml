@@ -28,28 +28,35 @@ jobs:
           ref: ${{ github.ref }}
       - id: test1
         name: "Test clean"
-        uses: './.github/actions/safe-string'
+        uses: './.github/actions/safe-strings'
         with:
           original: "bot/likes/slashes-and-dashes?"
       - id: test2
         name: "Test trim"
-        uses: './.github/actions/safe-string'
+        uses: './.github/actions/safe-strings'
         with:
           original: "a-very-very-very-very-long-string-that-should-not-be-used"
           length: 6
       - id: test3
         name: "Test suffix"
-        uses: './.github/actions/safe-string'
+        uses: './.github/actions/safe-strings'
         with:
           original: "branch"
           suffix: "1"
       - id: test4
         name: "Test trim and suffix"
-        uses: './.github/actions/safe-string'
+        uses: './.github/actions/safe-strings'
         with:
           original: "branchname-to-shortern"
           length: 7
           suffix: "1"
+      - id: test5
+        name: "Test conditional overwite"
+        uses: './.github/actions/safe-strings'
+        with:
+          original: "main"
+          conditional_match: "main"
+          conditional_value: "production"
       - id: results
         name: Test results
         run: |
@@ -57,6 +64,7 @@ jobs:
           t2="a-very"
           t3="branch1"
           t4="branch1"
+          t5="production"
           echo "### Test Information" >> $GITHUB_STEP_SUMMARY
           echo "| Test | Expected | Actual |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
@@ -64,6 +72,7 @@ jobs:
           echo "| Two | ${t2} | ${{steps.test2.outputs.version}} |" >> $GITHUB_STEP_SUMMARY
           echo "| Three | ${t3} | ${{steps.test3.outputs.version}} |" >> $GITHUB_STEP_SUMMARY
           echo "| Four | ${t4} | ${{steps.test4.outputs.version}} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Five | ${t5} | ${{steps.test5.outputs.version}} |" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{steps.test1.outputs.version}}" != "${t1}" ]; then
             exit 1
@@ -75,6 +84,9 @@ jobs:
             exit 1
           fi
           if [ "${{steps.test4.outputs.version}}" != "${t4}" ]; then
+            exit 1
+          fi
+          if [ "${{steps.test5.outputs.version}}" != "${t5}" ]; then
             exit 1
           fi
       
