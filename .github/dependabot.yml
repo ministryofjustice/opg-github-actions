@@ -3,6 +3,6 @@ updates:
   - package-ecosystem: 'github-actions'
     pull-request-branch-name:
       separator: "-"  
-    directory: '/'
+    directory: './.github/'
     schedule:
       interval: 'daily'
