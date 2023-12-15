@@ -49,23 +49,24 @@ runs:
 
         suffix_len="${#suffix}"
 
-        parsed=$(echo ${str} | tr '[:upper:]' '[:lower:]')
-        safe=$( echo "${parsed}" | tr -cd '[:alnum:]')
+        lower=$(echo ${str} | tr '[:upper:]' '[:lower:]')
+        safe=$( echo "${lower}" | tr -cd '[:alnum:]')
         full_length=${safe}
-        trimmed=""
 
         # If a max length as been set, then trim the string down
         if [ ! -z "${max_len}" ]; then
             sub_len="$((max_len - suffix_len))"
             trimmed="${safe:0:$sub_len}${suffix}"
             safe=${trimmed}
+        else
+          safe="${safe}${suffix}"
         fi
 
         # If conditional match equals the original string, then use the value directly
         # and overwrite the trimmed / safe values
         if [ ! -z "${conditional_match}" ] && [ "${str}" = "${conditional_match}" ]; then
-            safe="${conditional_value}"
-            trimmed="${conditional_value}"
+            full_length="${conditional_value}"
+            safe="${conditional_value}"  
         fi
 
         echo "original=${str}"
