@@ -40,7 +40,7 @@ jobs:
         uses: './.github/actions/safe-strings'
         with:
           original: "a-very-very-very-very-long-string-that-should-not-be-used"
-          length: 6
+          length: 5
       - id: test3
         name: "Test suffix"
         uses: './.github/actions/safe-strings'
@@ -65,7 +65,7 @@ jobs:
         name: Test results
         run: |
           t1="botlikesslashesanddashes"
-          t2="a-very"
+          t2="avery"
           t3="branch1"
           t4="branch1"
           t5="production"
