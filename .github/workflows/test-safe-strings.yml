@@ -66,8 +66,8 @@ jobs:
           t4="branch1"
           t5="production"
           echo "### Test Information" >> $GITHUB_STEP_SUMMARY
-          echo "| | Original | Expected | Actual |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
+          echo "| \#  | Original | Expected | Actual |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
           echo "| 1. | ${{steps.test1.outputs.original}} | ${t1} | ${{steps.test1.outputs.safe}} |" >> $GITHUB_STEP_SUMMARY
           echo "| 2. | ${{steps.test2.outputs.original}} | ${t2} | ${{steps.test2.outputs.safe}} |" >> $GITHUB_STEP_SUMMARY
           echo "| 3. | ${{steps.test3.outputs.original}} | ${t3} | ${{steps.test3.outputs.safe}} |" >> $GITHUB_STEP_SUMMARY
