@@ -10,6 +10,7 @@ jobs:
     runs-on: 'ubuntu-latest'
     name: "Test terraform-version"
     steps:
+      - uses: actions/checkout@v4
       - id: test1
         name: "Test exact value"
         uses: './.github/actions/terraform-version'
