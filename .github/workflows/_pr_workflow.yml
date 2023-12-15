@@ -9,7 +9,8 @@ jobs:
   test_terraform_version:
     name: "Test terraform-version"
     uses: './.github/workflows/test-terraform-version.yml'
-
+  
+  # test safe-strings
   test_safe_strings:
     name: "Test safe-strings"
     uses: './.github/workflows/test-safe-strings.yml'
