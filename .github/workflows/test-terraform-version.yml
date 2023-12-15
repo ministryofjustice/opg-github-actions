@@ -27,13 +27,13 @@ jobs:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
       - id: test1
-        name: "Test exact value"
+        name: "1. Test exact value"
         uses: './.github/actions/terraform-version'
         with:
           terraform_directory: "./terraform-version-tests"
           terraform_versions_file: "./one"
       - id: test2
-        name: "Test range value"
+        name: "2. Test range value"
         uses: './.github/actions/terraform-version'
         with:
           terraform_directory: "./terraform-version-tests"
