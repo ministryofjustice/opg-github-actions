@@ -26,6 +26,10 @@ jobs:
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
+      - run: |
+          ls -l
+          ls -l ./.github
+          ls -l ./.github/actions
       - id: test1
         name: "Test clean"
         uses: './.github/actions/safe-strings'
