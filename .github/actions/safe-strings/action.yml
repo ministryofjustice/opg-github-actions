@@ -1,0 +1,83 @@
+name: "Safe string generation"
+description: "Convert a string into shortern and remove unsafe characters. If conditional_match is set and original equals this value then conditional_value is used for the outputs."
+inputs:
+  original:
+    description: "Original string (such as branch name) to make safe for tag usage etc"
+    required: true
+  suffix:
+    description: "Directory where terraform will be run from. Looks for versions.tf file in this path."
+    default: ""
+  conditional_match:
+    description: "If the original string matches this value, then use the conditional_value directly."
+    default: ""
+  conditional_value:
+    description: "When original matches conditional_match use this value for all other outputs directly."
+    default: ""
+  length:
+    description: "If set, trim the string to this length"
+
+outputs:
+  original:
+    description: "Original string"
+    value: ${{ steps.make_safe.outputs.original }}
+  suffix:
+    description: "Original suffix"
+    value: ${{ steps.make_safe.outputs.suffix }}
+  length:
+    description: "Originally requested length"
+    value: ${{ steps.make_safe.outputs.length }}
+  full_length:
+    description: "Alphanumeric, lowercase, but full length version of the original string."
+    value: ${{ steps.make_safe.outputs.full_length }}
+  safe:
+    description: "Alphanumeric, lowercase, trimmed to length version of the original string."
+    value: ${{ steps.make_safe.outputs.safe }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: make_safe
+      shell: bash
+      run: |
+        set -e
+
+        str="${{inputs.original}}"
+        suffix="${{inputs.suffix}}"
+        max_len="${{inputs.length}}"
+        conditional_match="${{inputs.conditional_match}}"
+        conditional_value="${{inputs.conditional_value}}"
+
+        suffix_len="${#suffix}"
+
+        lower=$(echo ${str} | tr '[:upper:]' '[:lower:]')
+        safe=$( echo "${lower}" | tr -cd '[:alnum:]')
+        full_length=${safe}
+
+        # If a max length as been set, then trim the string down
+        if [ ! -z "${max_len}" ]; then
+            sub_len="$((max_len - suffix_len))"
+            trimmed="${safe:0:$sub_len}${suffix}"
+            safe=${trimmed}
+        else
+          safe="${safe}${suffix}"
+        fi
+
+        # If conditional match equals the original string, then use the value directly
+        # and overwrite the trimmed / safe values
+        if [ ! -z "${conditional_match}" ] && [ "${str}" = "${conditional_match}" ]; then
+            full_length="${conditional_value}"
+            safe="${conditional_value}"  
+        fi
+
+        echo "original=${str}"
+        echo "suffix=${suffix}"
+        echo "length=${max_len}"
+        echo "full_length=${full_length}"
+        echo "safe=${safe}"
+
+        echo "original=${str}" >> $GITHUB_OUTPUT
+        echo "suffix=${suffix}" >> $GITHUB_OUTPUT
+        echo "length=${max_len}" >> $GITHUB_OUTPUT
+        echo "full_length=${full_length}" >> $GITHUB_OUTPUT
+        echo "safe=${safe}" >> $GITHUB_OUTPUT
+

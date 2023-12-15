@@ -1,0 +1,57 @@
+name: "[Test] terraform-version"
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+  security-events: none
+  pull-requests: none
+  actions: none
+  checks: none
+  deployments: none
+  issues: none
+  packages: none
+  repository-projects: none
+  statuses: none
+
+
+jobs:
+  test:
+    runs-on: 'ubuntu-latest'
+    name: "Test terraform-version"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.ref }}
+      - id: test1
+        name: "1. Test exact value"
+        uses: './.github/actions/terraform-version'
+        with:
+          terraform_directory: "./terraform-version-tests"
+          terraform_versions_file: "./one"
+      - id: test2
+        name: "2. Test range value"
+        uses: './.github/actions/terraform-version'
+        with:
+          terraform_directory: "./terraform-version-tests"
+          terraform_versions_file: "./two"
+      - id: test_results
+        name: Test results
+        run: |
+          t1="1.6.5"
+          t2=">= 1.1.0"
+          echo "### Test Information" >> $GITHUB_STEP_SUMMARY
+          echo "| \# | Expected | Actual |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
+          echo "| 1. | ${t1} | ${{steps.test1.outputs.version}} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 2. | ${t2} | ${{steps.test2.outputs.version}} |" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{steps.test1.outputs.version}}" != "${t1}" ]; then
+            exit 1
+          fi
+          if [ "${{steps.test2.outputs.version}}" != "${t2}" ]; then
+            exit 1
+          fi
