@@ -14,7 +14,7 @@ jobs:
   # generate semver tag
   semver_tag:
     needs: [branch_name]
-    name: "Tag [${{ needs.branch_name.outputs.parse }}]"
+    name: "Tag [${{ needs.branch_name.outputs.parsed }}]"
     uses: ministryofjustice/opg-github-workflows/.github/workflows/data-parse-semver-tag.yml@v1.36.0
     with:
       branch_name: ${{ needs.branch_name.outputs.parsed }}
