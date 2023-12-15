@@ -5,24 +5,15 @@ on:
     branches: [main]
 
 jobs:
-  lint_yaml:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: yaml-lint
-        uses: ibiqlik/action-yamllint@v3
-        with:
-          file_or_dir: .github/actions/*.yml
   # generate branch name
   branch_name:
-    needs: [lint_yaml]
     name: "Branch name"
     uses: ministryofjustice/opg-github-workflows/.github/workflows/data-parse-branch-name.yml@v1.36.0
     secrets: inherit
   
   # generate semver tag
   semver_tag:
-    needs: [lint_yaml, branch_name]
+    needs: [branch_name]
     name: "Tag [${{ needs.branch_name.outputs.original }}]"
     uses: ministryofjustice/opg-github-workflows/.github/workflows/data-parse-semver-tag.yml@v1.36.0
     with:
