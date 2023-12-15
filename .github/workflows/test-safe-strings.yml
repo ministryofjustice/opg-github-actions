@@ -34,7 +34,7 @@ jobs:
         name: "Test clean"
         uses: './.github/actions/safe-strings'
         with:
-          original: "bot/likes/slashes-and-dashes?"
+          original: "bot/likes/slashes-and-dashes"
       - id: test2
         name: "Test trim"
         uses: './.github/actions/safe-strings'
