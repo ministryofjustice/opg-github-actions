@@ -7,51 +7,23 @@ on:
 jobs:
   # test terraform-version
   test_terraform_version:
-    runs-on: 'ubuntu-latest'
     name: "Test terraform-version"
-    steps:
-      - uses: actions/checkout@v4
-      - id: test1
-        name: "Test exact value"
-        uses: './.github/actions/terraform-version'
-        with:
-          terraform_directory: "./terraform-version-tests"
-          terraform_versions_file: "./one"
-      - id: test2
-        name: "Test range value"
-        uses: './.github/actions/terraform-version'
-        with:
-          terraform_directory: "./terraform-version-tests"
-          terraform_versions_file: "./two"
-      - id: test_results
-        name: Test results
-        run: |
-          t1="1.6.5"
-          t2=">= 1.1.0"
-          echo "### Test Information" >> $GITHUB_STEP_SUMMARY
-          echo "| Test | Expected | Actual |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
-          echo "| One | ${t1} | ${{steps.test1.outputs.version}} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Two | ${t2} | ${{steps.test2.outputs.version}} |" >> $GITHUB_STEP_SUMMARY
+    uses: './.github/workflows/test-terraform-version.yml'
 
-          if [ "${{steps.test1.outputs.version}}" != "${t1}" ]; then
-            exit 1
-          fi
-          if [ "${{steps.test2.outputs.version}}" != "${t2}" ]; then
-            exit 1
-          fi
-
+  test_safe_strings:
+    name: "Test safe-strings"
+    uses: './.github/workflows/test-safe-strings.yml'
 
   # generate branch name
   branch_name:
-    needs: [test_terraform_version]
+    needs: [test_terraform_version, test_safe_strings]
     name: "Branch name"
     uses: ministryofjustice/opg-github-workflows/.github/workflows/data-parse-branch-name.yml@v1.36.0
     secrets: inherit
   
   # generate semver tag
   semver_tag:
-    needs: [test_terraform_version, branch_name]
+    needs: [test_terraform_version, test_safe_strings, branch_name]
     name: "Tag [${{ needs.branch_name.outputs.parsed }}]"
     uses: ministryofjustice/opg-github-workflows/.github/workflows/data-parse-semver-tag.yml@v1.36.0
     with:
