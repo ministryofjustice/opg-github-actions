@@ -26,12 +26,12 @@ outputs:
   length:
     description: "Originally requested length"
     value: ${{ steps.make_safe.outputs.length }}
+  full_length:
+    description: "Alphanumeric, lowercase, but full length version of the original string."
+    value: ${{ steps.make_safe.outputs.full_length }}
   safe:
-    description: "Alphanumeric, lowercase, full length version of the original string."
+    description: "Alphanumeric, lowercase, trimmed to length version of the original string."
     value: ${{ steps.make_safe.outputs.safe }}
-  trimmed:
-    description: "Trimmed version of the `safe` output string"
-    value: ${{ steps.make_safe.outputs.trimmed }}
 
 runs:
   using: "composite"
@@ -51,12 +51,14 @@ runs:
 
         parsed=$(echo ${str} | tr '[:upper:]' '[:lower:]')
         safe=$( echo "${parsed}" | tr -cd '[:alnum:]')
+        full_length="${safe}"
         trimmed=""
 
         # If a max length as been set, then trim the string down
         if [ ! -z "${max_len}" ]; then
             sub_len="$((max_len - suffix_len))"
             trimmed="${safe:0:$sub_len}${suffix}"
+            safe="{$trimmed}"
         fi
 
         # If conditional match equals the original string, then use the value directly
@@ -69,12 +71,12 @@ runs:
         echo "original=${str}"
         echo "suffix=${suffix}"
         echo "length=${max_len}"
+        echo "full_length=${full_length}"
         echo "safe=${safe}"
-        echo "trimmed=${trimmed}"
 
         echo "original=${str}" >> $GITHUB_OUTPUT
         echo "suffix=${suffix}" >> $GITHUB_OUTPUT
         echo "length=${max_len}" >> $GITHUB_OUTPUT
+        echo "full_length=${full_length}" >> $GITHUB_OUTPUT
         echo "safe=${safe}" >> $GITHUB_OUTPUT
-        echo "trimmed=${trimmed}" >> $GITHUB_OUTPUT
 
