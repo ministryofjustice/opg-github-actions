@@ -45,7 +45,7 @@ jobs:
           t2=">= 1.1.0"
           echo "### Test Information" >> $GITHUB_STEP_SUMMARY
           echo "| \# | Expected | Actual |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
           echo "| 1. | ${t1} | ${{steps.test1.outputs.version}} |" >> $GITHUB_STEP_SUMMARY
           echo "| 2. | ${t2} | ${{steps.test2.outputs.version}} |" >> $GITHUB_STEP_SUMMARY
 
