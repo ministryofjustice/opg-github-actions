@@ -37,6 +37,7 @@ runs:
   using: "composite"
   steps:
     - id: make_safe
+      name: "Create tag-safe strings"
       shell: bash
       run: |
         set -e

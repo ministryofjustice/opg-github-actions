@@ -21,20 +21,19 @@ runs:
       with:
         repository: ${{ github.repository }}
         ref: ${{ github.ref }}
-    # set a blank version value
-    - shell: bash
-      run: |
-        echo "version=" >> $GITHUB_OUTPUT
     # fail if directory or version file does not exist
     - id: version
+      name: Parse terraform version data from [${{ inputs.terraform_directory }}][${{ inputs.terraform_versions_file }}]
       shell: bash
       run: |
-        echo "errors=" >> $GITHUB_OUTPUT
+        echo "version=" >> $GITHUB_OUTPUT
         if [ ! -d ${{ inputs.terraform_directory }} ]; then
+          echo "Directory not found"
           exit 1
         fi
         cd ${{ inputs.terraform_directory }}
         if [ ! -f ${{ inputs.terraform_versions_file }} ]; then
+          echo "File not found"
           exit 1
         fi
         terraform_version=$(cat ${{ inputs.terraform_versions_file }} | sed -r -n 's/.*required_version.*"(.*)"$/\1/p' )
