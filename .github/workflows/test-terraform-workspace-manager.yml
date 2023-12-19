@@ -49,9 +49,9 @@ jobs:
       - id: test_results
         name: Test results
         run: |
-          ws1=test${{github.sha}}
-          pw1=${{steps.test1.outputs.protected_workspaces}}
-          pw2=${{steps.test2.outputs.protected_workspaces}}
+          ws1="test${{github.sha}}"
+          pw1="${{steps.test1.outputs.protected_workspaces}}"
+          pw2="${{steps.test2.outputs.protected_workspaces}}"
           
           if [[ "${pw1}" != *"${ws1}"* ]]; then
             echo "workspace not found"
