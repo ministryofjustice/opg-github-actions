@@ -35,7 +35,7 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}          
           aws_account_id: '995199299616'
           aws_iam_role: 'gh-reusable-actions-ci'
-          register_workspace: "test${{github.ref}}"
+          register_workspace: "test${{github.sha}}"
           time_to_protect: 1
       - id: test_results
         name: Test results
