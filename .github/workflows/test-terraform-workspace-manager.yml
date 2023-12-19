@@ -1,0 +1,40 @@
+name: "[Test] terraform-workspace-manager"
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+  security-events: none
+  pull-requests: none
+  actions: none
+  checks: none
+  deployments: none
+  issues: none
+  packages: none
+  repository-projects: none
+  statuses: none
+
+
+jobs:
+  test:
+    runs-on: 'ubuntu-latest'
+    name: "Test terraform-workspace-manager"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.ref }}
+      - id: test1
+        name: "1. Test registration"
+        uses: './.github/actions/terraform-workspace-manager'
+        with:
+          # sandbox
+          aws_account_id: '995199299616'
+          aws_iam_role: 'gh-reusable-actions-ci'
+          register_workspace: "test"
+      - id: test_results
+        name: Test results
+        run: |
+          echo "${{steps.test1.outputs.protected_workspaces}}"

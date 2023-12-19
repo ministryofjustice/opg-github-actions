@@ -12,10 +12,17 @@ jobs:
     name: "Test terraform-version"
     uses: './.github/workflows/test-terraform-version.yml'
   
+  # test terraform-workspace-manager
+  test_terraform_workspace_manager:
+    name: "Test terraform-workspace-manager"
+    uses: './.github/workflows/test-terraform-workspace-manager.yml'
+
+  
   # test safe-strings
   test_safe_strings:
     name: "Test safe-strings"
     uses: './.github/workflows/test-safe-strings.yml'
+
 
   # generate branch name
   branch_name:
