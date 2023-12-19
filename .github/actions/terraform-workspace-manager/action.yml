@@ -71,7 +71,6 @@ runs:
             -aws-account-id=${{inputs.aws_account_id}} \
             -aws-iam-role=${{inputs.aws_iam_role}} \
             -protected-workspaces=true)
-        echo "${workspaces}"
         echo "list=${workspaces}" >> $GITHUB_OUTPUT
         echo "workspace=${{inputs.register_workspace}}" >> $GITHUB_OUTPUT
 
