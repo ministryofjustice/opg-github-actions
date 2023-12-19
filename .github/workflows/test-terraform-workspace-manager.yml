@@ -36,8 +36,13 @@ jobs:
           aws_account_id: '995199299616'
           aws_iam_role: 'gh-reusable-actions-ci'
           register_workspace: "test${{github.sha}}"
+          # short ttl
           time_to_protect: 1
       - id: test_results
         name: Test results
         run: |
-          echo "${{steps.test1.outputs.protected_workspaces}}"
+          ws1=test${{github.sha}}
+          if [[ "${steps.test1.outputs.protected_workspaces}" != *"${ws1}"* ]]; then
+            echo "workspace not found"
+            exit 1
+          fi

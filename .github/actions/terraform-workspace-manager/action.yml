@@ -28,6 +28,9 @@ outputs:
   protected_workspaces:
     description: 'Output from protected-workspaces call'
     value: ${{ steps.list.outputs.list }}
+  workspace_name:
+    description: 'registered workspace name'
+    value: ${{ steps.list.outputs.workspace }}
 
 runs:
   using: "composite"
@@ -70,6 +73,7 @@ runs:
             -protected-workspaces=true)
         echo "${workspaces}"
         echo "list=${workspaces}" >> $GITHUB_OUTPUT
+        echo "workspace=${{inputs.register_workspace}}" >> $GITHUB_OUTPUT
 
             
             
