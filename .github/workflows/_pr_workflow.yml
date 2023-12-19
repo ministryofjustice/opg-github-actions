@@ -16,7 +16,7 @@ jobs:
   test_terraform_workspace_manager:
     name: "Test terraform-workspace-manager"
     uses: './.github/workflows/test-terraform-workspace-manager.yml'
-
+    secrets: inherit
   
   # test safe-strings
   test_safe_strings:
