@@ -1,0 +1,73 @@
+name: "Terraform workspace manager"
+description: "Tool for terraform workspace manager. "
+  
+inputs:
+  # aws_access_key_id:
+  #   description: "AWS Access Key ID."
+  #   required: true
+  # aws_secret_access_key:
+  #   description: "AWS Secret Access Key."
+  # aws_region:
+  #   description: "AWS Region"
+  aws_account_id:
+    description: "Account ID for IAM Role"
+    required: true
+  aws_iam_role:
+    description: "AWS IAM Role Name"
+    required: true
+  register_workspace:
+    description: "Workspace name"
+    default: ""
+  time_to_protect:
+    description: "Time in hours to protect workspace for"
+    default: "24"
+  
+outputs:
+  protected_workspaces:
+    description: 'Output from protected-workspaces call'
+    value: ${{ steps.list.outputs.list }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: setup
+      name: Setup workspace manager
+      shell: bash
+      run: |
+        wget https://github.com/TomTucka/terraform-workspace-manager/releases/download/v0.3.1/terraform-workspace-manager_Linux_x86_64.tar.gz -O $HOME/terraform-workspace-manager.tar.gz
+        sudo tar -xvf $HOME/terraform-workspace-manager.tar.gz -C /usr/local/bin
+        sudo chmod +x /usr/local/bin/terraform-workspace-manager
+    # - id: aws_creds
+    #   name: Configure AWS Credentials For Terraform
+    #   uses: aws-actions/configure-aws-credentials@v4.0.1
+    #   with:
+    #     aws-access-key-id: ${{ inputs.aws_access_key_id }}
+    #     aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
+    #     aws-region: ${{ inputs.aws_region }}
+    #     role-duration-seconds: 600
+    #     role-session-name: "${{github.repository}}-TWM"
+    - id: register
+      if: inputs.register_workspace != ""
+      name: Register workspace name [${{inputs.register_workspace}}]
+      shell: bash
+      run: |
+        echo "Registering workspace"
+        terraform-workspace-manager \
+            -aws-account-id=${{inputs.aws_account_id}} \
+            -aws-iam-role=${{inputs.aws_iam_role}} \
+            -time-to-protect=${{inputs.time_to_protect}} \
+            -register-workspace=${{inputs.register_workspace}}
+    - id: list
+      name: List workspaces
+      shell: bash
+      run: |
+        echo "List protected workspace"
+        workspaces=$(terraform-workspace-manager \
+            -aws-account-id=${{inputs.aws_account_id}} \
+            -aws-iam-role=${{inputs.aws_iam_role}} \
+            -protected-workspaces=true)
+        echo "${workspaces}"
+        echo "list=${workspaces}" >> $GITHUB_OUTPUT
+
+            
+            
