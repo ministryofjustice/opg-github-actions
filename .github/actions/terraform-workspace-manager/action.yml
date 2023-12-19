@@ -46,8 +46,9 @@ runs:
     #     aws-region: ${{ inputs.aws_region }}
     #     role-duration-seconds: 600
     #     role-session-name: "${{github.repository}}-TWM"
+    
     - id: register
-      if: ${{ inputs.register_workspace != "" }}
+      if: ${{ inputs.register_workspace != '' }}
       name: Register workspace name [${{inputs.register_workspace}}]
       shell: bash
       run: |
