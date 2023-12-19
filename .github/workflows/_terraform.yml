@@ -34,6 +34,8 @@ jobs:
     env:
       tf_dir: "./terraform/account"
       apply: ${{ github.ref == 'refs/heads/main' }}
+      TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       TF_VAR_github_token: ${{ secrets.GIT_API_TOKEN }}
       TF_VAR_pagerduty_token: ${{ secrets.PAGERDUTY_TOKEN }}
     outputs:
