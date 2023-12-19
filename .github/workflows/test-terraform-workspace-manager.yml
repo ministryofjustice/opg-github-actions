@@ -38,11 +38,27 @@ jobs:
           register_workspace: "test${{github.sha}}"
           # short ttl
           time_to_protect: 1
+      - id: test2
+        name: "2. Test just listing"
+        uses: './.github/actions/terraform-workspace-manager'
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}          
+          aws_account_id: '995199299616'
+          aws_iam_role: 'gh-reusable-actions-ci'
       - id: test_results
         name: Test results
         run: |
           ws1=test${{github.sha}}
-          if [[ "${steps.test1.outputs.protected_workspaces}" != *"${ws1}"* ]]; then
+          pw1=${{steps.test1.outputs.protected_workspaces}}
+          pw2=${{steps.test2.outputs.protected_workspaces}}
+          
+          if [[ "${pw1}" != *"${ws1}"* ]]; then
             echo "workspace not found"
+            exit 1
+          fi
+
+          if [[ "${pw1}" != "${pw2}" ]]; then
+            echo "workspace list has changed"
             exit 1
           fi
