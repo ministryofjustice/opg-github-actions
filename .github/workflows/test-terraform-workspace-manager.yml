@@ -35,7 +35,7 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}          
           aws_account_id: '995199299616'
           aws_iam_role: 'gh-reusable-actions-ci'
-          register_workspace: "test${{github.sha}}"
+          register_workspace: "t${{github.sha}}"
           # short ttl
           time_to_protect: 1
       - id: test2
@@ -49,7 +49,7 @@ jobs:
       - id: test_results
         name: Test results
         run: |
-          ws1="test${{github.sha}}"
+          ws1="t${{github.sha}}"
           pw1="${{steps.test1.outputs.protected_workspaces}}"
           pw2="${{steps.test2.outputs.protected_workspaces}}"
           
