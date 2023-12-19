@@ -33,7 +33,7 @@ jobs:
         shell: bash        
     env:
       tf_dir: "./terraform/account"
-      apply: ${{ github.ref == 'refs/heads/main' }}
+      apply: ${{  }}
       TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       TF_VAR_github_token: ${{ secrets.GIT_API_TOKEN }}
@@ -68,8 +68,8 @@ jobs:
         run: |
           terraform init -input=false -lock-timeout=300s
           terraform plan -lock-timeout=300s -input=false -parallelism=30
-      - name: "Terraform Apply [apply: ${{env.apply}}]"
-        if: env.apply
+      - name: "Terraform Apply [apply: ${{github.ref == 'refs/heads/main'}}]"
+        if: github.ref == 'refs/heads/main'
         working-directory: ${{ env.tf_dir }}
         run: |
           terraform apply -lock-timeout=300s -input=false -auto-approve -parallelism=30

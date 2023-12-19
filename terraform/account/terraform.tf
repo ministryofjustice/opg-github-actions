@@ -29,6 +29,13 @@ provider "aws" {
   }
 }
 
+provider "aws" {
+  assume_role {
+    role_arn     = "arn:aws:iam::${local.sandbox}:role/${var.DEFAULT_ROLE}"
+    session_name = "terraform-session"
+  }
+}
+
 variable "github_token" {
 }
 
