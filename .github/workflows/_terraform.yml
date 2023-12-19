@@ -59,12 +59,15 @@ jobs:
           role-session-name: GitHubActionsOrgInfra
       - name: "Lint Terraform"
         id: tf_lint
+        working-directory: ${{ env.tf_dir }}
         run: terraform fmt -check -recursive
       - name: "Terraform Plan"
+        working-directory: ${{ env.tf_dir }}
         run: |
           terraform init -input=false -lock-timeout=300s
           terraform plan -lock-timeout=300s -input=false -parallelism=30
       - name: "Terraform Apply [apply: ${{env.apply}}]"
         if: env.apply
+        working-directory: ${{ env.tf_dir }}
         run: |
           terraform apply -lock-timeout=300s -input=false -auto-approve -parallelism=30
