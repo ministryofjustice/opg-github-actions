@@ -3,6 +3,8 @@ name: "[Pull Request] Workflow"
 on:
   pull_request:
     branches: [main]
+    paths-ignore: ['terraform/**', '.github/workflows/_terraform.yml']
+    
 
 jobs:
   # test terraform-version
