@@ -68,7 +68,7 @@ runs:
         git tag -n > tags.txt
     - name: Process tags
       shell: python
-      run:
+      run: |
         tag_file="tags.txt"
         tag_commit_list=[[int(i) for i in line.strip().split(',')] for line in open(tag_file).readlines()]
         print(*tag_commit_list, sep = "\n")
