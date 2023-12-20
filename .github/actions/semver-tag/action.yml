@@ -65,10 +65,8 @@ runs:
       shell: bash
       run: |
         git fetch --tags
-        all_tags=$(git tag -n)
-        echo "all_tags=${all_tags}"
-        echo '<<EOF'
-        echo "all_tags=\"${all_tags}\"" >> $GITHUB_OUTPUT
+        echo 'all_tags=<<EOF'
+        git tag -n >> $GITHUB_OUTPUT
         echo 'EOF' >> $GITHUB_OUTPUT
     - name: Process tags
       shell: python
