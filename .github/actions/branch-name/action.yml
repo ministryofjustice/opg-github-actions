@@ -14,7 +14,7 @@ outputs:
   ref:
     description: "Original ref"
     value: ${{ inputs.ref }}    
-  branch:
+  branch_name:
     description: "Branch name"
     value: ${{ steps.setup.outputs.branch }}
   full_length:
@@ -31,12 +31,15 @@ runs:
       name: "Workout base branch value"      
       shell: bash
       run: |      
-          branch=${{inputs.head_ref}}          
-          if [ -z "${{inputs.head_ref}}" ]; then
-            echo "head_ref is empty"
-            b=${{inputs.ref}}
-            branch=${b#refs/heads/}
+          b=""
+          if [ ! -z "${{inputs.ref}}" ]; then
+            echo "Using ref: [${{inputs.ref}}]"
+            b="${{inputs.ref}}"
+          elif [ ! -x "${{inputs.head_ref}}" ]; then
+            echo "Using head_ref: [${{inputs.head_ref}}]"
+            b="${{inputs.head_ref}}"
           fi
+          branch=${b#refs/heads/}
           echo "branch=${branch}" >> $GITHUB_OUTPUT
     - id: safe
       name: Safe string versions
