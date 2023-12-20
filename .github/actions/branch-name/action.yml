@@ -36,7 +36,7 @@ runs:
             echo "Using ref: [${{inputs.ref}}]"
             b="${{inputs.ref}}"
           fi
-          if [ ! -x "${{inputs.head_ref}}" ]; then
+          if [ ! -z "${{inputs.head_ref}}" ]; then
             echo "Using head_ref: [${{inputs.head_ref}}]"
             b="${{inputs.head_ref}}"
           fi
