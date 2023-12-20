@@ -30,19 +30,19 @@ jobs:
         name: "1. Test empty head_ref, set ref"
         uses: './.github/actions/branch-name'
         with:
-          ref: "refs/head/main"
+          ref: "refs/heads/main"
           head_ref: ""
       - id: test2
         name: "2. Test head_ref set, set ref"
         uses: './.github/actions/branch-name'
         with:
-          ref: "refs/head/main"
+          ref: "refs/heads/main"
           head_ref: "t2"
       - id: test3
         name: "2. Test long branch"
         uses: './.github/actions/branch-name'
         with:
-          ref: "refs/head/qwerty-123-456-789-wasd-0"
+          ref: "refs/heads/qwerty-123-456-789-wasd-0"
           head_ref: "t2"
       - id: test_results
         name: Test results
@@ -57,8 +57,9 @@ jobs:
           echo "| --- | --- | --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
           echo "| 1. | ${t1} | ${{steps.test1.outputs.branch}} | ${{steps.test1.outputs.safe}} | ${{steps.test1.outputs.full_length}} |" >> $GITHUB_STEP_SUMMARY
           echo "| 2. | ${t2} | ${{steps.test2.outputs.branch}} | ${{steps.test2.outputs.safe}} | ${{steps.test2.outputs.full_length}} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 3a. | ${t3} | ${{steps.test3.outputs.branch}} | ${{steps.test3.outputs.safe}} | ${{steps.test3.outputs.full_length}} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 3b. | ${t3} | ${{steps.test3.outputs.branch}} | ${{steps.test3.outputs.safe}} | ${{steps.test3.outputs.full_length}} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 3a. | ${t3a} | ${{steps.test3.outputs.branch}} | ${{steps.test3.outputs.safe}} | ${{steps.test3.outputs.full_length}} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 3b. | ${t3b} | ${{steps.test3.outputs.branch}} | ${{steps.test3.outputs.safe}} | ${{steps.test3.outputs.full_length}} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 3c. | ${t3c} | ${{steps.test3.outputs.branch}} | ${{steps.test3.outputs.safe}} | ${{steps.test3.outputs.full_length}} |" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{steps.test1.outputs.branch}}" != "${t1}" ]; then
             echo "test 1 failed"

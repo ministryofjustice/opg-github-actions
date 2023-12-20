@@ -31,8 +31,9 @@ runs:
       name: "Workout base branch value"      
       shell: bash
       run: |      
-          branch=${{inputs.head_ref}}
+          branch=${{inputs.head_ref}}          
           if [ -z "${{inputs.head_ref}}" ]; then
+            echo "head_ref is empty"
             b=${{inputs.ref}}
             branch=${b#refs/heads/}
           fi
