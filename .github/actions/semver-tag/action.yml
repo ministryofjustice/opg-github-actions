@@ -69,7 +69,7 @@ runs:
         git fetch --tags
         all_tags=$(git tag -n)
         echo "all_tags=${all_tags}"
-        echo "all_tags=${all_tags}" >> $GITHUB_OUTPUT
+        echo "all_tags=\"${all_tags}\"" >> $GITHUB_OUTPUT
     - name: Process tags
       shell: python
       run:
