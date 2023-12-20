@@ -8,6 +8,9 @@ inputs:
   terraform_versions_file:
     description: "Name of file that contains the required_version config is stored. (Default `./versions.tf`)"
     default: "./versions.tf"
+  simple_file:
+    description: "If set, change the parsing to presume terraform_versions_file is a plain text file that contains only a semver string."
+    default: ""
 outputs:
   version:
     description: 'Discovered terraform version range. This may be an exact number (like 1.5.5) or a semver range (like >= 1.0).'
@@ -36,5 +39,12 @@ runs:
           echo "File not found"
           exit 1
         fi
-        terraform_version=$(cat ${{ inputs.terraform_versions_file }} | sed -r -n 's/.*required_version.*"(.*)"$/\1/p' )
+
+        if [ ! -z "${{ inputs.simple_file }}" ]; then
+          echo "Presuming plain text file"
+          terraform_version=$(cat ${{ inputs.terraform_versions_file }} )
+        else
+          echo "Presuming terraform file"
+          terraform_version=$(cat ${{ inputs.terraform_versions_file }} | sed -r -n 's/.*required_version.*"(.*)"$/\1/p' )
+        fi
         echo "version=${terraform_version}" >> $GITHUB_OUTPUT

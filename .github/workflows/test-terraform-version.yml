@@ -38,20 +38,32 @@ jobs:
         with:
           terraform_directory: "./terraform-version-tests"
           terraform_versions_file: "./two"
+      - id: test3
+        name: "3. Test simple file"
+        uses: './.github/actions/terraform-version'
+        with:
+          terraform_directory: "./terraform-version-tests"
+          terraform_versions_file: "./three"
+          simple_file: true
       - id: test_results
         name: Test results
         run: |
           t1="1.6.5"
           t2=">= 1.1.0"
+          t3="1.6.3"
           echo "### Test Information" >> $GITHUB_STEP_SUMMARY
           echo "| \# | Expected | Actual |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
           echo "| 1. | ${t1} | ${{steps.test1.outputs.version}} |" >> $GITHUB_STEP_SUMMARY
           echo "| 2. | ${t2} | ${{steps.test2.outputs.version}} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 3. | ${t3} | ${{steps.test3.outputs.version}} |" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{steps.test1.outputs.version}}" != "${t1}" ]; then
             exit 1
           fi
           if [ "${{steps.test2.outputs.version}}" != "${t2}" ]; then
+            exit 1
+          fi
+          if [ "${{steps.test3.outputs.version}}" != "${t3}" ]; then
             exit 1
           fi
