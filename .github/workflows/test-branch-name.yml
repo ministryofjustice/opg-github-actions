@@ -43,7 +43,6 @@ jobs:
         uses: './.github/actions/branch-name'
         with:
           ref: "refs/heads/qwerty-123-456-789-wasd-0"
-          head_ref: "t2"
       - id: test_results
         name: Test results
         run: |
