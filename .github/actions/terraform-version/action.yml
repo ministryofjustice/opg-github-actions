@@ -12,6 +12,15 @@ inputs:
     description: "If set, change the parsing to presume terraform_versions_file is a plain text file that contains only a semver string."
     default: ""
 outputs:
+  terraform_directory:
+    description: "Input value of terraform_directory"
+    value: ${{ inputs.terraform_directory }}
+  terraform_versions_file:
+    description: "Input value of terraform_versions_file"
+    value: ${{ inputs.terraform_versions_file }}
+  simple_file:
+    description: "Input value of simple_file"
+    value: ${{ inputs.simple_file }}
   version:
     description: 'Discovered terraform version range. This may be an exact number (like 1.5.5) or a semver range (like >= 1.0).'
     value: ${{ steps.version.outputs.version }}
