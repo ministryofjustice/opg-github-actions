@@ -26,7 +26,6 @@ outputs:
   dry_run:
     description: "Inputed dry_run variable."
     value: ${{ inputs.dry_run }}
-
   new_tag:
     description: "The value of the newly created tag."
     value: ${{ steps.create_tags.outputs.new_tag }}
@@ -36,7 +35,7 @@ outputs:
   part:
     description: "The part of version which was bumped."
     value: ${{ steps.create_tags.outputs.part }}
-  
+
 
 runs:
   using: "composite"
@@ -56,7 +55,6 @@ runs:
       id: create_tag
       uses: anothrNick/github-tag-action@1.67.0
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         INITIAL_VERSION: 0.0.1
         DEFAULT_BUMP: minor
         PRERELEASE_SUFFIX: ${{ steps.safe_branch.outputs.safe }}
@@ -64,7 +62,3 @@ runs:
         RELEASE_BRANCHES: ${{ inputs.release_branch }}
         WITH_V: "true"
         DRY_RUN: ${{ inputs.dry_run != '' }}
-      
-
-      
-
