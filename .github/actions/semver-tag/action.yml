@@ -1,0 +1,70 @@
+name: "Create semver tag at current github ref using passed branch name as a suffix."
+description: "Use the branch name passed (can be either refs/heads/name-of-thing or just name-of-thing)."
+inputs:
+  branch_name:
+    description: "Branch name used as prerelease suffix to create the tag name (so v1.1.0-$branch_name.$index)."    
+    default: ""
+  release_branch:    
+    description: "Release branch main - if branch name matches this the tag change to be a production style v1.1.0 without suffixes."
+    default: "main"
+  prerelease:
+    description: "If set, creates a pre-release (draft)."
+    default: ""
+  dry_run:
+    description: "If set, acts as a dry run without creating a tag"
+    default: ""
+outputs:
+  branch_name:
+    description: "Inputed branch_name."    
+    value: ${{inputs.branch_name}}
+  release_branch:
+    description: "Inputed release_branch variable."
+    value: ${{ inputs.release_branch }}
+  prerelease:
+    description: "Inputed prerelease variable."
+    value: ${{ inputs.prerelease }}
+  dry_run:
+    description: "Inputed dry_run variable."
+    value: ${{ inputs.dry_run }}
+
+  new_tag:
+    description: "The value of the newly created tag."
+    value: ${{ steps.create_tags.outputs.new_tag }}
+  tag:
+    description: "The value of the latest tag after running this action."
+    value: ${{ steps.create_tags.outputs.tag }}
+  part:
+    description: "The part of version which was bumped."
+    value: ${{ steps.create_tags.outputs.part }}
+  
+
+runs:
+  using: "composite"
+  steps:
+    - id: safe_branch
+      name: "Generate a safe, trimmed branch name"
+      uses: ./.github/actions/branch-name
+      with:
+        ref: ${{ inputs.branch_name }}        
+    - name: "Checkout"
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: '0'
+        repository: ${{ github.repository }}
+        ref: ${{ github.ref }}
+    - name: "Create Tag"
+      id: create_tag
+      uses: anothrNick/github-tag-action@1.67.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        INITIAL_VERSION: 0.0.1
+        DEFAULT_BUMP: minor
+        PRERELEASE_SUFFIX: ${{ steps.safe_branch.outputs.safe }}
+        PRERELEASE: ${{ inputs.prerelease != '' }}
+        RELEASE_BRANCHES: ${{ inputs.release_branch }}
+        WITH_V: "true"
+        DRY_RUN: ${{ inputs.dry_run != '' }}
+      
+
+      
+
