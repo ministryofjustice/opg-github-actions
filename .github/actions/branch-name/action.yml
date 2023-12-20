@@ -39,7 +39,7 @@ runs:
           echo "branch=${branch}" >> $GITHUB_OUTPUT
     - id: safe
       name: Safe string versions
-      uses: .github/actions/safe-strings
+      uses: ./.github/actions/safe-strings
       with:
         original: ${{steps.setup.outputs.branch}}
         length: 12
