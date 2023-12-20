@@ -39,7 +39,7 @@ jobs:
           t1=""
           echo "### Test Information" >> $GITHUB_STEP_SUMMARY
           echo "| \# | Branch | Tag | New Tag | " >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- | --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
           echo "| 1. | ${{steps.test1.outputs.branch_name}} | ${{steps.test1.outputs.tag}} | ${{steps.test1.outputs.new_tag}} |" >> $GITHUB_STEP_SUMMARY
 
           

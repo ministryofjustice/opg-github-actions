@@ -1,6 +1,8 @@
 name: "Create semver tag at current github ref using passed branch name as a suffix."
 description: "Use the branch name passed (can be either refs/heads/name-of-thing or just name-of-thing)."
 inputs:
+  github_token:
+    description: "Github token"
   branch_name:
     description: "Branch name used as prerelease suffix to create the tag name (so v1.1.0-$branch_name.$index)."    
     default: ""
@@ -26,15 +28,24 @@ outputs:
   dry_run:
     description: "Inputed dry_run variable."
     value: ${{ inputs.dry_run }}
-  new_tag:
-    description: "The value of the newly created tag."
-    value: ${{ steps.create_tags.outputs.new_tag }}
-  tag:
-    description: "The value of the latest tag after running this action."
-    value: ${{ steps.create_tags.outputs.tag }}
-  part:
-    description: "The part of version which was bumped."
-    value: ${{ steps.create_tags.outputs.part }}
+  branch_full_length:
+    description: "Output from branch_name safety check - the full_length return value"
+    value: ${{ steps.safe_branch.outputs.full_length }}  
+  branch_safe:
+    description: "Output from branch_name safety check  - the safe return value"
+    value: ${{ steps.safe_branch.outputs.safe }}  
+  all_tags:
+    description: "All tags on the repo"
+    value: ${{ steps.get_tags.outputs.all }}
+  # new_tag:
+  #   description: "The value of the newly created tag."
+  #   value: ${{ steps.create_tags.outputs.new_tag }}
+  # tag:
+  #   description: "The value of the latest tag after running this action."
+  #   value: ${{ steps.create_tags.outputs.tag }}
+  # part:
+  #   description: "The part of version which was bumped."
+  #   value: ${{ steps.create_tags.outputs.part }}
 
 
 runs:
@@ -51,14 +62,26 @@ runs:
         fetch-depth: '0'
         repository: ${{ github.repository }}
         ref: ${{ github.ref }}
-    - name: "Create Tag"
-      id: create_tag
-      uses: anothrNick/github-tag-action@1.67.0
-      env:
-        INITIAL_VERSION: 0.0.1
-        DEFAULT_BUMP: minor
-        PRERELEASE_SUFFIX: ${{ steps.safe_branch.outputs.safe }}
-        PRERELEASE: ${{ inputs.prerelease != '' }}
-        RELEASE_BRANCHES: ${{ inputs.release_branch }}
-        WITH_V: "true"
-        DRY_RUN: ${{ inputs.dry_run != '' }}
+    - name: Get all tags
+      id: get_tags
+      shell: bash
+      run: |
+        git fetch --tags
+        all_tags=$(git tag -n)
+        echo "all=${all_tags}" >> $GITHUB_OUTPUT
+    - name: Process tags
+      shell: python
+      run:
+        print("${{ steps.get_tags.outputs.all }}")
+    # - name: "Create Tag"
+    #   id: create_tag
+    #   uses: anothrNick/github-tag-action@1.67.0
+    #   env:
+    #     GITHUB_TOKEN: ${{inputs.github_token}}
+    #     INITIAL_VERSION: 0.0.1
+    #     DEFAULT_BUMP: minor
+    #     PRERELEASE_SUFFIX: ${{ steps.safe_branch.outputs.safe }}
+    #     PRERELEASE: ${{ inputs.prerelease != '' }}
+    #     RELEASE_BRANCHES: ${{ inputs.release_branch }}
+    #     WITH_V: "true"
+    #     DRY_RUN: ${{ inputs.dry_run != '' }}
