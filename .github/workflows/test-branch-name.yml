@@ -1,0 +1,83 @@
+name: "[Test] branch-name"
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+  security-events: none
+  pull-requests: none
+  actions: none
+  checks: none
+  deployments: none
+  issues: none
+  packages: none
+  repository-projects: none
+  statuses: none
+
+
+jobs:
+  test:
+    runs-on: 'ubuntu-latest'
+    name: "Test branch-name"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.ref }}
+      - id: test1
+        name: "1. Test empty head_ref, set ref"
+        uses: './.github/actions/branch-name'
+        with:
+          ref: "refs/head/main"
+          head_ref: ""
+      - id: test2
+        name: "2. Test head_ref set, set ref"
+        uses: './.github/actions/branch-name'
+        with:
+          ref: "refs/head/main"
+          head_ref: "t2"
+      - id: test3
+        name: "2. Test long branch"
+        uses: './.github/actions/branch-name'
+        with:
+          ref: "refs/head/qwerty-123-456-789-wasd-0"
+          head_ref: "t2"
+      - id: test_results
+        name: Test results
+        run: |
+          t1="main"
+          t2="t2"
+          t3a="qwerty-123-456-789-wasd-0"
+          t3b="qwerty123456789wasd0"
+          t3c="qwerty123456"
+          echo "### Test Information" >> $GITHUB_STEP_SUMMARY
+          echo "| \# | Expected | Branch | Safe | Full |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
+          echo "| 1. | ${t1} | ${{steps.test1.outputs.branch}} | ${{steps.test1.outputs.safe}} | ${{steps.test1.outputs.full_length}} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 2. | ${t2} | ${{steps.test2.outputs.branch}} | ${{steps.test2.outputs.safe}} | ${{steps.test2.outputs.full_length}} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 3a. | ${t3} | ${{steps.test3.outputs.branch}} | ${{steps.test3.outputs.safe}} | ${{steps.test3.outputs.full_length}} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 3b. | ${t3} | ${{steps.test3.outputs.branch}} | ${{steps.test3.outputs.safe}} | ${{steps.test3.outputs.full_length}} |" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{steps.test1.outputs.branch}}" != "${t1}" ]; then
+            echo "test 1 failed"
+            exit 1
+          fi
+          if [ "${{steps.test2.outputs.branch}}" != "${t2}" ]; then
+            echo "test 2 failed"
+            exit 1
+          fi
+          if [ "${{steps.test3.outputs.branch}}" != "${t3a}" ]; then
+            echo "test 3a failed"
+            exit 1
+          fi
+          if [ "${{steps.test3.outputs.full_length}}" != "${t3b}" ]; then
+            echo "test 3b failed"
+            exit 1
+          fi
+          if [ "${{steps.test3.outputs.safe}}" != "${t3c}" ]; then
+            echo "test 3c failed"
+            exit 1
+          fi
+          

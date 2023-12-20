@@ -23,17 +23,22 @@ jobs:
     name: "Test safe-strings"
     uses: './.github/workflows/test-safe-strings.yml'
 
+  # test safe-strings
+  test_branch_name:
+    name: "Test branch-name"
+    uses: './.github/workflows/test-branch-name.yml'
+
 
   # generate branch name
   branch_name:
-    needs: [test_terraform_version, test_safe_strings]
+    needs: [test_terraform_version, test_terraform_workspace_manager, test_safe_strings, test_branch_name]
     name: "Branch name"
     uses: ministryofjustice/opg-github-workflows/.github/workflows/data-parse-branch-name.yml@v2.0.0
     secrets: inherit
   
   # generate semver tag
   semver_tag:
-    needs: [test_terraform_version, test_safe_strings, branch_name]
+    needs: [branch_name]
     name: "Tag [${{ needs.branch_name.outputs.original }}]"
     uses: ministryofjustice/opg-github-workflows/.github/workflows/data-parse-semver-tag.yml@v2.0.0
     with:

@@ -1,0 +1,49 @@
+name: "Branch Name"
+description: "Use GITHUB_HEAD_REF or GITHUB_REF to get the branch name. Example: ref/heads/main-123-456-789 => main-123-456-789. Also return safe-strings versions."
+inputs:
+  head_ref:
+    description: "Pass in ${GITHUB_HEAD_REF}"    
+    default: ""
+  ref:
+    description: "Pass in ${GITHUB_REF}"    
+    default: ""
+outputs:
+  head_ref:
+    description: "Original head_ref"
+    value: ${{ inputs.head_ref }}
+  ref:
+    description: "Original ref"
+    value: ${{ inputs.ref }}    
+  branch:
+    description: "Branch name"
+    value: ${{ steps.setup.outputs.branch }}
+  full_length:
+    description: 'Alphanumeric, lowercase, but full length version of the branch.'
+    value: ${{ steps.safe.outputs.full_length }}
+  safe:
+    description: 'Alphanumeric and lowercase version of the branch, trimmed to 12 characters.'
+    value: ${{ steps.safe.outputs.safe }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: setup
+      name: "Workout base branch value"      
+      shell: bash
+      run: |      
+          branch=${{inputs.head_ref}}
+          if [ -z "${{inputs.head_ref}}" ]; then
+            b=${{inputs.ref}}
+            branch=${b#refs/heads/}
+          fi
+          echo "branch=${branch}" >> $GITHUB_OUTPUT
+    - id: safe
+      name: Safe string versions
+      uses: .github/actions/safe-strings
+      with:
+        original: ${{steps.setup.outputs.branch}}
+        length: 12
+      
+
+      
+
