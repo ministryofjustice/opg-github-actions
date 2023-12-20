@@ -34,9 +34,7 @@ outputs:
   branch_safe:
     description: "Output from branch_name safety check  - the safe return value"
     value: ${{ steps.safe_branch.outputs.safe }}  
-  all_tags:
-    description: "All tags on the repo"
-    value: ${{ steps.get_tags.outputs.all }}
+  
   # new_tag:
   #   description: "The value of the newly created tag."
   #   value: ${{ steps.create_tags.outputs.new_tag }}
@@ -69,11 +67,15 @@ runs:
         git fetch --tags
         all_tags=$(git tag -n)
         echo "all_tags=${all_tags}"
+        echo '<<EOF'
         echo "all_tags=\"${all_tags}\"" >> $GITHUB_OUTPUT
+        echo 'EOF' >> $GITHUB_OUTPUT
     - name: Process tags
       shell: python
       run:
         print("hello")
+        all_tags = '${{steps.get_tags.all_tags}}'.splitlines()
+        
     # - name: "Create Tag"
     #   id: create_tag
     #   uses: anothrNick/github-tag-action@1.67.0
