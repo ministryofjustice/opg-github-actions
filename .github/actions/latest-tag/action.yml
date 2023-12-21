@@ -59,13 +59,11 @@ runs:
       shell: bash
       run: |
         pwd
-        ls -la
-        ls -la .github/
-        ls -la .github/actions
         ls -la target-repo/
     - name: Fetch tags
       id: fetch_tags
       shell: bash
+      working-directory: 'target-repo'
       run: |
         git fetch --tags
     - name: Install libs
@@ -79,12 +77,14 @@ runs:
       shell: bash
       env:
         RUN_AS_TEST: ${{inputs.test}}
-      run: |
+      run: |      
         src="${{github.action_path}}"
-        dir="${src}/.github/actions/semver-tag/"
-        python ${dir}./latest-tag.py \
-          --test_file=${{inputs.test_file}}
+        repo="${{github.workspace}}/target-repo"
+        python ${src}/./latest-tag.py \
+          --repository_root="${repo}" \
+          --test_file=${{inputs.test_file}} \
           --prerelease=${{inputs.prerelease}}
+          --prerelease_suffix=${{inputs.prerelease_suffix}} \
 
     # - name: Get last tag
     #   id: last_tag
