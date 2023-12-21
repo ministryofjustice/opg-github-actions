@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 echo "MAJORS"
 set -e
+err=""
 
 out=$(python ./next-tag.py \
     --test_file=./tests/majors.txt \
@@ -13,6 +14,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="2.0.0-moreactions.0"
 echo "#1.1 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #1.1"
     echo "${out}"
     echo "==="
@@ -29,6 +31,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="2.0.0-moreactions.1"
 echo "#1.2 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #1.2"
     echo "${out}"
     echo "==="
@@ -45,6 +48,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="2.0.0-moreactions.0"
 echo "#1.3 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #1.3"
     echo "${out}"
     echo "==="
@@ -60,6 +64,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="2.0.0"
 echo "#1.4 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #1.4"
     echo "${out}"
     echo "==="
@@ -75,6 +80,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.0.0"
 echo "#1.5 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #1.5"
     echo "${out}"
     echo "==="
@@ -91,6 +97,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.5.0-moreactions.1"
 echo "#2.1 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #2.1"
     echo "${out}"
     echo "==="
@@ -106,6 +113,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.5.0-moreactions.0"
 echo "#2.2 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #2.2"
     echo "${out}"
     echo "==="
@@ -121,6 +129,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.5.0"
 echo "#2.3 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #2.3"
     echo "${out}"
     echo "==="
@@ -135,6 +144,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="0.1.0"
 echo "#2.4 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #2.4"
     echo "${out}"
     echo "==="
@@ -152,6 +162,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.4.1-moreactions.0"
 echo "#3.1 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #3.1"
     echo "${out}"
     echo "==="
@@ -167,6 +178,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.4.1-moreactions.2"
 echo "#3.2 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #3.2"
     echo "${out}"
     echo "==="
@@ -182,6 +194,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.4.1"
 echo "#3.3 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #3.3"
     echo "${out}"
     echo "==="
@@ -196,6 +209,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="0.0.1"
 echo "#3.4 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #3.4"
     echo "${out}"
     echo "==="
@@ -214,6 +228,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.0.1-moreactions.1"
 echo "#4.1 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #4.1"
     echo "${out}"
     echo "==="
@@ -230,8 +245,9 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.0.1-moreactions.0"
 echo "#4.2 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #4.2"
-    #echo "${out}"
+    echo "${out}"
     echo "==="
 fi
 
@@ -247,6 +263,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="2.0.0-moreactions.0"
 echo "#4.3 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #4.3"
     echo "${out}"
     echo "==="
@@ -262,6 +279,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.1.0"
 echo "#4.4 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #4.4"
     echo "${out}"
     echo "==="
@@ -278,6 +296,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="0.0.1"
 echo "#4.5 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #4.5"
     echo "${out}"
     echo "==="
@@ -295,6 +314,7 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="0.0.1-moreactions.0"
 echo "#4.6 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #4.6"
     echo "${out}"
     echo "==="
@@ -310,7 +330,21 @@ actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="v2.0.0"
 echo "#4.7 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
+    err="1"
     echo "FAILED #4.7"
     echo "${out}"
     echo "==="
+fi
+
+
+# # local test using git rather than test files
+# python ./next-tag.py \
+#     --prerelease="true" \
+#     --prerelease_suffix="moreactions" \
+#     --last_release="v1.4.0" \
+#     --latest_tag="v1.5.0-moreactions.14" \
+#     --with_v="true"
+
+if [ -z "${err}" ]; then
+    exit 1
 fi
