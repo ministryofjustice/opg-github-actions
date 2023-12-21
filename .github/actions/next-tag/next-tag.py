@@ -17,6 +17,7 @@ def arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--prerelease_suffix", default="beta", help="Prerelease naming")
     parser.add_argument("--latest_tag", default="", help="Last tag")
     parser.add_argument("--last_release", default="", help="Last release var tag")
+    parser.add_argument("--with_v", default="true", help="apply prefix to the new tag")
     return parser
 
 def trim_v(str):
@@ -42,6 +43,17 @@ def starting_tag(latest_tag, initial_version, prerelease, prerelease_suffix):
 
     return tag
 
+def get_commits(test, test_file, default_branch, latest_tag):
+     #use test data
+    if test is not None and len(test) > 0 and len(test_file) > 0 :
+        print("Using test data")
+        commits = split_commits_from_lines( open(test_file).readlines() )
+    else:
+        commits = g.log("--oneline", f"{default_branch}...{latest_tag}")
+        print(f"Getting commits between [{default_branch}]...[{latest_tag}]")
+        commits = split_commits_from_lines( commits.split("\n") )
+    return commits
+
 def main():
     # get the args
     args = arg_parser().parse_args()
@@ -54,26 +66,19 @@ def main():
     prerelease_suffix = args.prerelease_suffix
     last_release = args.last_release
     latest_tag = args.latest_tag
-    initial_version = last_release if len(last_release) > 0 else "0.0.1"
+    # set the intial version to be last_release or 0.0.1 if thats empty
+    initial_version = last_release if len(last_release) > 0 else "0.0.0"
     
     # test info setup
     test = os.getenv("RUN_AS_TEST")
-    is_test = False
+    is_test = (test is not None and len(test) > 0 and len(test_file) > 0)
 
-    tag=starting_tag(latest_tag, initial_version, prerelease, prerelease_suffix)
-    compare=compare_to(latest_tag)
+    tag = starting_tag(latest_tag, initial_version, prerelease, prerelease_suffix)
+    compare = compare_to(latest_tag)
     g = Git(repo_root)
     
     # get the commits between shas
-        #use test data
-    if test is not None and len(test) > 0 and len(test_file) > 0 :
-        print("Using test data")
-        is_test = True
-        commits = split_commits_from_lines( open(test_file).readlines() )
-    else:
-        commits = g.log("--oneline", f"{default_branch}...{latest_tag}")
-        commits = split_commits_from_lines( commits.split("\n") )
-    
+    commits = get_commits(test, test_file, default_branch, latest_tag)
     # look for #major, #minor #patch in commits
     major=0
     minor=0
@@ -83,35 +88,36 @@ def main():
         minor = minor + 1 if "#minor" in c[1] else minor
         patch = patch + 1 if "#patch" in c[1] else patch
 
-    print(*commits, sep="\n")
     print(f"Majors: [{major}] Minors: [{minor}] Patches: [{patch}]")
 
     # get the last release
     last_release = Version.parse(trim_v(last_release)) if Version.is_valid(trim_v(last_release)) else Version.parse(initial_version)
-
-    print(f"last_release:{last_release}")
-    print(f"tag:{tag}")
     new_tag = tag
-    #v1.0 => v2.0
-    #v1.4.0-beta.0 when commit contains #major => v2.0.0-beta.0     
-    if major > 0 and tag.major <= last_release.major:
-        bumped = last_release.bump_major()
-        new_tag = Version.parse(f"{bumped.major}.0.0")
-        if prerelease:
-            new_tag = new_tag.replace(prerelease=f"{prerelease_suffix}.0")   
-    #v1.5.0-beta.1 => v1.5.0 when released
-    elif prerelease is False and minor > 0:
-        new_tag = last_release.bump_minor()
-    #v1.5.0
-    elif prerelease is False and patch > 0:
-        new_tag = last_release.bump_patch()
-    
 
-    # if this is a pre-release, not a mjor and has an existing tag then increase the counter
-    if prerelease and len(latest_tag) > 0:
-        new_tag = new_tag.bump_prerelease()    
+    if major > 0 and new_tag.major <= last_release.major:
+        print ("-> major bump")
+        # if its prerelease, then re-add the suffix as a 0
+        new_tag = new_tag.bump_major().replace(prerelease=f"{prerelease_suffix}.0") if prerelease else new_tag.bump_major()
+    elif major == 0 and minor > 0 and new_tag.minor <= last_release.minor:
+        print ("-> minor bump")
+        new_tag = new_tag.bump_minor().replace(prerelease=f"{prerelease_suffix}.0") if prerelease else new_tag.bump_minor()
+    elif major == 0 and minor ==0 and patch > 0 and new_tag.patch <= last_release.patch:
+        print ("-> minor bump")
+        new_tag = new_tag.bump_patch().replace(prerelease=f"{prerelease_suffix}.0") if prerelease else new_tag.bump_patch()
+    elif prerelease:
+        print ("-> prerelease")
+        new_tag = new_tag.bump_prerelease()
+
+    if not prerelease:
+        new_tag = new_tag.replace(prerelease=None)
     
-    print(f"new_tag:{new_tag}")    
+    print(f"prerelease={prerelease}")
+    print(f"last_release={args.last_release}")
+    print(f"last_release_processed={last_release}")
+    print(f"initial_version={initial_version}")
+    print(f"lastest_tag={args.latest_tag}")
+    print(f"starting_tag={tag}")
+    print(f"new_tag={new_tag}")    
         
     
 
