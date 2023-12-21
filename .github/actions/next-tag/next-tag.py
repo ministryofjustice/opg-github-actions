@@ -18,6 +18,7 @@ def arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--latest_tag", default="", help="Last tag")
     parser.add_argument("--last_release", default="", help="Last release var tag")
     parser.add_argument("--with_v", default="false", help="apply prefix to the new tag")
+    parser.add_argument("--default_bump", default="patch", help="If there are no triggers in commits, bump by this")
     return parser
 
 def trim_v(str):
@@ -33,15 +34,15 @@ def compare_to(latest_tag):
         compare = "HEAD"
     return compare
 
-def starting_tag(latest_tag, initial_version, prerelease, prerelease_suffix):
-    if len(latest_tag) == 0:        
-        tag = Version.parse(trim_v(initial_version))
-        if prerelease:
-            tag = tag.replace(prerelease=f"{prerelease_suffix}.0")
-    else:
-        tag = Version.parse(trim_v(latest_tag))
+def initial_semver_tag(tag):
+    # if len(latest_tag) == 0:        
+    #     tag = Version.parse(trim_v(initial_version))
+    #     if prerelease:
+    #         tag = tag.replace(prerelease=f"{prerelease_suffix}.0")
+    # else:
+    #     tag = Version.parse(trim_v(latest_tag))
 
-    return tag
+    return Version.parse(trim_v(tag))
 
 def get_commits(test, test_file, default_branch, latest_tag):
      #use test data
@@ -59,82 +60,95 @@ def main():
     args = arg_parser().parse_args()
     test_file = args.test_file
     
-    repo_root = args.repository_root
-    default_branch = args.default_branch
+    repo_root = args.repository_root    
 
-    prerelease = (len(args.prerelease) > 0)    
-    prerelease_suffix = args.prerelease_suffix
-    last_release = args.last_release
-    latest_tag = args.latest_tag
-    # set the intial version to be last_release or 0.0.1 if thats empty
-    initial_version = last_release if len(last_release) > 0 else "0.0.0"
+    is_prerelease = (len(args.prerelease) > 0)    
     
+    # set the intial version to be last_release or 0.0.1 if thats empty
+    base = "0.0.0"
+    last_release = Version.parse(trim_v(args.last_release)) if Version.is_valid(trim_v(args.last_release)) else Version.parse(base)
+    latest_tag = Version.parse(trim_v(args.latest_tag)) if len(args.latest_tag) > 0 and Version.is_valid(trim_v(args.latest_tag)) else None
+
     # test info setup
     test = os.getenv("RUN_AS_TEST")
     is_test = (test is not None and len(test) > 0 and len(test_file) > 0)
 
-    tag = starting_tag(latest_tag, initial_version, prerelease, prerelease_suffix)
-    compare = compare_to(latest_tag)
+    starting_tag = last_release
+    compare = compare_to(args.latest_tag)
     g = Git(repo_root)
     
     # get the commits between shas
-    commits = get_commits(test, test_file, default_branch, latest_tag)
+    commits = get_commits(test, test_file, args.default_branch, args.latest_tag)
     # look for #major, #minor #patch in commits
-    major=0
-    minor=0
-    patch=0
+    # - use the default_bump to always increase one
+    major=1 if args.default_bump == "major" else 0
+    minor=1 if args.default_bump == "minor" else 0
+    patch=1 if args.default_bump == "patch" else 0
     for c in commits:
         major = major + 1 if "#major" in c[1] else major
         minor = minor + 1 if "#minor" in c[1] else minor
         patch = patch + 1 if "#patch" in c[1] else patch
 
+   
     print(f"Majors: [{major}] Minors: [{minor}] Patches: [{patch}]")
+    
+    
+    new_tag = starting_tag
 
-    # get the last release
-    last_release = Version.parse(trim_v(last_release)) if Version.is_valid(trim_v(last_release)) else Version.parse(initial_version)
-    new_tag = tag
-
-    if major > 0 and new_tag.major <= last_release.major:
+    # Bump the tag along based on what was found
+    if major > 0:
         print ("-> major bump")
-        # if its prerelease, then re-add the suffix as a 0
-        new_tag = new_tag.bump_major().replace(prerelease=f"{prerelease_suffix}.0") if prerelease else new_tag.bump_major()
-    elif major == 0 and minor > 0 and new_tag.minor <= last_release.minor:
+        new_tag = new_tag.bump_major()
+    elif minor > 0:
         print ("-> minor bump")
-        new_tag = new_tag.bump_minor().replace(prerelease=f"{prerelease_suffix}.0") if prerelease else new_tag.bump_minor()
-    elif major == 0 and minor ==0 and patch > 0 and new_tag.patch <= last_release.patch:
-        print ("-> minor bump")
-        new_tag = new_tag.bump_patch().replace(prerelease=f"{prerelease_suffix}.0") if prerelease else new_tag.bump_patch()
-    elif prerelease:
-        print ("-> prerelease")
-        new_tag = new_tag.bump_prerelease()
+        new_tag = new_tag.bump_minor()
+    elif patch > 0:
+        print ("-> patch bump")
+        new_tag = new_tag.bump_patch()
 
-    if not prerelease:
-        new_tag = new_tag.replace(prerelease=None)
-    
+    # If this is a prerelease, and there is a pre-existing tag we should copy over
+    # the prerelease information to the new tag
+    # existing_tag = v2.0.0-moreactions.0 would become v2.0.0-moreactions.1
+    if is_prerelease and latest_tag is not None:
+        print ("-> prerelease bump with tag")
+        new_tag = new_tag.replace(prerelease=latest_tag.prerelease).bump_prerelease()
+    # If this prerelease is the first of its kind the setup the prerelease segment
+    # to use the suffix
+    elif is_prerelease and latest_tag is None:
+         print ("-> prerelease bump without tag")
+         new_tag = new_tag.replace(prerelease=f"{args.prerelease_suffix}.0")
+
+    # if this is the first version of the new major (so latest_tag is v1.5.0-moreactions.1)
+    # then reset the prerelease counter
+    if major > 0 and latest_tag is not None and latest_tag.major < new_tag.major:
+        print ("-> reset prerelease")
+        new_tag = new_tag.replace(prerelease=f"{args.prerelease_suffix}.0") 
+
+    # generate the string version for output
     new_tag_str = f"{new_tag}"
-    
+    # prepend the v if enabled
     if len(args.with_v) > 0 and args.with_v == "true":
         new_tag_str = f"v{new_tag_str}"
 
     print(f"prerelease={args.prerelease}")
-    print(f"prerelease_processed={prerelease}")
+    print(f"prerelease_processed={is_prerelease}")
+    print(f"default_bump={args.default_bump}")
     print(f"last_release={args.last_release}")
     print(f"last_release_processed={last_release}")
-    print(f"initial_version={initial_version}")
     print(f"lastest_tag={args.latest_tag}")
-    print(f"starting_tag={tag}")
+    print(f"starting_tag={starting_tag}")
     print(f"next_tag={new_tag_str}")    
 
     if 'GITHUB_OUTPUT' in os.environ:
         print("Pushing to GitHub Output")
         with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
             print(f"prerelease={args.prerelease}", file=fh)
-            print(f"prerelease_processed={prerelease}", file=fh)
+            print(f"prerelease_processed={is_prerelease}", file=fh)
+            print(f"default_bump={args.default_bump}", file=fh)
             print(f"last_release={args.last_release}", file=fh)
             print(f"last_release_processed={last_release}", file=fh)
-            print(f"initial_version={initial_version}", file=fh)
             print(f"lastest_tag={args.latest_tag}", file=fh)
-            print(f"starting_tag={tag}", file=fh)
+            print(f"starting_tag={starting_tag}", file=fh)
             print(f"next_tag={new_tag_str}", file=fh)  
             
     
