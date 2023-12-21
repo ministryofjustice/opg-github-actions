@@ -20,7 +20,7 @@ permissions:
 jobs:
   minors:
     runs-on: 'ubuntu-latest'
-    name: "Test next-tag minors"
+    name: "Test next-tag [minors]"
     steps:
       - name: "Checkout"
         uses: actions/checkout@v4
@@ -53,7 +53,7 @@ jobs:
           test: true
           test_file: "./tests/minors.txt"
           prerelease_suffix: "moreactions"
-          latest_release: "v1.5.0-moreactions.0"
+          latest_tag: "v1.5.0-moreactions.0"
           last_release: "v1.4.0"
       - id: test4
         name: "4. Test minor version bump without latest_tag as a release"
