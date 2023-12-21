@@ -34,14 +34,42 @@ jobs:
           test: true
           prerelease: true
           prerelease_suffix: "moreactions"
-        
+      - id: test2
+        name: "2. Test 123rand123 is not found and latest is empty"
+        uses: './.github/actions/latest-tag'
+        with: 
+          test: true
+          prerelease: true
+          prerelease_suffix: "123rand123"
+      - id: test3
+        name: "3. Test last release version is 1.4.0"
+        uses: './.github/actions/latest-tag'
+        with: 
+          test: true
       - id: test_results
         name: Test results
         run: |
-          t1="1.5.0-moreactions.0"
+          t1="v1.5.0-moreactions.0"
+          t2=""
+          t3="v1.4.0"
           echo "### Test Information" >> $GITHUB_STEP_SUMMARY
           echo "| \# | Expected | Actual | " >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
           echo "| 1. | ${t1} | ${{steps.test1.outputs.latest}} | " >> $GITHUB_STEP_SUMMARY
+          echo "| 2. | ${t2} | ${{steps.test2.outputs.latest}} | " >> $GITHUB_STEP_SUMMARY
+          echo "| 3. | ${t3} | ${{steps.test3.outputs.latest}} | " >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{steps.test1.outputs.latest}}" != "${t1}" ]; then
+            echo "test 1 failed"
+            exit 1
+          fi
+          if [ "${{steps.test2.outputs.latest}}" != "${t2}" ]; then
+            echo "test 2 failed"
+            exit 1
+          fi
+          if [ "${{steps.test3.outputs.latest}}" != "${t3}" ]; then
+            echo "test 3 failed"
+            exit 1
+          fi
 
           
