@@ -27,7 +27,7 @@ jobs:
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
-      - name: "Test shell"
+      - name: "Test shell"        
         shell: bash
         env:
           RUN_AS_TEST: "true"
@@ -35,7 +35,7 @@ jobs:
           pip3 install git+https://github.com/python-semver/python-semver.git@3.0.2
           pip3 install git+https://github.com//gitpython-developers/GitPython.git@3.1.40
           cd .github/actions/next-tag/
-          ./test-run.sh
+          ./test-run.sh >> $GITHUB_STEP_SUMMARY
 
   patch:
     runs-on: 'ubuntu-latest'

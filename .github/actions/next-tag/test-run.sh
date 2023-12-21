@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-echo "MAJORS"
 set -e
 export RUN_AS_TEST="true"
 err=""
+
+echo "| ## Test Information"
+echo "| \# | Expected | Actual | "
+echo "| --- | --- | --- |"
 
 out=$(python ./next-tag.py \
     --test_file=./tests/majors.txt \
@@ -13,7 +16,7 @@ out=$(python ./next-tag.py \
 
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="2.0.0-moreactions.0"
-echo "#1.1 [${expected}]=>[${actual}]"
+echo "| 1.1 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="1"
     echo "FAILED #1.1"
@@ -30,7 +33,7 @@ out=$(python ./next-tag.py \
 
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="2.0.0-moreactions.1"
-echo "#1.2 [${expected}]=>[${actual}]"
+echo "| 1.2 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="1"
     echo "FAILED #1.2"
@@ -47,7 +50,7 @@ out=$(python ./next-tag.py \
     --last_release="v1.4.0")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="2.0.0-moreactions.0"
-echo "#1.3 [${expected}]=>[${actual}]"
+echo "| 1.3 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="1"
     echo "FAILED #1.3"
@@ -63,7 +66,7 @@ out=$(python ./next-tag.py \
     --last_release="v1.4.0")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="2.0.0"
-echo "#1.4 [${expected}]=>[${actual}]"
+echo "| 1.4 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="2"
     echo "FAILED #1.4"
@@ -79,7 +82,7 @@ out=$(python ./next-tag.py \
     --last_release="")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.0.0"
-echo "#1.5 [${expected}]=>[${actual}]"
+echo "| 1.5 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="3"
     echo "FAILED #1.5"
@@ -87,7 +90,7 @@ if [ "${actual}" != "${expected}" ]; then
     echo "==="
 fi
 
-echo "MINORS"
+
 out=$(python ./next-tag.py \
     --test_file=./tests/minors.txt \
     --prerelease_suffix="moreactions" \
@@ -96,7 +99,7 @@ out=$(python ./next-tag.py \
     --last_release="v1.4.0")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.5.0-moreactions.1"
-echo "#2.1 [${expected}]=>[${actual}]"
+echo "| 2.1 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="4"
     echo "FAILED #2.1"
@@ -112,7 +115,7 @@ out=$(python ./next-tag.py \
     --last_release="v1.4.0")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.5.0-moreactions.0"
-echo "#2.2 [${expected}]=>[${actual}]"
+echo "| 2.2 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="1"
     echo "FAILED #2.2"
@@ -128,7 +131,7 @@ out=$(python ./next-tag.py \
     --last_release="v1.4.0")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.5.0"
-echo "#2.3 [${expected}]=>[${actual}]"
+echo "| 2.3 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="5"
     echo "FAILED #2.3"
@@ -143,7 +146,7 @@ out=$(python ./next-tag.py \
     --last_release="")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="0.1.0"
-echo "#2.4 [${expected}]=>[${actual}]"
+echo "| 2.4 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="6"
     echo "FAILED #2.4"
@@ -152,7 +155,6 @@ if [ "${actual}" != "${expected}" ]; then
 fi
 
 
-echo "PATCH"
 out=$(python ./next-tag.py \
     --test_file=./tests/patch.txt \
     --prerelease=true \
@@ -161,7 +163,7 @@ out=$(python ./next-tag.py \
     --last_release="v1.4.0")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.4.1-moreactions.0"
-echo "#3.1 [${expected}]=>[${actual}]"
+echo "| 3.1 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="7"
     echo "FAILED #3.1"
@@ -177,7 +179,7 @@ out=$(python ./next-tag.py \
     --last_release="v1.4.0")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.4.1-moreactions.2"
-echo "#3.2 [${expected}]=>[${actual}]"
+echo "| 3.2 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="8"
     echo "FAILED #3.2"
@@ -193,7 +195,7 @@ out=$(python ./next-tag.py \
     --last_release="v1.4.0")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.4.1"
-echo "#3.3 [${expected}]=>[${actual}]"
+echo "| 3.3 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="9"
     echo "FAILED #3.3"
@@ -208,7 +210,7 @@ out=$(python ./next-tag.py \
     --last_release="")    
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="0.0.1"
-echo "#3.4 [${expected}]=>[${actual}]"
+echo "| 3.4 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="10"
     echo "FAILED #3.4"
@@ -216,8 +218,6 @@ if [ "${actual}" != "${expected}" ]; then
     echo "==="
 fi
 
-
-echo "OTHERS"
 # this is a prerelease with an existing tag, so just bump the prerelease
 out=$(python ./next-tag.py \
     --test_file=./tests/none.txt \
@@ -227,7 +227,7 @@ out=$(python ./next-tag.py \
     --last_release="v1.0.0")    
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.0.1-moreactions.1"
-echo "#4.1 [${expected}]=>[${actual}]"
+echo "| 4.1 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="11"
     echo "FAILED #4.1"
@@ -244,7 +244,7 @@ out=$(python ./next-tag.py \
     --last_release="v1.0.0")    
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.0.1-moreactions.0"
-echo "#4.2 [${expected}]=>[${actual}]"
+echo "| 4.2 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="12"
     echo "FAILED #4.2"
@@ -262,7 +262,7 @@ out=$(python ./next-tag.py \
     --last_release="v1.0.0")    
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="2.0.0-moreactions.0"
-echo "#4.3 [${expected}]=>[${actual}]"
+echo "| 4.3 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="13"
     echo "FAILED #4.3"
@@ -278,7 +278,7 @@ out=$(python ./next-tag.py \
     --last_release="v1.0.0")    
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.1.0"
-echo "#4.4 [${expected}]=>[${actual}]"
+echo "| 4.4 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="14"
     echo "FAILED #4.4"
@@ -295,7 +295,7 @@ out=$(python ./next-tag.py \
     --last_release="")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="0.0.1"
-echo "#4.5 [${expected}]=>[${actual}]"
+echo "| 4.5 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="15"
     echo "FAILED #4.5"
@@ -313,7 +313,7 @@ out=$(python ./next-tag.py \
     --last_release="")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="0.0.1-moreactions.0"
-echo "#4.6 [${expected}]=>[${actual}]"
+echo "| 4.6 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="16"
     echo "FAILED #4.6"
@@ -329,7 +329,7 @@ out=$(python ./next-tag.py \
     --with_v="true")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="v2.0.0"
-echo "#4.7 [${expected}]=>[${actual}]"
+echo "| 4.7 | ${expected} | ${actual} |"
 if [ "${actual}" != "${expected}" ]; then
     err="17"
     echo "FAILED #4.7"
