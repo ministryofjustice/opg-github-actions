@@ -1,4 +1,4 @@
-name: "Create semver tag at current github ref using passed branch name as a suffix."
+name: "Get the latest semver compatible tag on this repo"
 description: "Use the branch name passed (can be either refs/heads/name-of-thing or just name-of-thing)."
 inputs:
   test:
@@ -13,6 +13,12 @@ inputs:
   prerelease_suffix:
     description: "If prerelease is set, this string is used as the ${suffix} in the tag pattern. (Default: beta)"
     default: "beta"
+  branch_name:
+    description: "Current branch name"
+    default: "beta"
+  release_branches:
+    description: "Branches that would trigger this as a release."
+    default: "main,master"
   
   
 outputs:
@@ -65,6 +71,8 @@ runs:
         repo="${{github.workspace}}/target-repo"
         python ${src}/./latest-tag.py \
           --repository_root="${repo}" \
-          --test_file=${src}/${{inputs.test_file}} \
+          --branch_name="${{inputs.branch_name}}" \
+          --release_branches="${{inputs.release_branches}}" \
           --prerelease=${{inputs.prerelease}} \
-          --prerelease_suffix=${{inputs.prerelease_suffix}}
+          --prerelease_suffix=${{inputs.prerelease_suffix}} \
+          --test_file=${src}/${{inputs.test_file}}
