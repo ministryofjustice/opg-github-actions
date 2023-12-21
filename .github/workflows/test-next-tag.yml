@@ -63,7 +63,7 @@ jobs:
           test_file: "./tests/minors.txt"
           prerelease_suffix: "moreactions"
       - id: test_results
-        name: Test results [Majors]
+        name: Test results [Minors]
         run: |
           t1="1.5.0-moreactions.1"
           t2="1.5.0-moreactions.0"
