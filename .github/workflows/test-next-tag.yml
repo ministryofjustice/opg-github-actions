@@ -29,6 +29,8 @@ jobs:
           ref: ${{ github.ref }}
       - name: "Test shell"
         shell: bash
+        env:
+          RUN_AS_TEST: "true"
         run: |
           pip3 install git+https://github.com/python-semver/python-semver.git@3.0.2
           pip3 install git+https://github.com//gitpython-developers/GitPython.git@3.1.40

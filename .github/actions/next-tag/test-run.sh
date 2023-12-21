@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 echo "MAJORS"
 set -e
+export RUN_AS_TEST="true"
 err=""
 
 out=$(python ./next-tag.py \
