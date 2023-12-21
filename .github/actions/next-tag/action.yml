@@ -21,7 +21,7 @@ inputs:
     default: ""
   with_v:
     description: "New tag will start with a v prefix"
-    default: "true"
+    default: "false"
 
   
 outputs:
