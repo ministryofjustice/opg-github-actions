@@ -14,24 +14,27 @@ def arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--prerelease_suffix", default="beta", help="Prerelease naming")
     return parser
 
+def to_valid_dict(str) -> dict|None:
+    t = (str[1:] if str.startswith('v') else s)    
+    if Version.is_valid(t):            
+        return {"raw": str, "tag": Version.parse(t)}
+    return None
 
 def tags_from_file(file):
     lines=[[str(i) for i in line.strip().split(" ", 1)] for line in open(file).readlines()]
     tags=[]    
     for line in lines:
-        s = line[0]
-        t = (s[1:] if s.startswith('v') else s)    
-        if Version.is_valid(t):            
-            tags.append(Version.parse(t))
+        d = to_valid_dict(line[0])
+        if d is not None:
+            tags.append(d)        
     return tags
 
 def semver_list(tags):
     semver_tags = []
     for tag in tags:
-        s = f"{tag}"            
-        t = (s[1:] if s.startswith('v') else s)    
-        if Version.is_valid(t):        
-            semver_tags.append(Version.parse(t))
+        d = to_valid_dict(f"{tag}")
+        if d is not None:
+            semver_tags.append(d)
     return semver_tags
 
 def main():
@@ -55,13 +58,15 @@ def main():
     matching = []
     if prerelease:
         pattern = re.compile(f"{prerelease_suffix}.[0-9]+$")
-        matching = list( filter(lambda t:( pattern.match(f"{t.prerelease}") ), tags ) )
+        matching = list( filter(lambda t:( pattern.match(f"{t['tag'].prerelease}") ), tags ) )
     else:
-        matching = list( filter(lambda t:( t.prerelease is None ), tags ) )
+        matching = list( filter(lambda t:( t['tag'].prerelease is None ), tags ) )
 
     last = ""
     if len(matching) > 0:
-        last = max(matching)
+        # use the raw tag
+        last = max(matching, key=lambda x: x['raw'] )
+        last = last.get("raw")        
 
     # summary for shell
     print(f"test={is_test}")
