@@ -44,12 +44,13 @@ def initial_semver_tag(tag):
 
     return Version.parse(trim_v(tag))
 
-def get_commits(test, test_file, default_branch, latest_tag):
+def get_commits(test, test_file, repo_root, default_branch, latest_tag):
      #use test data
     if test is not None and len(test) > 0 and len(test_file) > 0 :
         print("Using test data")
         commits = split_commits_from_lines( open(test_file).readlines() )
     else:
+        g = Git(repo_root)
         commits = g.log("--oneline", f"{default_branch}...{latest_tag}")
         print(f"Getting commits between [{default_branch}]...[{latest_tag}]")
         commits = split_commits_from_lines( commits.split("\n") )
@@ -60,10 +61,7 @@ def main():
     args = arg_parser().parse_args()
     test_file = args.test_file
     
-    repo_root = args.repository_root    
-
     is_prerelease = (len(args.prerelease) > 0)    
-    
     # set the intial version to be last_release or 0.0.1 if thats empty
     base = "0.0.0"
     last_release = Version.parse(trim_v(args.last_release)) if Version.is_valid(trim_v(args.last_release)) else Version.parse(base)
@@ -75,10 +73,8 @@ def main():
 
     starting_tag = last_release
     compare = compare_to(args.latest_tag)
-    g = Git(repo_root)
-    
     # get the commits between shas
-    commits = get_commits(test, test_file, args.default_branch, args.latest_tag)
+    commits = get_commits(test, test_file, args.repository_root, args.default_branch, args.latest_tag)
     # look for #major, #minor #patch in commits
     # - use the default_bump to always increase one
     major=1 if args.default_bump == "major" else 0
@@ -91,7 +87,6 @@ def main():
 
    
     print(f"Majors: [{major}] Minors: [{minor}] Patches: [{patch}]")
-    
     
     new_tag = starting_tag
 
