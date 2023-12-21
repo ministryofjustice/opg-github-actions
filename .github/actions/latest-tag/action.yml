@@ -46,12 +46,14 @@ runs:
         path: 'target-repo'
     - name: debug
       shell: bash
+      if: ${{ (inputs.test == '') && (inputs.test_file == '' ) }}
       run: |
         pwd
         ls -la target-repo/
     - name: Fetch tags
       id: fetch_tags
       shell: bash
+      if: ${{ (inputs.test == '') && (inputs.test_file == '' ) }}
       working-directory: 'target-repo'
       run: |
         git fetch --tags
