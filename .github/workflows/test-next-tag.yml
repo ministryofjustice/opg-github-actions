@@ -18,6 +18,83 @@ permissions:
 
 
 jobs:
+  patch:
+    runs-on: 'ubuntu-latest'
+    name: "Test next-tag [patch]"
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.ref }}
+      - id: test1
+        name: "1. Test patch version bump as an prerelease without latest_tag"
+        uses: './.github/actions/next-tag'
+        with: 
+          test: true
+          test_file: "./tests/patch.txt"
+          prerelease: true
+          prerelease_suffix: "moreactions"
+          last_release: "v1.4.0"
+      - id: test2
+        name: "2. Test patch version bump with existing tag"
+        uses: './.github/actions/next-tag'
+        with: 
+          test: true
+          test_file: "./tests/patch.txt"
+          prerelease: true
+          prerelease_suffix: "moreactions"
+          latest_tag: "v1.4.1-moreactions.1"
+          last_release: "v1.4.0"
+      - id: test3
+        name: "3. Test patch version bump as a release"
+        uses: './.github/actions/next-tag'
+        with: 
+          test: true
+          test_file: "./tests/patch.txt"
+          prerelease_suffix: "moreactions"
+          latest_tag: "v1.4.1-moreactions.1"
+          last_release: "v1.4.0"
+      - id: test4
+        name: "4. Test patch version bump without latest_tag as a release"
+        uses: './.github/actions/next-tag'
+        with: 
+          test: true
+          test_file: "./tests/patch.txt"
+          prerelease_suffix: "moreactions"
+      - id: test_results
+        name: Test results [patch]
+        run: |
+          t1="1.4.1-moreactions.0"
+          t2="1.4.1-moreactions.2"
+          t3="1.4.1"
+          t4="0.0.1"
+          
+          echo "### Test Information" >> $GITHUB_STEP_SUMMARY
+          echo "| \# | Expected | Actual | " >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
+          echo "| 1. | ${t1} | ${{steps.test1.outputs.next_tag}} | " >> $GITHUB_STEP_SUMMARY
+          echo "| 2. | ${t2} | ${{steps.test2.outputs.next_tag}} | " >> $GITHUB_STEP_SUMMARY
+          echo "| 3. | ${t3} | ${{steps.test3.outputs.next_tag}} | " >> $GITHUB_STEP_SUMMARY
+          echo "| 4. | ${t4} | ${{steps.test4.outputs.next_tag}} | " >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{steps.test1.outputs.next_tag}}" != "${t1}" ]; then
+            echo "test 1.1 failed"
+            exit 1
+          fi
+          if [ "${{steps.test2.outputs.next_tag}}" != "${t2}" ]; then
+            echo "test 1.2 failed"
+            exit 1
+          fi
+          if [ "${{steps.test3.outputs.next_tag}}" != "${t3}" ]; then
+            echo "test 1.3 failed"
+            exit 1
+          fi
+          if [ "${{steps.test4.outputs.next_tag}}" != "${t4}" ]; then
+            echo "test 1.4 failed"
+            exit 1
+          fi
+  
   minors:
     runs-on: 'ubuntu-latest'
     name: "Test next-tag [minors]"
