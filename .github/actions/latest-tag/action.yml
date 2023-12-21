@@ -28,16 +28,6 @@ outputs:
   latest:
     description: "Latest tag found"
     value: ${{steps.latest.outputs.latest}}
-  # new_tag:
-  #   description: "The value of the newly created tag."
-  #   value: ${{ steps.create_tags.outputs.new_tag }}
-  # tag:
-  #   description: "The value of the latest tag after running this action."
-  #   value: ${{ steps.create_tags.outputs.tag }}
-  # part:
-  #   description: "The part of version which was bumped."
-  #   value: ${{ steps.create_tags.outputs.part }}
-
 
 runs:
   using: "composite"
@@ -73,28 +63,8 @@ runs:
       run: |      
         src="${{github.action_path}}"
         repo="${{github.workspace}}/target-repo"
-        ls -la ${repo}
         python ${src}/./latest-tag.py \
           --repository_root="${repo}" \
           --test_file=${src}/${{inputs.test_file}} \
           --prerelease=${{inputs.prerelease}} \
           --prerelease_suffix=${{inputs.prerelease_suffix}}
-
-    # - name: Get last tag
-    #   id: last_tag
-    #   shell: bash
-    #   run: |
-    #     src="${{github.action_path}}"
-    #     python ${dir}/.github/actions/semver-tag/latest-tag.py --prerelease=${{inputs.prerelease}}
-    # - name: "Create Tag"
-    #   id: create_tag
-    #   uses: anothrNick/github-tag-action@1.67.0
-    #   env:
-    #     GITHUB_TOKEN: ${{inputs.github_token}}
-    #     INITIAL_VERSION: 0.0.1
-    #     DEFAULT_BUMP: minor
-    #     PRERELEASE_SUFFIX: ${{ steps.safe_branch.outputs.safe }}
-    #     PRERELEASE: ${{ inputs.prerelease != '' }}
-    #     RELEASE_BRANCHES: ${{ inputs.release_branch }}
-    #     WITH_V: "true"
-    #     DRY_RUN: ${{ inputs.dry_run != '' }}
