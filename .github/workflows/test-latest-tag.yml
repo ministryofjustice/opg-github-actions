@@ -32,7 +32,7 @@ jobs:
         uses: './.github/actions/latest-tag'
         with: 
           test: true
-          branch: "more-actions"
+          branch_name: "more-actions"
           prerelease: true
           prerelease_suffix: "moreactions"
       - id: test2
@@ -40,7 +40,7 @@ jobs:
         uses: './.github/actions/latest-tag'
         with: 
           test: true
-          branch: "more-actions"
+          branch_name: "more-actions"
           prerelease: true
           prerelease_suffix: "123rand123"
       - id: test3
@@ -53,7 +53,7 @@ jobs:
         uses: './.github/actions/latest-tag'
         with: 
           test: true
-          branch: "main"
+          branch_name: "main"
           release_branches: "main"
           prerelease: true
           prerelease_suffix: "123rand123"
