@@ -84,29 +84,29 @@ jobs:
           echo "### Test Information" >> $GITHUB_STEP_SUMMARY
           echo "| \# | Expected | Actual | " >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
-          echo "| 1. | ${t1_1} | ${{steps.t1_1.outputs.latest}} | " >> $GITHUB_STEP_SUMMARY
-          echo "| 2. | ${t1_2} | ${{steps.t1_2.outputs.latest}} | " >> $GITHUB_STEP_SUMMARY
-          echo "| 3. | ${t1_3} | ${{steps.t1_3.outputs.latest}} | " >> $GITHUB_STEP_SUMMARY
-          echo "| 4. | ${t1_4} | ${{steps.t1_4.outputs.latest}} | " >> $GITHUB_STEP_SUMMARY
-          echo "| 5. | ${t1_5} | ${{steps.t1_5.outputs.latest}} | " >> $GITHUB_STEP_SUMMARY
+          echo "| 1. | ${t1_1} | ${{steps.t1_1.outputs.next_tag}} | " >> $GITHUB_STEP_SUMMARY
+          echo "| 2. | ${t1_2} | ${{steps.t1_2.outputs.next_tag}} | " >> $GITHUB_STEP_SUMMARY
+          echo "| 3. | ${t1_3} | ${{steps.t1_3.outputs.next_tag}} | " >> $GITHUB_STEP_SUMMARY
+          echo "| 4. | ${t1_4} | ${{steps.t1_4.outputs.next_tag}} | " >> $GITHUB_STEP_SUMMARY
+          echo "| 5. | ${t1_5} | ${{steps.t1_5.outputs.next_tag}} | " >> $GITHUB_STEP_SUMMARY
           
-          if [ "${{steps.t1_1.outputs.latest}}" != "${t1_1}" ]; then
+          if [ "${{steps.t1_1.outputs.next_tag}}" != "${t1_1}" ]; then
             echo "test 1.1 failed"
             exit 1
           fi
-          if [ "${{steps.t1_2.outputs.latest}}" != "${t1_2}" ]; then
+          if [ "${{steps.t1_2.outputs.next_tag}}" != "${t1_2}" ]; then
             echo "test 1.2 failed"
             exit 1
           fi
-          if [ "${{steps.t1_3.outputs.latest}}" != "${t1_3}" ]; then
+          if [ "${{steps.t1_3.outputs.next_tag}}" != "${t1_3}" ]; then
             echo "test 1.3 failed"
             exit 1
           fi
-          if [ "${{steps.t1_4.outputs.latest}}" != "${t1_4}" ]; then
+          if [ "${{steps.t1_4.outputs.next_tag}}" != "${t1_4}" ]; then
             echo "test 1.4 failed"
             exit 1
           fi
-          if [ "${{steps.t1_4.outputs.latest}}" != "${t1_4}" ]; then
+          if [ "${{steps.t1_4.outputs.next_tag}}" != "${t1_4}" ]; then
             echo "test 1.5 failed"
             exit 1
           fi

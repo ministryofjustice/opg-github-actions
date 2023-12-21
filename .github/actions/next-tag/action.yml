@@ -46,6 +46,10 @@ outputs:
   with_v:
     description: "Inputed with_v variable."
     value: ${{inputs.with_v}}
+  
+  next_tag:
+    description: "Next tag that should be created."
+    value: ${{steps.next_tag.outputs.next_tag}}
 
 
 runs:
