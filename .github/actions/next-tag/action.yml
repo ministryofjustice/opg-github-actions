@@ -49,7 +49,7 @@ outputs:
   
   next_tag:
     description: "Next tag that should be created."
-    value: ${{steps.next_tag.outputs.next_tag}}
+    value: ${{steps.get_next_tag.outputs.next_tag}}
 
 
 runs:
@@ -61,18 +61,20 @@ runs:
         repository: ${{ github.repository }}
         ref: ${{ github.ref }}
         path: 'target-repo'
-    - name: debug
+    - name: Debug when not testing
+      if: ${{ (inputs.test == '') && (inputs.test_file == '' ) }}
       shell: bash
       run: |
         pwd
         ls -la target-repo/
-    - name: Fetch tags
+    - name: Fetch tags (when not testing)
       id: fetch_tags
+      if: ${{ (inputs.test == '') && (inputs.test_file == '' ) }}
       shell: bash
       working-directory: 'target-repo'
       run: |
-        git fetch --tags
         git fetch
+        git fetch --tags
     - name: Install libs
       id: install_libs
       shell: bash
@@ -80,7 +82,7 @@ runs:
         pip3 install git+https://github.com/python-semver/python-semver.git@3.0.2
         pip3 install git+https://github.com//gitpython-developers/GitPython.git@3.1.40
     - name: Get new Tag
-      id: next_tag
+      id: get_next_tag
       shell: bash
       env:
         RUN_AS_TEST: ${{inputs.test}}
