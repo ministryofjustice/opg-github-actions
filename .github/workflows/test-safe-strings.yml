@@ -75,18 +75,23 @@ jobs:
           echo "| 5. | ${{steps.test5.outputs.original}} | ${t5} | ${{steps.test5.outputs.safe}} |" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{steps.test1.outputs.safe}}" != "${t1}" ]; then
+            echo "test 1 failed"
             exit 1
           fi
           if [ "${{steps.test2.outputs.safe}}" != "${t2}" ]; then
+            echo "test 2 failed"
             exit 1
           fi
           if [ "${{steps.test3.outputs.safe}}" != "${t3}" ]; then
+            echo "test 3 failed"
             exit 1
           fi
           if [ "${{steps.test4.outputs.safe}}" != "${t4}" ]; then
+            echo "test 4 failed"
             exit 1
           fi
           if [ "${{steps.test5.outputs.safe}}" != "${t5}" ]; then
+            echo "test 5 failed"
             exit 1
           fi
       
