@@ -77,7 +77,7 @@ runs:
         python ${src}/./latest-tag.py \
           --repository_root="${repo}" \
           --test_file=${src}/${{inputs.test_file}} \
-          --prerelease=${{inputs.prerelease}}
+          --prerelease=${{inputs.prerelease}} \
           --prerelease_suffix=${{inputs.prerelease_suffix}}
 
     # - name: Get last tag
