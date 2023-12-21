@@ -52,11 +52,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - id: safe_branch
-      name: "Generate a safe, trimmed branch name"
-      uses: ./.github/actions/branch-name
-      with:
-        ref: ${{ inputs.branch_name }}            
     - name: "Checkout original repo to set folder"
       uses: actions/checkout@v4
       with:
@@ -69,13 +64,13 @@ runs:
         pwd
         ls -la
         ls -la target-repo/
-    # - name: Get all tags
-    #   id: get_tags
-    #   shell: bash
-    #   run: |
-    #     git fetch --tags
-    #     pip3 install git+https://github.com/python-semver/python-semver.git@3.0.2
-    #     pip3 install git+https://github.com//gitpython-developers/GitPython.git@3.1.40
+    - name: Get all tags
+      id: get_tags
+      shell: bash
+      run: |
+        git fetch --tags
+        pip3 install git+https://github.com/python-semver/python-semver.git@3.0.2
+        pip3 install git+https://github.com//gitpython-developers/GitPython.git@3.1.40
     # - name: Get last tag
     #   id: last_tag
     #   shell: bash

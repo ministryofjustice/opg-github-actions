@@ -1,0 +1,39 @@
+v0.1.0          Initial commit
+v0.2.0-dependabotgithub.0 Merge b83cf1e1e9d580be33fd2a297ee27b99cb8a7eac into 54e2d0b1e123a071e24c1e8658a96c80ad91474e
+v0.2.0-dependabotgithub.1 Merge 7419b78ec9787aaea4a7140855cef4c4c3c5de73 into 54e2d0b1e123a071e24c1e8658a96c80ad91474e
+v0.2.0-dependabotgithub.2 Merge bd20332250d3c67e51ad5f3f5c2612aa7c28bc62 into 54e2d0b1e123a071e24c1e8658a96c80ad91474e
+v0.2.0-migrate.0 Merge f0eca99a6ce26b43592717e29e1c349dd54da57d into 54e2d0b1e123a071e24c1e8658a96c80ad91474e
+v0.2.0-migrate.1 Merge 6b1cce5e2e3d77f56b7923350c77e60dc63f61e9 into 54e2d0b1e123a071e24c1e8658a96c80ad91474e
+v1.0.0          Merge pull request #6 from ministryofjustice/migrate
+v1.0.0-migrate.0 Merge 9a55596c83c222766f3ce4c3125bfd370001bbcf into 54e2d0b1e123a071e24c1e8658a96c80ad91474e
+v1.0.0-migrate.1 Merge 8238647396a579c5b32288b25498addbabf79055 into 54e2d0b1e123a071e24c1e8658a96c80ad91474e
+v1.0.0-migrate.2 Merge b4baac4c277d95ca16814a2eef3ffab7c04680c4 into 54e2d0b1e123a071e24c1e8658a96c80ad91474e
+v1.0.0-migrate.3 Merge 1f186982dd7c16155cbdf4644f7b52c5de77422d into 54e2d0b1e123a071e24c1e8658a96c80ad91474e
+v1.0.0-migrate.4 Merge bc9162f9c2ab898f5cede906f744ebbcbfff1ee8 into 54e2d0b1e123a071e24c1e8658a96c80ad91474e
+v1.0.0-migrate.5 Merge aaf5d5bee42b27a6504f03221beb612cb08586ce into 54e2d0b1e123a071e24c1e8658a96c80ad91474e
+v1.0.0-migrate.6 Merge 159eaf54c7edde38560ba41d04ed04d30a326eb5 into 54e2d0b1e123a071e24c1e8658a96c80ad91474e
+v1.0.0-migrate.7 Merge c88feeaaa7eb91d665a4bb092717fb8e44b18847 into 54e2d0b1e123a071e24c1e8658a96c80ad91474e
+v1.1.0          Merge pull request #7 from ministryofjustice/use-v2-workflows
+v1.1.0-usev2workflows.0 Merge a378fb3d93be98bfa4e6da6ec7204575134bf88b into 7c92a11bc8cbb5d7c87e410ab55f4906efc44362
+v1.2.0          Merge pull request #9 from ministryofjustice/cleanup-tf-version
+v1.2.0-cleanuptfversion.0 Merge b3b631ce699858e8e89885e70a5373c8818b7a17 into 93e6918437ce5c9b6ac156633fd85ffa039e7ad6
+v1.2.0-cleanuptfversion.1 Merge dd62d0d3e5413490d210ef94b889b96353552135 into 93e6918437ce5c9b6ac156633fd85ffa039e7ad6
+v1.3.0          Merge pull request #10 from ministryofjustice/workspace-manager
+v1.3.0-workspacemanager.0 Merge f7b7896396f20c4dc46a9c59ac435e8e93620e8e into 8794c9e7d2a73f16bb980e95db73aed99bf33804
+v1.3.0-workspacemanager.1 Merge 3cb5e6c3f2d13636711f3d0013228dc1e8cc8350 into 8794c9e7d2a73f16bb980e95db73aed99bf33804
+v1.3.0-workspacemanager.10 Merge 3e1b93effebcc5949d5f26d7359d5309a706ab4d into 8794c9e7d2a73f16bb980e95db73aed99bf33804
+v1.3.0-workspacemanager.11 Merge 9943dc0700019958fbdede84c6780ea0baf63da2 into 8794c9e7d2a73f16bb980e95db73aed99bf33804
+v1.3.0-workspacemanager.12 Merge 537f97e84be2b5a11f71b56c294228b8ac72f4f8 into 8794c9e7d2a73f16bb980e95db73aed99bf33804
+v1.3.0-workspacemanager.13 Merge 4ab835eceaa5976271f43475a4bac44b77378251 into 8794c9e7d2a73f16bb980e95db73aed99bf33804
+v1.3.0-workspacemanager.14 Merge 538f4e468a10b9e9c706f4f474cc5695ac66a8c4 into 8794c9e7d2a73f16bb980e95db73aed99bf33804
+v1.3.0-workspacemanager.2 Merge 16879da8a02cacc7284fd395d864d3ef2801d289 into 8794c9e7d2a73f16bb980e95db73aed99bf33804
+v1.3.0-workspacemanager.3 Merge 43bf2bb3ad84d67e016e56c1a62ac4dd0602bc5a into 8794c9e7d2a73f16bb980e95db73aed99bf33804
+v1.3.0-workspacemanager.4 Merge b019651fa6711ce6a09756181d9f38ceda962631 into 8794c9e7d2a73f16bb980e95db73aed99bf33804
+v1.3.0-workspacemanager.5 Merge d15194b295648b2d6c2b2b1ad069ccaa0755b2bc into 8794c9e7d2a73f16bb980e95db73aed99bf33804
+v1.3.0-workspacemanager.6 Merge 35a48790939f676bbb2ab0a930c128ad57eae47e into 8794c9e7d2a73f16bb980e95db73aed99bf33804
+v1.3.0-workspacemanager.7 Merge 75d8b7b5c5cde4676d9ee3701aeeb0d94c14fed3 into 8794c9e7d2a73f16bb980e95db73aed99bf33804
+v1.3.0-workspacemanager.8 Merge 1ead4af1065290beaea26e90b2fd743644b841a0 into 8794c9e7d2a73f16bb980e95db73aed99bf33804
+v1.3.0-workspacemanager.9 Merge 209ad33bf7ee54906c73b22d90a0105e4e827fe7 into 8794c9e7d2a73f16bb980e95db73aed99bf33804
+v1.4.0          Merge pull request #11 from ministryofjustice/update-tf-version-lookup
+v1.4.0-updatetfversionl.0 Merge 546830b9e4f6a71cede986cdd415f59d4ac87fa6 into 0466e6c3a904130a0758b72f2f5f49e8eeede1b2
+v1.5.0-moreactions.0 Merge 3d131774b950a0dc37c2c0953a299b5ea0278637 into dab1b63e158b041297802388c23791e725166457

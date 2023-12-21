@@ -1,4 +1,4 @@
-name: "[Test] semver-tag"
+name: "[Test] latest-tag"
 
 on:
   workflow_dispatch:
@@ -20,19 +20,24 @@ permissions:
 jobs:
   test:
     runs-on: 'ubuntu-latest'
-    name: "Test semver-tag"
+    name: "Test latest-tag.py"
     steps:
       - uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
-      # - id: test1
-      #   name: "1. Test pre-release tag construction"
-      #   uses: './.github/actions/semver-tag'
-      #   with:
-      #     dry_run: true
-      #     prerelease: true
-      #     branch_name: "tf-test"
+      - id: test1
+        name: "1. Test moreactions is found"
+        env:
+          RUN_AS_TEST: true
+        run: |
+          src="${{github.action_path}}"
+          cd ${src}
+          python ./latest-tag.py \
+            --test_file=./tests/tags.txt \
+            --prerelease=true \
+            --prerelease_suffix=moreactions
+
       # - id: test_results
       #   name: Test results
       #   run: |

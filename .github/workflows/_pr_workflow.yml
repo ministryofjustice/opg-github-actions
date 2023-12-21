@@ -28,10 +28,10 @@ jobs:
     name: "Test branch-name"
     uses: './.github/workflows/test-branch-name.yml'
 
-  # test semver-tag
-  test_semver_tag:
-    name: "Test semver-tag"
-    uses: './.github/workflows/test-semver-tag.yml'
+  # test latest-tag
+  test_latest_tag:
+    name: "Test latest-tag"
+    uses: './.github/workflows/test-latest-tag.yml'
 
   # generate branch name
   branch_name:
