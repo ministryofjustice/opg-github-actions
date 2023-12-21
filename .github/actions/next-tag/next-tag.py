@@ -17,7 +17,7 @@ def arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--prerelease_suffix", default="beta", help="Prerelease naming")
     parser.add_argument("--latest_tag", default="", help="Last tag")
     parser.add_argument("--last_release", default="", help="Last release var tag")
-    parser.add_argument("--with_v", default="true", help="apply prefix to the new tag")
+    parser.add_argument("--with_v", default="false", help="apply prefix to the new tag")
     return parser
 
 def trim_v(str):
@@ -111,14 +111,32 @@ def main():
     if not prerelease:
         new_tag = new_tag.replace(prerelease=None)
     
-    print(f"prerelease={prerelease}")
+    new_tag_str = f"{new_tag}"
+    
+    if len(args.with_v) > 0 and args.with_v == "true":
+        new_tag_str = f"v{new_tag_str}"
+
+    print(f"prerelease={args.prerelease}")
+    print(f"prerelease_processed={prerelease}")
     print(f"last_release={args.last_release}")
     print(f"last_release_processed={last_release}")
     print(f"initial_version={initial_version}")
     print(f"lastest_tag={args.latest_tag}")
     print(f"starting_tag={tag}")
-    print(f"new_tag={new_tag}")    
-        
+    print(f"new_tag={new_tag_str}")    
+
+    if 'GITHUB_OUTPUT' in os.environ:
+        print("Pushing to GitHub Output")
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+            print(f"prerelease={args.prerelease}", file=fh)
+            print(f"prerelease_processed={prerelease}", file=fh)
+            print(f"last_release={args.last_release}", file=fh)
+            print(f"last_release_processed={last_release}", file=fh)
+            print(f"initial_version={initial_version}", file=fh)
+            print(f"lastest_tag={args.latest_tag}", file=fh)
+            print(f"starting_tag={tag}", file=fh)
+            print(f"new_tag={new_tag_str}", file=fh)  
+            
     
 
 

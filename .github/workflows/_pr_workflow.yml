@@ -33,9 +33,20 @@ jobs:
     name: "Test latest-tag"
     uses: './.github/workflows/test-latest-tag.yml'
 
+# test latest-tag
+  test_next_tag:
+    name: "Test next-tag"
+    uses: './.github/workflows/test-next-tag.yml'
+
   # generate branch name
   branch_name:
-    needs: [test_terraform_version, test_terraform_workspace_manager, test_safe_strings, test_branch_name]
+    needs: 
+      - test_terraform_version
+      - test_terraform_workspace_manager
+      - test_safe_strings
+      - test_branch_name
+      - test_latest_tag
+      - test_next_tag
     name: "Branch name"
     uses: ministryofjustice/opg-github-workflows/.github/workflows/data-parse-branch-name.yml@v2.0.0
     secrets: inherit

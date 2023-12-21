@@ -6,7 +6,7 @@ inputs:
     default: ""
   test_file:
     description: "If test is set, then use the content of this file"
-    default: "./tests/tags.txt"
+    default: ""
   prerelease:
     description: "If set, looks for pre-release tag patterns (v1.1.1-${suffix}.${count})"
     default: ""
@@ -14,26 +14,39 @@ inputs:
     description: "If prerelease is set, this string is used as the ${suffix} in the tag pattern. (Default: beta)"
     default: "beta"
   latest_tag:
-    description: "Lastest tag to bump from"
+    description: "Lastest tag to bump from."
     default: ""
   last_release:
-    description: "Last release"
+    description: "Last release tag"
     default: ""
+  with_v:
+    description: "New tag will start with a v prefix"
+    default: "true"
 
   
 outputs:
   test:
-    description: "Inputed test."    
+    description: "Inputed test variable."    
     value: ${{inputs.test}}
+  test_file:
+    description: "Inputed test_file variable."    
+    value: ${{inputs.test_file}}
   prerelease:
     description: "Inputed prerelease variable."
     value: ${{ inputs.prerelease }}
   prerelease_suffix:
     description: "Inputed prerelease_suffix variable."
     value: ${{ inputs.prerelease_suffix }}
-  latest:
-    description: "Latest tag found"
-    value: ${{steps.latest.outputs.latest}}
+  latest_tag:
+    description: "Inputed latest_tag variable."
+    value: ${{inputs.latest_tag}}
+  last_release:
+    description: "Inputed last_release variable."
+    value: ${{inputs.last_release}}
+  with_v:
+    description: "Inputed with_v variable."
+    value: ${{inputs.with_v}}
+
 
 runs:
   using: "composite"
@@ -55,23 +68,27 @@ runs:
       working-directory: 'target-repo'
       run: |
         git fetch --tags
+        git fetch
     - name: Install libs
       id: install_libs
       shell: bash
       run: |
         pip3 install git+https://github.com/python-semver/python-semver.git@3.0.2
         pip3 install git+https://github.com//gitpython-developers/GitPython.git@3.1.40
-    - name: Get latest Tag
-      id: latest
+    - name: Get new Tag
+      id: next_tag
       shell: bash
       env:
         RUN_AS_TEST: ${{inputs.test}}
       run: |      
         src="${{github.action_path}}"
         repo="${{github.workspace}}/target-repo"
-        python ${src}/./latest-tag.py \
+        python ${src}/./next-tag.py \
           --repository_root="${repo}" \
           --default_branch="${{ github.event.repository.default_branch }}" \
-          --test_file=${src}/${{inputs.test_file}} \
           --prerelease=${{inputs.prerelease}} \
-          --prerelease_suffix=${{inputs.prerelease_suffix}}
+          --prerelease_suffix=${{inputs.prerelease_suffix}} \
+          --latest_tag="${{inputs.latest_tag}}" \
+          --last_release=${{inputs.last_release}} \
+          --with_v=${{inputs.with_v}} \
+          --test_file=${src}/${{inputs.test_file}} \
