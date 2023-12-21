@@ -1,0 +1,77 @@
+name: "Create semver tag at current github ref using passed branch name as a suffix."
+description: "Use the branch name passed (can be either refs/heads/name-of-thing or just name-of-thing)."
+inputs:
+  test:
+    description: "If set, run test versions of data"
+    default: ""
+  test_file:
+    description: "If test is set, then use the content of this file"
+    default: "./tests/tags.txt"
+  prerelease:
+    description: "If set, looks for pre-release tag patterns (v1.1.1-${suffix}.${count})"
+    default: ""
+  prerelease_suffix:
+    description: "If prerelease is set, this string is used as the ${suffix} in the tag pattern. (Default: beta)"
+    default: "beta"
+  latest_tag:
+    description: "Lastest tag to bump from"
+    default: ""
+  last_release:
+    description: "Last release"
+    default: ""
+
+  
+outputs:
+  test:
+    description: "Inputed test."    
+    value: ${{inputs.test}}
+  prerelease:
+    description: "Inputed prerelease variable."
+    value: ${{ inputs.prerelease }}
+  prerelease_suffix:
+    description: "Inputed prerelease_suffix variable."
+    value: ${{ inputs.prerelease_suffix }}
+  latest:
+    description: "Latest tag found"
+    value: ${{steps.latest.outputs.latest}}
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Checkout original repo to set folder"
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ github.repository }}
+        ref: ${{ github.ref }}
+        path: 'target-repo'
+    - name: debug
+      shell: bash
+      run: |
+        pwd
+        ls -la target-repo/
+    - name: Fetch tags
+      id: fetch_tags
+      shell: bash
+      working-directory: 'target-repo'
+      run: |
+        git fetch --tags
+    - name: Install libs
+      id: install_libs
+      shell: bash
+      run: |
+        pip3 install git+https://github.com/python-semver/python-semver.git@3.0.2
+        pip3 install git+https://github.com//gitpython-developers/GitPython.git@3.1.40
+    - name: Get latest Tag
+      id: latest
+      shell: bash
+      env:
+        RUN_AS_TEST: ${{inputs.test}}
+      run: |      
+        src="${{github.action_path}}"
+        repo="${{github.workspace}}/target-repo"
+        python ${src}/./latest-tag.py \
+          --repository_root="${repo}" \
+          --default_branch="${{ github.event.repository.default_branch }}" \
+          --test_file=${src}/${{inputs.test_file}} \
+          --prerelease=${{inputs.prerelease}} \
+          --prerelease_suffix=${{inputs.prerelease_suffix}}

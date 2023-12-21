@@ -32,6 +32,7 @@ jobs:
         uses: './.github/actions/latest-tag'
         with: 
           test: true
+          branch: "more-actions"
           prerelease: true
           prerelease_suffix: "moreactions"
       - id: test2
@@ -39,25 +40,38 @@ jobs:
         uses: './.github/actions/latest-tag'
         with: 
           test: true
+          branch: "more-actions"
           prerelease: true
           prerelease_suffix: "123rand123"
       - id: test3
         name: "3. Test last release version is 1.4.0"
         uses: './.github/actions/latest-tag'
+        with:           
+          test: true
+      - id: test4
+        name: "4. Test branch that matches a release branch forces a release version"
+        uses: './.github/actions/latest-tag'
         with: 
           test: true
+          branch: "main"
+          release_branches: "main"
+          prerelease: true
+          prerelease_suffix: "123rand123"
+
       - id: test_results
         name: Test results
         run: |
           t1="v1.5.0-moreactions.0"
           t2=""
           t3="v1.4.0"
+          t4="v1.4.0"
           echo "### Test Information" >> $GITHUB_STEP_SUMMARY
           echo "| \# | Expected | Actual | " >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
           echo "| 1. | ${t1} | ${{steps.test1.outputs.latest}} | " >> $GITHUB_STEP_SUMMARY
           echo "| 2. | ${t2} | ${{steps.test2.outputs.latest}} | " >> $GITHUB_STEP_SUMMARY
           echo "| 3. | ${t3} | ${{steps.test3.outputs.latest}} | " >> $GITHUB_STEP_SUMMARY
+          echo "| 4. | ${t4} | ${{steps.test4.outputs.latest}} | " >> $GITHUB_STEP_SUMMARY
 
           if [ "${{steps.test1.outputs.latest}}" != "${t1}" ]; then
             echo "test 1 failed"
@@ -69,6 +83,10 @@ jobs:
           fi
           if [ "${{steps.test3.outputs.latest}}" != "${t3}" ]; then
             echo "test 3 failed"
+            exit 1
+          fi
+          if [ "${{steps.test4.outputs.latest}}" != "${t4}" ]; then
+            echo "test 4 failed"
             exit 1
           fi
 
