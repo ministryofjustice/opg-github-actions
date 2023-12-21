@@ -42,13 +42,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: debug
-      shell: bash
-      run: |
-        pwd
-        ls -la
-        ls -la .github/
-        ls -la .github/actions      
     - name: "Checkout original repo to set folder"
       uses: actions/checkout@v4
       with:
@@ -80,11 +73,12 @@ runs:
       run: |      
         src="${{github.action_path}}"
         repo="${{github.workspace}}/target-repo"
+        ls -la ${repo}
         python ${src}/./latest-tag.py \
           --repository_root="${repo}" \
-          --test_file=${{inputs.test_file}} \
+          --test_file=${src}/${{inputs.test_file}} \
           --prerelease=${{inputs.prerelease}}
-          --prerelease_suffix=${{inputs.prerelease_suffix}} \
+          --prerelease_suffix=${{inputs.prerelease_suffix}}
 
     # - name: Get last tag
     #   id: last_tag
