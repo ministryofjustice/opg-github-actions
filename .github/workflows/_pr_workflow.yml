@@ -9,33 +9,33 @@ on:
 jobs:
   # test terraform-version
   test_terraform_version:
-    name: "Test terraform-version"
+    name: "[Test] terraform-version"
     uses: './.github/workflows/test-terraform-version.yml'
   
   # test terraform-workspace-manager
   test_terraform_workspace_manager:
-    name: "Test terraform-workspace-manager"
+    name: "[Test] terraform-workspace-manager"
     uses: './.github/workflows/test-terraform-workspace-manager.yml'
     secrets: inherit
   
   # test safe-strings
   test_safe_strings:
-    name: "Test safe-strings"
+    name: "[Test] safe-strings"
     uses: './.github/workflows/test-safe-strings.yml'
 
   # test safe-strings
   test_branch_name:
-    name: "Test branch-name"
+    name: "[Test] branch-name"
     uses: './.github/workflows/test-branch-name.yml'
 
   # test latest-tag
   test_latest_tag:
-    name: "Test latest-tag"
+    name: "[Test] latest-tag"
     uses: './.github/workflows/test-latest-tag.yml'
 
 # test latest-tag
   test_next_tag:
-    name: "Test next-tag"
+    name: "[Test] next-tag"
     uses: './.github/workflows/test-next-tag.yml'
 
   # generate branch name
