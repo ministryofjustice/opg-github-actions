@@ -1,43 +1,33 @@
 name: "Create semver tag at current github ref using passed branch name as a suffix."
 description: "Use the branch name passed (can be either refs/heads/name-of-thing or just name-of-thing)."
 inputs:
-  
-  github_token:
-    description: "Github token"
-  branch_name:
-    description: "Branch name used as prerelease suffix to create the tag name (so v1.1.0-$branch_name.$index)."    
+  test:
+    description: "If set, run test versions of data"
     default: ""
-  release_branch:    
-    description: "Release branch main - if branch name matches this the tag change to be a production style v1.1.0 without suffixes."
-    default: "main"
+  test_file:
+    description: "If test is set, then use the content of this file"
+    default: "./tests/tags.txt"
   prerelease:
-    description: "If set, creates a pre-release (draft)."
+    description: "If set, looks for pre-release tag patterns (v1.1.1-${suffix}.${count})"
     default: ""
+  prerelease_suffix:
+    description: "If prerelease is set, this string is used as the ${suffix} in the tag pattern. (Default: beta)"
+    default: "beta"
   
   
-  dry_run:
-    description: "If set, acts as a dry run without creating a tag"
-    default: ""
 outputs:
-  branch_name:
-    description: "Inputed branch_name."    
-    value: ${{inputs.branch_name}}
-  release_branch:
-    description: "Inputed release_branch variable."
-    value: ${{ inputs.release_branch }}
+  test:
+    description: "Inputed test."    
+    value: ${{inputs.test}}
   prerelease:
     description: "Inputed prerelease variable."
     value: ${{ inputs.prerelease }}
-  dry_run:
-    description: "Inputed dry_run variable."
-    value: ${{ inputs.dry_run }}
-  branch_full_length:
-    description: "Output from branch_name safety check - the full_length return value"
-    value: ${{ steps.safe_branch.outputs.full_length }}  
-  branch_safe:
-    description: "Output from branch_name safety check  - the safe return value"
-    value: ${{ steps.safe_branch.outputs.safe }}  
-  
+  prerelease_suffix:
+    description: "Inputed prerelease_suffix variable."
+    value: ${{ inputs.prerelease_suffix }}
+  latest:
+    description: "Latest tag found"
+    value: ${{steps.latest.outputs.latest}}
   # new_tag:
   #   description: "The value of the newly created tag."
   #   value: ${{ steps.create_tags.outputs.new_tag }}
@@ -64,13 +54,29 @@ runs:
         pwd
         ls -la
         ls -la target-repo/
-    - name: Get all tags
-      id: get_tags
+    - name: Fetch tags
+      id: fetch_tags
       shell: bash
       run: |
         git fetch --tags
+    - name: Install libs
+      id: install_libs
+      shell: bash
+      run: |
         pip3 install git+https://github.com/python-semver/python-semver.git@3.0.2
         pip3 install git+https://github.com//gitpython-developers/GitPython.git@3.1.40
+    - name: Get latest Tag
+      id: latest
+      shell: bash
+      env:
+        RUN_AS_TEST: ${{inputs.test}}
+      run: |
+        src="${{github.action_path}}"
+        dir="${src}/.github/actions/semver-tag/"
+        python ${dir}./latest-tag.py \
+          --test_file=${{inputs.test_file}}
+          --prerelease=${{inputs.prerelease}}
+
     # - name: Get last tag
     #   id: last_tag
     #   shell: bash

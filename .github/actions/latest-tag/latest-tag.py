@@ -42,7 +42,10 @@ def main():
     prerelease_suffix = args.prerelease_suffix
 
     # use test content
-    if os.getenv("RUN_AS_TEST") and len(test_file) > 0:
+    test = os.getenv("RUN_AS_TEST")
+    is_test = False
+    if len(test) > 0 and len(test_file) > 0:
+        is_test = True
         tags = tags_from_file(test_file)
     else:
         repo = Repo(repo_root)    
@@ -61,6 +64,7 @@ def main():
         last = max(matching)
 
     # summary for shell
+    print(f"test={is_test}")
     print(f"prerelease={prerelease}")
     print(f"prerelease_suffix={prerelease_suffix}")
     print(f"latest={last}")
@@ -68,6 +72,7 @@ def main():
     if 'GITHUB_OUTPUT' in os.environ:
         print("Pushing to GitHub Output")
         with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+            print(f'test={is_test}', file=fh)
             print(f'prerelease={prerelease}', file=fh)
             print(f'prerelease_suffix={prerelease_suffix}', file=fh)
             print(f'latest={last}', file=fh)
