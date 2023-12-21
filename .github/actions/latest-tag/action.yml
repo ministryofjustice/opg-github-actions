@@ -42,17 +42,26 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: debug
+      shell: bash
+      run: |
+        pwd
+        ls -la
+        ls -la .github/
+        ls -la .github/actions      
     - name: "Checkout original repo to set folder"
       uses: actions/checkout@v4
       with:
         repository: ${{ github.repository }}
         ref: ${{ github.ref }}
         path: 'target-repo'
-    - name: Listing
+    - name: debug
       shell: bash
       run: |
         pwd
         ls -la
+        ls -la .github/
+        ls -la .github/actions
         ls -la target-repo/
     - name: Fetch tags
       id: fetch_tags
