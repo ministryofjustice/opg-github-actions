@@ -33,7 +33,7 @@ jobs:
     name: "[Test] latest-tag"
     uses: './.github/workflows/test-latest-tag.yml'
 
-# test latest-tag
+  # test next-tag
   test_next_tag:
     name: "[Test] next-tag"
     uses: './.github/workflows/test-next-tag.yml'
