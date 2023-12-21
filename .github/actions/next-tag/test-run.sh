@@ -3,7 +3,7 @@ set -e
 export RUN_AS_TEST="true"
 err=""
 
-echo "| ## Test Information"
+echo "## Test Information"
 echo "| \# | Expected | Actual | "
 echo "| --- | --- | --- |"
 
