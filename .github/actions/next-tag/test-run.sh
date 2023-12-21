@@ -9,7 +9,7 @@ out=$(python ./next-tag.py \
     --latest_tag="v1.5.0-moreactions.1" \
     --last_release="v1.4.0")
 
-actual=$(echo "${out}" | sed -r -n 's/.*new_tag=(.*)$/\1/p' )
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="2.0.0-moreactions.0"
 echo "#1.1 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
@@ -25,7 +25,7 @@ out=$(python ./next-tag.py \
     --latest_tag="v2.0.0-moreactions.0" \
     --last_release="v1.4.0")
 
-actual=$(echo "${out}" | sed -r -n 's/.*new_tag=(.*)$/\1/p' )
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="2.0.0-moreactions.1"
 echo "#1.2 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
@@ -41,7 +41,7 @@ out=$(python ./next-tag.py \
     --prerelease=true \
     --latest_tag="" \
     --last_release="v1.4.0")
-actual=$(echo "${out}" | sed -r -n 's/.*new_tag=(.*)$/\1/p' )
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="2.0.0-moreactions.0"
 echo "#1.3 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
@@ -56,7 +56,7 @@ out=$(python ./next-tag.py \
     --prerelease_suffix="moreactions" \
     --latest_tag="" \
     --last_release="v1.4.0")
-actual=$(echo "${out}" | sed -r -n 's/.*new_tag=(.*)$/\1/p' )
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="2.0.0"
 echo "#1.4 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
@@ -71,7 +71,7 @@ out=$(python ./next-tag.py \
     --prerelease_suffix="moreactions" \
     --latest_tag="" \
     --last_release="")
-actual=$(echo "${out}" | sed -r -n 's/.*new_tag=(.*)$/\1/p' )
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.0.0"
 echo "#1.5 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
@@ -87,7 +87,7 @@ out=$(python ./next-tag.py \
     --prerelease=true \
     --latest_tag="v1.5.0-moreactions.0" \
     --last_release="v1.4.0")
-actual=$(echo "${out}" | sed -r -n 's/.*new_tag=(.*)$/\1/p' )
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.5.0-moreactions.1"
 echo "#2.1 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
@@ -102,7 +102,7 @@ out=$(python ./next-tag.py \
     --prerelease=true \
     --latest_tag="" \
     --last_release="v1.4.0")
-actual=$(echo "${out}" | sed -r -n 's/.*new_tag=(.*)$/\1/p' )
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.5.0-moreactions.0"
 echo "#2.2 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
@@ -117,7 +117,7 @@ out=$(python ./next-tag.py \
     --prerelease_suffix="moreactions" \
     --latest_tag="v1.5.0-moreactions.0" \
     --last_release="v1.4.0")
-actual=$(echo "${out}" | sed -r -n 's/.*new_tag=(.*)$/\1/p' )
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.5.0"
 echo "#2.3 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
@@ -131,7 +131,7 @@ out=$(python ./next-tag.py \
     --prerelease_suffix="moreactions" \
     --latest_tag="" \
     --last_release="")
-actual=$(echo "${out}" | sed -r -n 's/.*new_tag=(.*)$/\1/p' )
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="0.1.0"
 echo "#2.4 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
@@ -148,7 +148,7 @@ out=$(python ./next-tag.py \
     --prerelease_suffix="moreactions" \
     --latest_tag="" \
     --last_release="v1.4.0")
-actual=$(echo "${out}" | sed -r -n 's/.*new_tag=(.*)$/\1/p' )
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.4.1-moreactions.0"
 echo "#3.1 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
@@ -163,7 +163,7 @@ out=$(python ./next-tag.py \
     --prerelease_suffix="moreactions" \
     --latest_tag="v1.4.1-moreactions.1" \
     --last_release="v1.4.0")
-actual=$(echo "${out}" | sed -r -n 's/.*new_tag=(.*)$/\1/p' )
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.4.1-moreactions.2"
 echo "#3.2 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
@@ -178,7 +178,7 @@ out=$(python ./next-tag.py \
     --prerelease_suffix="moreactions" \
     --latest_tag="v1.4.1-moreactions.1" \
     --last_release="v1.4.0")
-actual=$(echo "${out}" | sed -r -n 's/.*new_tag=(.*)$/\1/p' )
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.4.1"
 echo "#3.3 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
@@ -192,7 +192,7 @@ out=$(python ./next-tag.py \
     --prerelease_suffix="moreactions" \
     --latest_tag="" \
     --last_release="")    
-actual=$(echo "${out}" | sed -r -n 's/.*new_tag=(.*)$/\1/p' )
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="0.0.1"
 echo "#3.4 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then

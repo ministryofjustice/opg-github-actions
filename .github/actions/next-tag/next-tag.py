@@ -123,7 +123,7 @@ def main():
     print(f"initial_version={initial_version}")
     print(f"lastest_tag={args.latest_tag}")
     print(f"starting_tag={tag}")
-    print(f"new_tag={new_tag_str}")    
+    print(f"next_tag={new_tag_str}")    
 
     if 'GITHUB_OUTPUT' in os.environ:
         print("Pushing to GitHub Output")
@@ -135,7 +135,7 @@ def main():
             print(f"initial_version={initial_version}", file=fh)
             print(f"lastest_tag={args.latest_tag}", file=fh)
             print(f"starting_tag={tag}", file=fh)
-            print(f"new_tag={new_tag_str}", file=fh)  
+            print(f"next_tag={new_tag_str}", file=fh)  
             
     
 
