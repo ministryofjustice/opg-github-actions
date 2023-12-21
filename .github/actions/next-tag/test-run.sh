@@ -1,4 +1,4 @@
-# #!/usr/bin/env bash
+#!/usr/bin/env bash
 echo "MAJORS"
 set -e
 
@@ -197,6 +197,120 @@ expected="0.0.1"
 echo "#3.4 [${expected}]=>[${actual}]"
 if [ "${actual}" != "${expected}" ]; then
     echo "FAILED #3.4"
+    echo "${out}"
+    echo "==="
+fi
+
+
+echo "OTHERS"
+# this is a prerelease with an existing tag, so just bump the prerelease
+out=$(python ./next-tag.py \
+    --test_file=./tests/none.txt \
+    --prerelease=true \
+    --prerelease_suffix="moreactions" \
+    --latest_tag="v1.0.1-moreactions.0" \
+    --last_release="v1.0.0")    
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
+expected="1.0.1-moreactions.1"
+echo "#4.1 [${expected}]=>[${actual}]"
+if [ "${actual}" != "${expected}" ]; then
+    echo "FAILED #4.1"
+    echo "${out}"
+    echo "==="
+fi
+
+# this is a prerelease without an existing tag, so should get a minor bump by default and
+# a prerelease segment added
+out=$(python ./next-tag.py \
+    --test_file=./tests/none.txt \
+    --prerelease=true \
+    --prerelease_suffix="moreactions" \
+    --last_release="v1.0.0")    
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
+expected="1.0.1-moreactions.0"
+echo "#4.2 [${expected}]=>[${actual}]"
+if [ "${actual}" != "${expected}" ]; then
+    echo "FAILED #4.2"
+    #echo "${out}"
+    echo "==="
+fi
+
+
+# a prerelease, with a major bump
+out=$(python ./next-tag.py \
+    --test_file=./tests/none.txt \
+    --default_bump="major" \
+    --prerelease="true" \
+    --prerelease_suffix="moreactions" \
+    --last_release="v1.0.0")    
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
+expected="2.0.0-moreactions.0"
+echo "#4.3 [${expected}]=>[${actual}]"
+if [ "${actual}" != "${expected}" ]; then
+    echo "FAILED #4.3"
+    echo "${out}"
+    echo "==="
+fi
+
+# not a prerelease, so should bump the minor version segment
+out=$(python ./next-tag.py \
+    --test_file=./tests/none.txt \
+    --default_bump="minor" \
+    --prerelease_suffix="moreactions" \
+    --last_release="v1.0.0")    
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
+expected="1.1.0"
+echo "#4.4 [${expected}]=>[${actual}]"
+if [ "${actual}" != "${expected}" ]; then
+    echo "FAILED #4.4"
+    echo "${out}"
+    echo "==="
+fi
+
+# no previous tags, nothing in commits to trigger a bump
+# default as patch, not a prerelease
+out=$(python ./next-tag.py \
+    --test_file=./tests/none.txt \
+    --prerelease_suffix="moreactions" \
+    --latest_tag="" \
+    --last_release="")
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
+expected="0.0.1"
+echo "#4.5 [${expected}]=>[${actual}]"
+if [ "${actual}" != "${expected}" ]; then
+    echo "FAILED #4.5"
+    echo "${out}"
+    echo "==="
+fi
+
+# no previous tags, nothing in commits to trigger a bump
+# default as patch, a prerelease so should generate that segement
+out=$(python ./next-tag.py \
+    --test_file=./tests/none.txt \
+    --prerelease="true" \
+    --prerelease_suffix="moreactions" \
+    --latest_tag="" \
+    --last_release="")
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
+expected="0.0.1-moreactions.0"
+echo "#4.6 [${expected}]=>[${actual}]"
+if [ "${actual}" != "${expected}" ]; then
+    echo "FAILED #4.6"
+    echo "${out}"
+    echo "==="
+fi
+# previous release, not a prerelease, with_v and major bump
+out=$(python ./next-tag.py \
+    --test_file=./tests/none.txt \
+    --prerelease_suffix="moreactions" \
+    --last_release="v1.1.0" \
+    --default_bump="major" \
+    --with_v="true")
+actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
+expected="v2.0.0"
+echo "#4.7 [${expected}]=>[${actual}]"
+if [ "${actual}" != "${expected}" ]; then
+    echo "FAILED #4.7"
     echo "${out}"
     echo "==="
 fi
