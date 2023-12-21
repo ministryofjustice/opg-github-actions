@@ -34,14 +34,7 @@ def compare_to(latest_tag):
         compare = "HEAD"
     return compare
 
-def initial_semver_tag(tag):
-    # if len(latest_tag) == 0:        
-    #     tag = Version.parse(trim_v(initial_version))
-    #     if prerelease:
-    #         tag = tag.replace(prerelease=f"{prerelease_suffix}.0")
-    # else:
-    #     tag = Version.parse(trim_v(latest_tag))
-
+def initial_semver_tag(tag):   
     return Version.parse(trim_v(tag))
 
 def get_commits(test, test_file, repo_root, default_branch, latest_tag):
@@ -125,6 +118,8 @@ def main():
     if len(args.with_v) > 0 and args.with_v == "true":
         new_tag_str = f"v{new_tag_str}"
 
+    print(f"repository_root={args.repository_root}")
+    print(f"default_branch={args.default_branch}")
     print(f"prerelease={args.prerelease}")
     print(f"prerelease_processed={is_prerelease}")
     print(f"default_bump={args.default_bump}")
@@ -132,11 +127,14 @@ def main():
     print(f"last_release_processed={last_release}")
     print(f"lastest_tag={args.latest_tag}")
     print(f"starting_tag={starting_tag}")
+    # needs to be last for bash tests
     print(f"next_tag={new_tag_str}")    
 
     if 'GITHUB_OUTPUT' in os.environ:
         print("Pushing to GitHub Output")
         with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+            print(f"repository_root={args.repository_root}", file=fh)
+            print(f"default_branch={args.default_branch}", file=fh)
             print(f"prerelease={args.prerelease}", file=fh)
             print(f"prerelease_processed={is_prerelease}", file=fh)
             print(f"default_bump={args.default_bump}", file=fh)
