@@ -22,8 +22,8 @@ inputs:
   default_bump:
     description: "Bump version along by this. (Default: minor)"
     default: "minor"
-  sha:
-    description: "Sha to compare commits from"
+  commitish:
+    description: "Branch to compare commits from"
     default: ""
   with_v:
     description: "New tag will start with a v prefix"
@@ -94,7 +94,7 @@ runs:
         repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         python ${src}/./next-tag.py \
           --repository_root="${repo}" \
-          --commitish="${{inputs.sha}}" \
+          --commitish="${{inputs.commitish}}" \
           --default_bump="${{inputs.default_bump}}" \
           --default_branch="${{ github.event.repository.default_branch }}" \
           --prerelease="${{inputs.prerelease}}" \
