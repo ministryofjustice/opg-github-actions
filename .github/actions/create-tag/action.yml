@@ -70,11 +70,12 @@ runs:
       working-directory: ${{inputs.caller_repo_subfolder}}
       run: |        
         latest_tag=$(git tag --points-at="${{inputs.commitish}}" --sort=creatordate | sort --version-sort -f | tail -n1)
+        echo "latest_tag=${latest_tag}"
         echo "latest_tag=${latest_tag}" >> $GITHUB_OUTPUT
     - name: Push tag
       id: push_tag
       shell: bash
-      if: ${{ inputs.dry_run != '' }}
+      if: ${{ inputs.dry_run == '' }}
       working-directory: ${{inputs.caller_repo_subfolder}}
       run: |
-        git push "${{inputs.tag_name}}"
+        git push origin "${{inputs.tag_name}}"
