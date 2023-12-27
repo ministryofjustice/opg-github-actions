@@ -137,6 +137,7 @@ jobs:
           prerelease_suffix: "moreactions"
           latest_tag: "v1.5.0-moreactions.0"
           last_release: "v1.4.0"
+          default_bump: patch
       - id: test2
         name: "2. Test minor version bump prerelease without latest_tag"
         uses: './.github/actions/next-tag'
@@ -146,6 +147,7 @@ jobs:
           prerelease: true
           prerelease_suffix: "moreactions"
           last_release: "v1.4.0"
+          default_bump: patch
       - id: test3
         name: "3. Test minor version bump as a release"
         uses: './.github/actions/next-tag'
@@ -155,6 +157,7 @@ jobs:
           prerelease_suffix: "moreactions"
           latest_tag: "v1.5.0-moreactions.0"
           last_release: "v1.4.0"
+          default_bump: patch
       - id: test4
         name: "4. Test minor version bump without latest_tag as a release"
         uses: './.github/actions/next-tag'
@@ -162,6 +165,7 @@ jobs:
           test: true
           test_file: "./tests/minors.txt"
           prerelease_suffix: "moreactions"
+          default_bump: patch
       - id: test_results
         name: Test results [Minors]
         run: |
@@ -215,6 +219,7 @@ jobs:
           latest_tag: "v1.5.0-moreactions.1"
           last_release: "v1.4.0"
           with_v: true
+          default_bump: patch
       - id: test2
         name: "2. Test major version bump as an existing prerelease"
         uses: './.github/actions/next-tag'
@@ -225,6 +230,7 @@ jobs:
           prerelease_suffix: "moreactions"
           latest_tag: "v2.0.0-moreactions.0"
           last_release: "v1.4.0"
+          default_bump: patch
       - id: test3
         name: "3. Test major version bump without latest_tag as a prerelease"
         uses: './.github/actions/next-tag'
@@ -234,6 +240,7 @@ jobs:
           prerelease: true
           prerelease_suffix: "moreactions"
           last_release: "v1.4.0"
+          default_bump: patch
       - id: test4
         name: "4. Test major version bump without latest_tag as a release"
         uses: './.github/actions/next-tag'
@@ -242,6 +249,7 @@ jobs:
           test_file: "./tests/majors.txt"
           prerelease_suffix: "moreactions"
           last_release: "v1.4.0"
+          default_bump: patch
       - id: test5
         name: "5. Test major version from empty"
         uses: './.github/actions/next-tag'
@@ -249,6 +257,7 @@ jobs:
           test: true
           test_file: "./tests/majors.txt"
           prerelease_suffix: "moreactions"
+          default_bump: patch
       - id: test_results
         name: Test results [Major]
         run: |
