@@ -324,8 +324,8 @@ out=$(python ./next-tag.py \
     --test_file=./tests/none.txt \
     --prerelease="true" \
     --prerelease_suffix="moreactions" \
+    --default_bump="patch" \
     --latest_tag="" \
-    
     --last_release="")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="0.0.1-moreactions.0"
