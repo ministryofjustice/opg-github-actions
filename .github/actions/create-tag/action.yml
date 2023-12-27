@@ -1,7 +1,10 @@
-name: "Create a new git tag at the ref passed"
-description: "Create a new git tag at the ref passed"
+name: "Create a new git tag at the commitish passed"
+description: "Create a new git tag at the commitish passed"
 inputs:  
-  ref:
+  branch_name:
+    description: "Branch name to checkout to. (Default: main)"
+    default: "main"
+  commitish:
     description: "The github commit reference to checkout to and create the tag at"
     required: true
   tag_name:
@@ -16,9 +19,9 @@ inputs:
 
 
 outputs:
-  ref:
-    description: "Inputed ref variable."
-    value: ${{ inputs.ref }}
+  commitish:
+    description: "Inputed commitish variable."
+    value: ${{ inputs.commitish }}
   tag_name:
     description: "Inputed tag_name variable."
     value: ${{ inputs.tag_name }}
@@ -27,7 +30,7 @@ outputs:
     value: ${{ inputs.dry_run }}
 
   latest:
-    description: "Latest tag found at ref provided"
+    description: "Latest tag found at commitish provided"
     value: ${{steps.tags_found.outputs.latest_tag}}
 
 runs:
@@ -37,8 +40,9 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: ${{ github.repository }}
-        ref: ${{ inputs.ref }}
+        ref: ${{ inputs.branch_name }}
         path: ${{inputs.caller_repo_subfolder}}
+        fetch-tags: true
     - name: debug
       shell: bash
       if: ${{ inputs.dry_run != '' }}
@@ -46,25 +50,26 @@ runs:
         pwd
         ls -la ./
         ls -la ${{inputs.caller_repo_subfolder}}
-    - name: Fetch
+    - name: Fetch and checkout
       id: fetch
       shell: bash
       working-directory: ${{inputs.caller_repo_subfolder}}
       run: |
         git fetch
         git fetch --tags
+        git checkout -f "${{inputs.commitish}}"
     - name: Create tag
       id: create_tag
       shell: bash
       working-directory: ${{inputs.caller_repo_subfolder}}
       run: |
-        git tag "${{inputs.tag_name}}" "${{inputs.ref}}"
+        git tag "${{inputs.tag_name}}" "${{inputs.commitish}}"
     - name: Tags for commit
       id: tags_found
       shell: bash
       working-directory: ${{inputs.caller_repo_subfolder}}
       run: |        
-        latest_tag=$(git tag --points-at="${{inputs.ref}}" --sort=creatordate | sort --version-sort -f | tail -n1)
+        latest_tag=$(git tag --points-at="${{inputs.commitish}}" --sort=creatordate | sort --version-sort -f | tail -n1)
         echo "latest_tag=${latest_tag}" >> $GITHUB_OUTPUT
     - name: Push tag
       id: push_tag

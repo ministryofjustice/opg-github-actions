@@ -5,7 +5,7 @@ on:
   workflow_call:
 
 permissions:
-  contents: read
+  contents: write
   security-events: none
   pull-requests: none
   actions: none
@@ -31,7 +31,7 @@ jobs:
         uses: './.github/actions/create-tag'
         with:
           dry_run: true
-          ref: "dab1b63"
+          commitish: "dab1b63"
           tag_name: "test_tag_wont_be_found"
       - id: test_results
         name: Test results
