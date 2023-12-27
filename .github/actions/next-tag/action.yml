@@ -68,7 +68,7 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: ${{ github.repository }}
-        ref: ${{ github.ref }}
+        ref: ${{ github.head_ref }}
         path: ${{inputs.caller_repo_subfolder}}
         fetch-tags: true
     - name: Fetch repo content
@@ -76,40 +76,40 @@ runs:
       shell: bash
       working-directory: ${{inputs.caller_repo_subfolder}}
       run: |     
+        git fetch --quiet --unshallow || git fetch --quiet --all
+        git fetch --tags --quiet
+
         echo "base ref>>${{github.base_ref}}"
         echo "head ref>>${{github.head_ref}}"
         echo "ref name>>${{github.ref_name}}"
         echo "sha >>${{github.sha}}"
         git rev-parse HEAD
-        git fetch --quiet --unshallow || git fetch --quiet --all
-        git fetch --tags --quiet
-        if [ ! -z "${{inputs.commitish}}" ]; then
-          git checkout -f "${{inputs.commitish}}"
-          git pull --all
-          git log --oneline ${{ github.event.repository.default_branch }}...${{inputs.commitish}} > commits
-        fi
-    - name: Install libs
-      id: install_libs
-      shell: bash
-      run: |
-        pip3 install git+https://github.com/python-semver/python-semver.git@3.0.2 -q -q
-        pip3 install git+https://github.com//gitpython-developers/GitPython.git@3.1.40 -q -q
-    - name: Get new Tag
-      id: get_next_tag
-      shell: bash
-      env:
-        RUN_AS_TEST: ${{inputs.test}}
-      run: |      
-        src="${{github.action_path}}"
-        repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
-        python ${src}/./next-tag.py \
-          --repository_root="${repo}" \
-          --commits="${{github.workspace}}/${{inputs.caller_repo_subfolder}}/commits" \
-          --default_bump="${{inputs.default_bump}}" \
-          --default_branch="${{ github.event.repository.default_branch }}" \
-          --prerelease="${{inputs.prerelease}}" \
-          --prerelease_suffix="${{inputs.prerelease_suffix}}" \
-          --latest_tag="${{inputs.latest_tag}}" \
-          --last_release="${{inputs.last_release}}" \
-          --with_v="${{inputs.with_v}}" \
-          --test_file="${src}/${{inputs.test_file}}"
+        
+        git log --oneline "${{github.base_ref}}"..."${{github.head_ref}}"
+
+        
+    # - name: Install libs
+    #   id: install_libs
+    #   shell: bash
+    #   run: |
+    #     pip3 install git+https://github.com/python-semver/python-semver.git@3.0.2 -q -q
+    #     pip3 install git+https://github.com//gitpython-developers/GitPython.git@3.1.40 -q -q
+    # - name: Get new Tag
+    #   id: get_next_tag
+    #   shell: bash
+    #   env:
+    #     RUN_AS_TEST: ${{inputs.test}}
+    #   run: |      
+    #     src="${{github.action_path}}"
+    #     repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
+    #     python ${src}/./next-tag.py \
+    #       --repository_root="${repo}" \
+    #       --commits="${{github.workspace}}/${{inputs.caller_repo_subfolder}}/commits" \
+    #       --default_bump="${{inputs.default_bump}}" \
+    #       --default_branch="${{ github.event.repository.default_branch }}" \
+    #       --prerelease="${{inputs.prerelease}}" \
+    #       --prerelease_suffix="${{inputs.prerelease_suffix}}" \
+    #       --latest_tag="${{inputs.latest_tag}}" \
+    #       --last_release="${{inputs.last_release}}" \
+    #       --with_v="${{inputs.with_v}}" \
+    #       --test_file="${src}/${{inputs.test_file}}"
