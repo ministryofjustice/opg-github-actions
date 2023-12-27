@@ -15,6 +15,7 @@ def arg_parser() -> argparse.ArgumentParser:
     
     parser.add_argument('--prerelease', default="", help="If set, then this is a pre-release")    
     parser.add_argument("--prerelease_suffix", default="beta", help="Prerelease naming")
+    parser.add_argument("--commitish", default="", help="Get use this as the point to compare against main")
     parser.add_argument("--latest_tag", default="", help="Last tag")
     parser.add_argument("--last_release", default="", help="Last release var tag")
     parser.add_argument("--with_v", default="false", help="apply prefix to the new tag")
@@ -37,20 +38,21 @@ def compare_to(latest_tag):
 def initial_semver_tag(tag):   
     return Version.parse(trim_v(tag))
 
-def get_commits(test, test_file, repo_root, default_branch, latest_tag):
+def get_commits(test, test_file, repo_root, default_branch, latest_tag, commitish):
      #use test data
+    lines = []
+    compare = commitish if len(commitish) > 0 else latest_tag
+
     if test is not None and len(test) > 0 and len(test_file) > 0 :
         print("Using test data")
-        commits = split_commits_from_lines( open(test_file).readlines() )
+        lines = open(test_file).readlines()
     else:
         print(f"Repository: {repo_root}")
-        g = Git(repo_root)
-        repo = Repo(repo_root)
-        for remote in repo.remotes:
-            remote.fetch()
-        print(f"Getting commits between [{default_branch}]...[{latest_tag}]")
-        commits = g.log("--oneline", f"{default_branch}...{latest_tag}")        
-        commits = split_commits_from_lines( commits.split("\n") )
+        print(f"Getting commits between [{default_branch}]...[{compare}]")
+        g = Git(repo_root)        
+        commits = g.log("--oneline", f"{default_branch}...{compare}")        
+        lines = commits.split("\n")
+    commits = split_commits_from_lines( lines )
     return commits
 
 def main():
@@ -71,7 +73,7 @@ def main():
     starting_tag = last_release
     compare = compare_to(args.latest_tag)
     # get the commits between shas
-    commits = get_commits(test, test_file, args.repository_root, args.default_branch, args.latest_tag)
+    commits = get_commits(test, test_file, args.repository_root, args.default_branch, args.latest_tag, args.commitish)
     # look for #major, #minor #patch in commits
     # - use the default_bump to always increase one
     major=1 if args.default_bump == "major" else 0
