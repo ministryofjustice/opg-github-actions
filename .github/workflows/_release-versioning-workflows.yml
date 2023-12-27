@@ -10,6 +10,7 @@ jobs:
   run_tests:
     name: "[Tests]"
     uses: './.github/workflows/_tests.yml'
+    secrets: inherit
 
   # generate branch name
   branch_name:
