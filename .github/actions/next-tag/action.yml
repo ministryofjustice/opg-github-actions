@@ -81,7 +81,8 @@ runs:
       working-directory: ${{inputs.caller_repo_subfolder}}
       run: |
         set -eo pipefail
-        git log --oneline "${{github.base_ref}}".."${{github.head_ref}}"
+        # git log --oneline "${{github.base_ref}}".."${{github.head_ref}}"
+        
         # get the sha for the head_ref
         # this should be the branch being merged to the default branch
         current_sha=$(git rev-parse HEAD)
@@ -121,8 +122,8 @@ runs:
         repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         python ${src}/./next-tag.py \
           --repository_root="${repo}" \
-          --commit_a="${{steps.fetch.outputs.commit_a}}" \
-          --commit_b="${{steps.fetch.outputs.commit_b}}" \
+          --commit_a="${{ github.head_ref }}" \
+          --commit_b="${{github.base_ref}}" \
           --prerelease="${{inputs.prerelease}}" \
           --prerelease_suffix="${{inputs.prerelease_suffix}}" \
           --latest_tag="${{inputs.latest_tag}}" \
