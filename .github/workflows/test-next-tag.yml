@@ -102,19 +102,19 @@ jobs:
           echo "| 4. | ${t4} | ${{steps.test4.outputs.next_tag}} | " >> $GITHUB_STEP_SUMMARY
           
           if [ "${{steps.test1.outputs.next_tag}}" != "${t1}" ]; then
-            echo "test 1.1 failed"
+            echo "test 1 failed"
             exit 1
           fi
           if [ "${{steps.test2.outputs.next_tag}}" != "${t2}" ]; then
-            echo "test 1.2 failed"
+            echo "test 2 failed"
             exit 1
           fi
           if [ "${{steps.test3.outputs.next_tag}}" != "${t3}" ]; then
-            echo "test 1.3 failed"
+            echo "test 3 failed"
             exit 1
           fi
           if [ "${{steps.test4.outputs.next_tag}}" != "${t4}" ]; then
-            echo "test 1.4 failed"
+            echo "test 4 failed"
             exit 1
           fi
   
@@ -183,19 +183,19 @@ jobs:
           echo "| 4. | ${t4} | ${{steps.test4.outputs.next_tag}} | " >> $GITHUB_STEP_SUMMARY
           
           if [ "${{steps.test1.outputs.next_tag}}" != "${t1}" ]; then
-            echo "test 1.1 failed"
+            echo "test 1 failed"
             exit 1
           fi
           if [ "${{steps.test2.outputs.next_tag}}" != "${t2}" ]; then
-            echo "test 1.2 failed"
+            echo "test 2 failed"
             exit 1
           fi
           if [ "${{steps.test3.outputs.next_tag}}" != "${t3}" ]; then
-            echo "test 1.3 failed"
+            echo "test 3 failed"
             exit 1
           fi
           if [ "${{steps.test4.outputs.next_tag}}" != "${t4}" ]; then
-            echo "test 1.4 failed"
+            echo "test 4 failed"
             exit 1
           fi
           
@@ -277,23 +277,23 @@ jobs:
           echo "| 5. | ${t5} | ${{steps.test5.outputs.next_tag}} | " >> $GITHUB_STEP_SUMMARY
           
           if [ "${{steps.test1.outputs.next_tag}}" != "${t1}" ]; then
-            echo "test 1.1 failed"
+            echo "test 1 failed"
             exit 1
           fi
           if [ "${{steps.test2.outputs.next_tag}}" != "${t2}" ]; then
-            echo "test 1.2 failed"
+            echo "test 2 failed"
             exit 1
           fi
           if [ "${{steps.test3.outputs.next_tag}}" != "${t3}" ]; then
-            echo "test 1.3 failed"
+            echo "test 3 failed"
             exit 1
           fi
           if [ "${{steps.test4.outputs.next_tag}}" != "${t4}" ]; then
-            echo "test 1.4 failed"
+            echo "test 4 failed"
             exit 1
           fi
           if [ "${{steps.test5.outputs.next_tag}}" != "${t5}" ]; then
-            echo "test 1.5 failed"
+            echo "test 5 failed"
             exit 1
           fi
           

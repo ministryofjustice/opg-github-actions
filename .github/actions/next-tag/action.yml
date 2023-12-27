@@ -74,6 +74,7 @@ runs:
         ref: ${{ github.head_ref }}
         path: ${{inputs.caller_repo_subfolder}}
         fetch-tags: true
+        fetch-depth: 0
     - name: Fetch repo content
       id: fetch  
       shell: bash
@@ -85,9 +86,9 @@ runs:
         current_sha=$(git rev-parse HEAD)
         current_sha=${current_sha:0:7}
 
-        # run fetch to make sure everything is present
-        git fetch --quiet --unshallow || git fetch --quiet --all
-        git fetch --tags --quiet
+        # # run fetch to make sure everything is present
+        # git fetch --quiet --unshallow || git fetch --quiet --all
+        # git fetch --tags --quiet
         
         # checkout to the base_ref
         # this should be the default branch - generally main
