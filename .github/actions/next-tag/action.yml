@@ -83,8 +83,8 @@ runs:
       id: install_libs
       shell: bash
       run: |
-        pip3 install git+https://github.com/python-semver/python-semver.git@3.0.2 1> /dev/null
-        pip3 install git+https://github.com//gitpython-developers/GitPython.git@3.1.40 1> /dev/null
+        pip3 install git+https://github.com/python-semver/python-semver.git@3.0.2 -q -q
+        pip3 install git+https://github.com//gitpython-developers/GitPython.git@3.1.40 -q -q
     - name: Get new Tag
       id: get_next_tag
       shell: bash
