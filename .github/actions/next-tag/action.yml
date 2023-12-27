@@ -81,15 +81,12 @@ runs:
       working-directory: ${{inputs.caller_repo_subfolder}}
       run: |
         set -eo pipefail
+        git log --oneline "${{github.base_ref}}".."${{github.head_ref}}"
         # get the sha for the head_ref
         # this should be the branch being merged to the default branch
         current_sha=$(git rev-parse HEAD)
         current_sha=${current_sha:0:7}
 
-        # # run fetch to make sure everything is present
-        # git fetch --quiet --unshallow || git fetch --quiet --all
-        # git fetch --tags --quiet
-        
         # checkout to the base_ref
         # this should be the default branch - generally main
         git checkout -f "${{github.base_ref}}" --quiet
@@ -105,7 +102,6 @@ runs:
         echo "current_branch_sha  = ${current_sha}"
         echo "default_branch_sha  = ${default_sha}"
 
-        # git log --oneline "${default_sha}".."${current_sha}"
         echo "commit_a=${current_sha}" >> $GITHUB_OUTPUT
         echo "commit_b=${default_sha}" >> $GITHUB_OUTPUT
 
