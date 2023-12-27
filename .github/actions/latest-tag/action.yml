@@ -84,6 +84,6 @@ runs:
           --repository_root="${repo}" \
           --branch_name="${{inputs.branch_name}}" \
           --release_branches="${{inputs.release_branches}}" \
-          --prerelease=${{inputs.prerelease}} \
-          --prerelease_suffix=${{inputs.prerelease_suffix}} \
-          --test_file=${src}/${{inputs.test_file}}
+          --prerelease="${{inputs.prerelease}}" \
+          --prerelease_suffix="${{inputs.prerelease_suffix}}" \
+          --test_file="${src}/${{inputs.test_file}}"

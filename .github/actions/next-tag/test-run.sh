@@ -12,6 +12,7 @@ out=$(python ./next-tag.py \
     --prerelease_suffix="moreactions" \
     --prerelease=true \
     --latest_tag="v1.5.0-moreactions.1" \
+    --default_bump="patch" \
     --last_release="v1.4.0")
 
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
@@ -29,6 +30,7 @@ out=$(python ./next-tag.py \
     --prerelease_suffix="moreactions" \
     --prerelease=true \
     --latest_tag="v2.0.0-moreactions.0" \
+    --default_bump="patch" \
     --last_release="v1.4.0")
 
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
@@ -47,6 +49,7 @@ out=$(python ./next-tag.py \
     --prerelease_suffix="moreactions" \
     --prerelease=true \
     --latest_tag="" \
+    --default_bump="patch" \
     --last_release="v1.4.0")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="2.0.0-moreactions.0"
@@ -63,6 +66,7 @@ out=$(python ./next-tag.py \
     --test_file=./tests/majors.txt \
     --prerelease_suffix="moreactions" \
     --latest_tag="" \
+    --default_bump="patch" \
     --last_release="v1.4.0")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="2.0.0"
@@ -78,6 +82,7 @@ fi
 out=$(python ./next-tag.py \
     --test_file=./tests/majors.txt \
     --prerelease_suffix="moreactions" \
+    --default_bump="patch" \
     --latest_tag="" \
     --last_release="")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
@@ -95,6 +100,7 @@ out=$(python ./next-tag.py \
     --test_file=./tests/minors.txt \
     --prerelease_suffix="moreactions" \
     --prerelease=true \
+    --default_bump="patch" \
     --latest_tag="v1.5.0-moreactions.0" \
     --last_release="v1.4.0")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
@@ -111,6 +117,7 @@ out=$(python ./next-tag.py \
     --test_file=./tests/minors.txt \
     --prerelease_suffix="moreactions" \
     --prerelease=true \
+    --default_bump="patch" \
     --latest_tag="" \
     --last_release="v1.4.0")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
@@ -128,6 +135,7 @@ out=$(python ./next-tag.py \
     --test_file=./tests/minors.txt \
     --prerelease_suffix="moreactions" \
     --latest_tag="v1.5.0-moreactions.0" \
+    --default_bump="patch" \
     --last_release="v1.4.0")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.5.0"
@@ -160,6 +168,7 @@ out=$(python ./next-tag.py \
     --prerelease=true \
     --prerelease_suffix="moreactions" \
     --latest_tag="" \
+    --default_bump="patch" \
     --last_release="v1.4.0")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="1.4.1-moreactions.0"
@@ -174,6 +183,7 @@ fi
 out=$(python ./next-tag.py \
     --test_file=./tests/patch.txt \
     --prerelease=true \
+    --default_bump="patch" \
     --prerelease_suffix="moreactions" \
     --latest_tag="v1.4.1-moreactions.1" \
     --last_release="v1.4.0")
@@ -190,6 +200,7 @@ fi
 
 out=$(python ./next-tag.py \
     --test_file=./tests/patch.txt \
+    --default_bump="patch" \
     --prerelease_suffix="moreactions" \
     --latest_tag="v1.4.1-moreactions.1" \
     --last_release="v1.4.0")
@@ -206,6 +217,7 @@ fi
 out=$(python ./next-tag.py \
     --test_file=./tests/patch.txt \
     --prerelease_suffix="moreactions" \
+    --default_bump="patch" \
     --latest_tag="" \
     --last_release="")    
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
@@ -222,6 +234,7 @@ fi
 out=$(python ./next-tag.py \
     --test_file=./tests/none.txt \
     --prerelease=true \
+    --default_bump="patch" \
     --prerelease_suffix="moreactions" \
     --latest_tag="v1.0.1-moreactions.0" \
     --last_release="v1.0.0")    
@@ -240,6 +253,7 @@ fi
 out=$(python ./next-tag.py \
     --test_file=./tests/none.txt \
     --prerelease=true \
+    --default_bump="patch" \
     --prerelease_suffix="moreactions" \
     --last_release="v1.0.0")    
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
@@ -292,6 +306,7 @@ out=$(python ./next-tag.py \
     --test_file=./tests/none.txt \
     --prerelease_suffix="moreactions" \
     --latest_tag="" \
+    --default_bump="patch" \
     --last_release="")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="0.0.1"
@@ -310,6 +325,7 @@ out=$(python ./next-tag.py \
     --prerelease="true" \
     --prerelease_suffix="moreactions" \
     --latest_tag="" \
+    --default_bump="patch" \
     --last_release="")
 actual=$(echo "${out}" | sed -r -n 's/.*next_tag=(.*)$/\1/p' )
 expected="0.0.1-moreactions.0"

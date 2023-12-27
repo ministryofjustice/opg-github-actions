@@ -18,7 +18,7 @@ def arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--latest_tag", default="", help="Last tag")
     parser.add_argument("--last_release", default="", help="Last release var tag")
     parser.add_argument("--with_v", default="false", help="apply prefix to the new tag")
-    parser.add_argument("--default_bump", default="patch", help="If there are no triggers in commits, bump by this")
+    parser.add_argument("--default_bump", default="minor", help="If there are no triggers in commits, bump by this")
     return parser
 
 def trim_v(str):

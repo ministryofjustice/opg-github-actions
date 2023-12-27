@@ -55,6 +55,7 @@ jobs:
           prerelease: true
           prerelease_suffix: "moreactions"
           last_release: "v1.4.0"
+          default_bump: "patch"
       - id: test2
         name: "2. Test patch version bump with existing tag"
         uses: './.github/actions/next-tag'
@@ -65,6 +66,7 @@ jobs:
           prerelease_suffix: "moreactions"
           latest_tag: "v1.4.1-moreactions.1"
           last_release: "v1.4.0"
+          default_bump: "patch"
       - id: test3
         name: "3. Test patch version bump as a release"
         uses: './.github/actions/next-tag'
@@ -74,6 +76,7 @@ jobs:
           prerelease_suffix: "moreactions"
           latest_tag: "v1.4.1-moreactions.1"
           last_release: "v1.4.0"
+          default_bump: "patch"
       - id: test4
         name: "4. Test patch version bump without latest_tag as a release"
         uses: './.github/actions/next-tag'
@@ -81,6 +84,7 @@ jobs:
           test: true
           test_file: "./tests/patch.txt"
           prerelease_suffix: "moreactions"
+          default_bump: "patch"
       - id: test_results
         name: Test results [patch]        
         run: |
