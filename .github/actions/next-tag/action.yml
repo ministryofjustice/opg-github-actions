@@ -56,6 +56,12 @@ outputs:
   next_tag:
     description: "Next tag that should be created."
     value: ${{steps.get_next_tag.outputs.next_tag}}
+  commit_a:
+    description: "Commit used to look for version bump triggers in messages"
+    value: ${{steps.fetch.outputs.commit_a}}
+  commit_b:
+    description: "Commit used to look for version bump triggers in messages"
+    value: ${{steps.fetch.outputs.commit_b}}
 
 
 runs:
@@ -99,8 +105,8 @@ runs:
         echo "default_branch_sha  = ${default_sha}"
 
         # git log --oneline "${default_sha}".."${current_sha}"
-        echo "current_branch_sha=${current_sha}" >> $GITHUB_OUTPUT
-        echo "default_branch_sha=${default_sha}" >> $GITHUB_OUTPUT
+        echo "commit_a=${current_sha}" >> $GITHUB_OUTPUT
+        echo "commit_b=${default_sha}" >> $GITHUB_OUTPUT
 
     - name: Install libs
       id: install_libs
@@ -118,8 +124,8 @@ runs:
         repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         python ${src}/./next-tag.py \
           --repository_root="${repo}" \
-          --commit_a="${{steps.fetch.outputs.default_branch_sha}}" \
-          --commit_b="${{steps.fetch.outputs.current_branch_sha}}" \
+          --commit_a="${{steps.fetch.outputs.commit_a}}" \
+          --commit_b="${{steps.fetch.outputs.commit_b}}" \
           --prerelease="${{inputs.prerelease}}" \
           --prerelease_suffix="${{inputs.prerelease_suffix}}" \
           --latest_tag="${{inputs.latest_tag}}" \
