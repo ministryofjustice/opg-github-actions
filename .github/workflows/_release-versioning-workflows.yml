@@ -6,8 +6,14 @@ on:
     paths-ignore: ['terraform/**', '.github/workflows/_terraform.yml']
 
 jobs:
+  # test actions
+  run_tests:
+    name: "[Tests]"
+    uses: './.github/workflows/_tests.yml'
+
   # generate branch name
   branch_name:
+    needs: [run_tests]
     name: "Branch name"
     uses: ministryofjustice/opg-github-workflows/.github/workflows/data-parse-branch-name.yml@v2.0.0
     secrets: inherit

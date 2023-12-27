@@ -6,60 +6,15 @@ on:
     paths-ignore: ['terraform/**', '.github/workflows/_terraform.yml']
     
 jobs:
-  # # test terraform-version
-  # test_terraform_version:
-  #   name: "[Test] terraform-version"
-  #   uses: './.github/workflows/test-terraform-version.yml'
-  
-  # # test terraform-workspace-manager
-  # test_terraform_workspace_manager:
-  #   name: "[Test] terraform-workspace-manager"
-  #   uses: './.github/workflows/test-terraform-workspace-manager.yml'
-  #   secrets: inherit
-  
-  # # test safe-strings
-  # test_safe_strings:
-  #   name: "[Test] safe-strings"
-  #   uses: './.github/workflows/test-safe-strings.yml'
-
-  # # test safe-strings
-  # test_branch_name:
-  #   name: "[Test] branch-name"
-  #   uses: './.github/workflows/test-branch-name.yml'
-
-  # # test latest-tag
-  # test_latest_tag:
-  #   name: "[Test] latest-tag"
-  #   uses: './.github/workflows/test-latest-tag.yml'
-
-  # test next-tag
-  test_next_tag:
-    name: "[Test] next-tag"
-    uses: './.github/workflows/test-next-tag.yml'
-
-  # test create-tag
-  test_create_tag:
-    name: "[Test] create-tag"
-    uses: './.github/workflows/test-create-tag.yml'
-
-  # test semver-tag
-  test_semver:
-    name: "[Test] semver-tag"
-    uses: './.github/workflows/test-semver-tag.yml'
-
-
+  # test actions
+  run_tests:
+    name: "[Tests]"
+    uses: './.github/workflows/_tests.yml'
 
   # generate branch name
   branch_name:
     needs: 
-      # - test_terraform_version
-      # - test_terraform_workspace_manager
-      # - test_safe_strings
-      # - test_branch_name
-      # - test_latest_tag
-      - test_next_tag
-      - test_create_tag
-      - test_semver
+      - run_tests
     name: "Branch name"
     uses: ministryofjustice/opg-github-workflows/.github/workflows/data-parse-branch-name.yml@v2.0.0
     secrets: inherit
