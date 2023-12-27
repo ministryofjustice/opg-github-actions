@@ -75,7 +75,8 @@ runs:
       id: fetch_tags      
       shell: bash
       working-directory: ${{inputs.caller_repo_subfolder}}
-      run: |        
+      run: |     
+        git rev-parse HEAD
         git fetch --quiet --unshallow || git fetch --quiet --all
         git fetch --tags --quiet
         if [ ! -z "${{inputs.commitish}}" ]; then
