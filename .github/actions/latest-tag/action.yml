@@ -19,7 +19,10 @@ inputs:
   release_branches:
     description: "Branches that would trigger this as a release."
     default: "main,master"
-  
+  caller_repo_subfolder:
+    description: "Location to checkout active repository into. (Default: ./latest-tag-caller-repository)"
+    default: "./latest-tag-caller-repository"
+
   
 outputs:
   test:
@@ -43,18 +46,19 @@ runs:
       with:
         repository: ${{ github.repository }}
         ref: ${{ github.ref }}
-        path: 'target-repo'
+        path: ${{inputs.caller_repo_subfolder}}
     - name: debug
       shell: bash
       if: ${{ (inputs.test == '') && (inputs.test_file == '' ) }}
       run: |
         pwd
-        ls -la target-repo/
+        ls -la
+        ls -la ${{inputs.caller_repo_subfolder}}
     - name: Fetch tags
       id: fetch_tags
       shell: bash
       if: ${{ (inputs.test == '') && (inputs.test_file == '' ) }}
-      working-directory: 'target-repo'
+      working-directory: ${{inputs.caller_repo_subfolder}}
       run: |
         git fetch --tags
     - name: Install libs
