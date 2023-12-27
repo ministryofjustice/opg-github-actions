@@ -30,7 +30,7 @@ jobs:
         name: "1. Test a known ref that should return a preexisting semver tag"
         uses: './.github/actions/create-tag'
         with:
-          dry_run: true
+          test: true
           commitish: "dab1b63"
           tag_name: "test_tag_wont_be_latest"
       - id: test_results
