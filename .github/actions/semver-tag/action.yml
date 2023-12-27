@@ -95,7 +95,7 @@ runs:
     - name: summary
       shell: bash
       if: always()
-      run:
+      run: |
         set -eo pipefail
         echo "### Semver tag summary" >> $GITHUB_STEP_SUMMARY
         echo "| Stage | Variable | Value |" >> $GITHUB_STEP_SUMMARY
