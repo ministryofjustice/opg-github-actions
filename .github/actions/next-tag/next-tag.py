@@ -46,7 +46,7 @@ def get_commits(repo_root, commitish_a, commitish_b, test, test_file):
     else:
         g = Git(repo_root) 
         r = Repo(repo_root)
-        print(f"Commits: Using repository: {repo_root}")
+        print(f"Commits: Using repository data: {repo_root}")
         print(f"Checking out [{commitish_a}]")
         r.git.checkout(commitish_a)
         print(f"Checking out [{commitish_b}]")
@@ -56,7 +56,9 @@ def get_commits(repo_root, commitish_a, commitish_b, test, test_file):
         # instead of new lines, as commit messages can have many lines
         commits = g.log("--pretty=format:~%h\ %s%n%b%-", f"{commitish_b}...{commitish_a}")        
         lines = commits.split("~")        
+        print(*lines, sep="\n")
     commits = split_commits_from_lines( lines )    
+    # print(*commits, sep="\n")
     return commits
 
 def main():
