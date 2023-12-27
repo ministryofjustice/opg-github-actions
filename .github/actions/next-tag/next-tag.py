@@ -45,6 +45,9 @@ def get_commits(test, test_file, repo_root, default_branch, latest_tag):
     else:
         print(f"Repository: {repo_root}")
         g = Git(repo_root)
+        repo = Repo(repo_root)
+        for remote in repo.remotes:
+            remote.fetch()
         commits = g.log("--oneline", f"{default_branch}...{latest_tag}")
         print(f"Getting commits between [{default_branch}]...[{latest_tag}]")
         commits = split_commits_from_lines( commits.split("\n") )
