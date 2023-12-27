@@ -76,7 +76,7 @@ runs:
       id: next_tag
       uses: './.github/actions/next-tag'
       with:          
-          sha: ${{github.sha}}
+          sha: ${{github.event.repository.sha}}
           prerelease: ${{steps.latest_tag.outputs.prerelease}}
           prerelease_suffix: ${{steps.latest_tag.outputs.prerelease_suffix}}
           latest_tag: ${{steps.latest_tag.outputs.latest}}
@@ -87,5 +87,5 @@ runs:
       uses: './.github/actions/create-tag'
       with:
           test: ${{inputs.test}}
-          commitish: ${{github.sha}}
+          commitish: ${{github.event.repository.sha}}
           tag_name: ${{steps.next_tag.outputs.next_tag}}
