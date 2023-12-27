@@ -82,7 +82,7 @@ jobs:
           test_file: "./tests/patch.txt"
           prerelease_suffix: "moreactions"
       - id: test_results
-        name: Test results [patch]
+        name: Test results [patch]        
         run: |
           t1="1.4.1-moreactions.0"
           t2="1.4.1-moreactions.2"

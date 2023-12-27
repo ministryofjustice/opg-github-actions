@@ -1,0 +1,75 @@
+name: "Create a new git tag at the ref passed"
+description: "Create a new git tag at the ref passed"
+inputs:  
+  ref:
+    description: "The github commit reference to checkout to and create the tag at"
+    required: true
+  tag_name:
+    description: "Name of the tag to create"
+    required: true
+  dry_run:
+    description: "If set, tag is not pushed to the remote."
+    default: ""
+  caller_repo_subfolder:
+    description: "Location to checkout active repository into. (Default: ./create-tag-caller-repository)"
+    default: "./create-tag-caller-repository"
+
+
+outputs:
+  ref:
+    description: "Inputed ref variable."
+    value: ${{ inputs.ref }}
+  tag_name:
+    description: "Inputed tag_name variable."
+    value: ${{ inputs.tag_name }}
+  dry_run:
+    description: "Inputed dry_run variable."
+    value: ${{ inputs.dry_run }}
+
+  latest:
+    description: "Latest tag found at ref provided"
+    value: ${{steps.tags_found.outputs.latest_tag}}
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Checkout original repo to set folder"
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ github.repository }}
+        ref: ${{ inputs.ref }}
+        path: ${{inputs.caller_repo_subfolder}}
+    - name: debug
+      shell: bash
+      if: ${{ inputs.dry_run != '' }}
+      run: |
+        pwd
+        ls -la ./
+        ls -la ${{inputs.caller_repo_subfolder}}
+    - name: Fetch
+      id: fetch
+      shell: bash
+      working-directory: ${{inputs.caller_repo_subfolder}}
+      run: |
+        git fetch
+        git fetch --tags
+    - name: Create tag
+      id: create_tag
+      shell: bash
+      working-directory: ${{inputs.caller_repo_subfolder}}
+      run: |
+        git tag "${{inputs.tag_name}}" "${{inputs.ref}}"
+    - name: Tags for commit
+      id: tags_found
+      shell: bash
+      working-directory: ${{inputs.caller_repo_subfolder}}
+      run: |        
+        latest_tag=$(git tag --points-at="${{inputs.ref}}" --sort=creatordate | sort --version-sort -f | tail -n1)
+        echo "latest_tag=${latest_tag}" >> $GITHUB_OUTPUT
+    - name: Push tag
+      id: push_tag
+      shell: bash
+      if: ${{ inputs.dry_run != '' }}
+      working-directory: ${{inputs.caller_repo_subfolder}}
+      run: |
+        git push "${{inputs.tag_name}}"
