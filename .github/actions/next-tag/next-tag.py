@@ -57,11 +57,7 @@ def get_commits(repo_root, commitish_a, commitish_b, test, test_file):
         # instead of new lines, as commit messages can have many lines
         log_items = g.log(f"--pretty=format:{newline}%h %s%n%b%-", f"{commitish_b}...{commitish_a}")        
         lines = [line for line in log_items.split(newline) if line.strip()]       
-        print("LINES:")
-        print(*lines, sep="\n")
     commits = split_commits_from_lines( lines )    
-    print("COMMITS:")
-    print(commits, sep="\n")
     return commits
 
 def main():
