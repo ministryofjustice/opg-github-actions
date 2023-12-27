@@ -32,14 +32,24 @@ jobs:
         with:
           dry_run: true
           commitish: "dab1b63"
-          tag_name: "test_tag_wont_be_found"
+          tag_name: "test_tag_wont_be_latest"
       - id: test_results
         name: Test results
         run: |
-          t1="v1.4.0"
-          
+          t1a="v1.4.0"
+          t1b="test_tag_wont_be_latest"
+
           echo "### Test Information" >> $GITHUB_STEP_SUMMARY
           echo "| \# | Expected | Actual | " >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
-          echo "| 1. | ${t1} | ${{steps.test1.outputs.latest}} | " >> $GITHUB_STEP_SUMMARY
+          echo "| 1a. | ${t1a} | ${{steps.test1.outputs.latest}} | " >> $GITHUB_STEP_SUMMARY
+          echo "| 1b. | ${t1b} | ${{steps.test1.outputs.found}} | " >> $GITHUB_STEP_SUMMARY
           
+          if [ "${{steps.test1.outputs.latest}}" != "${t1a}" ]; then
+            echo "test 1a failed"
+            exit 1
+          fi
+          if [ "${{steps.test1.outputs.found}}" != "${t1b}" ]; then
+            echo "test 1b failed"
+            exit 1
+          fi
