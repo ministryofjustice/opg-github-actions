@@ -76,7 +76,7 @@ runs:
       shell: bash
       working-directory: ${{inputs.caller_repo_subfolder}}
       run: |
-        git --versions     
+        git --version
         git fetch --quiet --unshallow || git fetch --quiet --all
         git fetch --tags --quiet
         head=$(git rev-parse HEAD)
