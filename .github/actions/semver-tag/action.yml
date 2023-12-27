@@ -109,15 +109,15 @@ runs:
         echo "| Branch | original | ${{ steps.branch_name.outputs.branch_name }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| Branch | safe | ${{ steps.branch_name.outputs.safe }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| Branch | full_length | ${{ steps.branch_name.outputs.full_length }} |"  >> $GITHUB_STEP_SUMMARY    
-              
+
         echo "| Latest Tag | latest | ${{ steps.latest_tag.outputs.latest }} |"  >> $GITHUB_STEP_SUMMARY
-        echo "| Latest Tag | last_release | ${{ steps.latest_tag.last_release }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Latest Tag | last_release | ${{ steps.latest_tag.outputs.last_release }} |"  >> $GITHUB_STEP_SUMMARY
         
-        echo "| Next Tag | latest | ${{ steps.next_tag.outputs.latest }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| Next Tag | last_release | ${{ steps.next_tag.outputs.last_release }} |"  >> $GITHUB_STEP_SUMMARY
-        echo "| Next Tag | next_tag | ${{ steps.next_tag.outputs.next_tag }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Next Tag | latest_tag | ${{ steps.next_tag.outputs.latest_tag }} |"  >> $GITHUB_STEP_SUMMARY                
         echo "| Next Tag | commit_a | ${{ steps.next_tag.outputs.commit_a }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| Next Tag | commit_b | ${{ steps.next_tag.outputs.commit_b }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Next Tag | next_tag | ${{ steps.next_tag.outputs.next_tag }} |"  >> $GITHUB_STEP_SUMMARY
         
         echo "| Create Tag | latest | ${{ steps.create_tag.outputs.latest }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| Create Tag | all | ${{ steps.create_tag.outputs.all }} |"  >> $GITHUB_STEP_SUMMARY
