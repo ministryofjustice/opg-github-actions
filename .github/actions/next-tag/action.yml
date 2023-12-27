@@ -78,6 +78,8 @@ runs:
       run: |     
         echo "base ref>>${{github.base_ref}}"
         echo "head ref>>${{github.head_ref}}"
+        echo "ref name>>${{github.ref_name}}"
+        echo "sha >>${{github.sha}}"
         git rev-parse HEAD
         git fetch --quiet --unshallow || git fetch --quiet --all
         git fetch --tags --quiet
