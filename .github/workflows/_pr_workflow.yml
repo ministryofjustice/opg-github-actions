@@ -32,10 +32,10 @@ jobs:
   #   name: "[Test] latest-tag"
   #   uses: './.github/workflows/test-latest-tag.yml'
 
-  # # test next-tag
-  # test_next_tag:
-  #   name: "[Test] next-tag"
-  #   uses: './.github/workflows/test-next-tag.yml'
+  # test next-tag
+  test_next_tag:
+    name: "[Test] next-tag"
+    uses: './.github/workflows/test-next-tag.yml'
 
   # # test create-tag
   # test_create_tag:
@@ -57,7 +57,7 @@ jobs:
       # - test_safe_strings
       # - test_branch_name
       # - test_latest_tag
-      # - test_next_tag
+      - test_next_tag
       # - test_create_tag
       - test_semver
     name: "Branch name"

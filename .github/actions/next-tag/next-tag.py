@@ -11,15 +11,18 @@ def arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--test_file', default="", help="trigger the use of a test file for list of tags")
     
     parser.add_argument('--repository_root', default="./", help="Path to root of repository")    
-    parser.add_argument('--default_branch', default="main", help="Base branch to compare against. (Default: main)")    
+    parser.add_argument('--commit_a', default="", help="Commit sha used to compare in log to look for triggers")    
+    parser.add_argument('--commit_b', default="", help="Commit sha used to compare in log to look for triggers")    
     
+
     parser.add_argument('--prerelease', default="", help="If set, then this is a pre-release")    
     parser.add_argument("--prerelease_suffix", default="beta", help="Prerelease naming")
-    parser.add_argument("--commits", default="", help="File of commit hashes and messages between points")
+    
     parser.add_argument("--latest_tag", default="", help="Last tag")
     parser.add_argument("--last_release", default="", help="Last release var tag")
     parser.add_argument("--with_v", default="false", help="apply prefix to the new tag")
     parser.add_argument("--default_bump", default="minor", help="If there are no triggers in commits, bump by this")
+    
     return parser
 
 def trim_v(str):
@@ -29,30 +32,20 @@ def split_commits_from_lines(lines):
     split_lines = [[str(i) for i in line.strip().split(" ", 1)] for line in lines]
     return split_lines
 
-def compare_to(latest_tag):
-    compare=latest_tag
-    if len(latest_tag) == 0:
-        compare = "HEAD"
-    return compare
-
 def initial_semver_tag(tag):   
     return Version.parse(trim_v(tag))
 
-def get_commits(test, test_file, repo_root, default_branch, latest_tag, commit_file):
-     #use test data
+def get_commits(repo_root, commit_a, commit_b, test, test_file):
     lines = []    
-
+    #use test data
     if test is not None and len(test) > 0 and len(test_file) > 0 :
         print("Commits: Using test data")
         lines = open(test_file).readlines()
-    elif len(commit_file) > 0:
-        print(f"Commits: Using file data [{commit_file}]")
-        lines = open(commit_file).readlines()
     else:
         print(f"Commits: Using repository: {repo_root}")
-        print(f"Getting commits between [{default_branch}]...[{latest_tag}]")
+        print(f"Getting commits between [{commit_a}]...[{commit_b}]")
         g = Git(repo_root)        
-        commits = g.log("--oneline", f"{default_branch}...{latest_tag}")        
+        commits = g.log("--oneline", f"{commit_a}...{commit_b}")        
         lines = commits.split("\n")
     commits = split_commits_from_lines( lines )
     return commits
@@ -73,9 +66,8 @@ def main():
     is_test = (test is not None and len(test) > 0 and len(test_file) > 0)
 
     starting_tag = last_release
-    compare = compare_to(args.latest_tag)
     # get the commits between shas
-    commits = get_commits(test, test_file, args.repository_root, args.default_branch, args.latest_tag, args.commits)
+    commits = get_commits(args.repository_root, args.commit_a, args.commit_b, test, test_file)
     # look for #major, #minor #patch in commits
     # - use the default_bump to always increase one
     major=1 if args.default_bump == "major" else 0
@@ -128,7 +120,6 @@ def main():
 
     print("NEXT TAG DATA")
     print(f"repository_root={args.repository_root}")
-    print(f"default_branch={args.default_branch}")
     print(f"prerelease={args.prerelease}")
     print(f"prerelease_processed={is_prerelease}")
     print(f"default_bump={args.default_bump}")
@@ -143,7 +134,6 @@ def main():
         print("Pushing to GitHub Output")
         with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
             print(f"repository_root={args.repository_root}", file=fh)
-            print(f"default_branch={args.default_branch}", file=fh)
             print(f"prerelease={args.prerelease}", file=fh)
             print(f"prerelease_processed={is_prerelease}", file=fh)
             print(f"default_bump={args.default_bump}", file=fh)
