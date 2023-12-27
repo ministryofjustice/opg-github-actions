@@ -76,17 +76,25 @@ runs:
       shell: bash
       working-directory: ${{inputs.caller_repo_subfolder}}
       run: |
+        current_head=$(git rev-parse HEAD)
+        current_head=${current_head:0:7}
+
+        set -eo pipefail
         git --version
         git fetch --quiet --unshallow || git fetch --quiet --all
         git fetch --tags --quiet
-        head=$(git rev-parse HEAD)
-        head=${head:0:7}
-
-        echo "base\t>>${{github.base_ref}}"
-        echo "head\t>>${{github.head_ref}}"
-        echo "ref\t>>${{github.ref_name}}"
-        echo "sha\t>>${{github.sha}}"
-        echo "head\t>>${head}"
+        
+        git checkout -f "${{github.base_ref}}" --quiet
+        git pull origin "${{github.base_ref}}" --quiet
+        default_head=$(git rev-parse HEAD)
+        default_head=${default_:0:7}
+        
+        echo "base_branch         >${{github.base_ref}}"
+        echo "head_branch         >${{github.head_ref}}"
+        echo "ref_name            >${{github.ref_name}}"
+        echo "ref_sha             >${{github.sha}}"
+        echo "branch_sha          >${current_head}"
+        echo "default_branch_sha  >${head}"
 
         git log --oneline -n5
         git log --oneline "${{github.base_ref}}".."${head}"
