@@ -91,6 +91,7 @@ def main():
         latest = latest_items.pop()
 
     # summary for shell
+    print("LATEST TAG DATA")
     print(f"test={is_test}")
     print(f"prerelease_argument={args.prerelease}")
     print(f"prerelease_calculated={prerelease_by_branch}")

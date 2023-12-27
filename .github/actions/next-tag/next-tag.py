@@ -118,6 +118,7 @@ def main():
     if len(args.with_v) > 0 and args.with_v == "true":
         new_tag_str = f"v{new_tag_str}"
 
+    print("NEXT TAG DATA")
     print(f"repository_root={args.repository_root}")
     print(f"default_branch={args.default_branch}")
     print(f"prerelease={args.prerelease}")

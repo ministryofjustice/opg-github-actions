@@ -72,13 +72,12 @@ runs:
         ls -la
         ls -la ${{inputs.caller_repo_subfolder}}
     - name: Fetch tags (when not testing)
-      id: fetch_tags
-      if: ${{ (inputs.test == '') && (inputs.test_file == '' ) }}
+      id: fetch_tags      
       shell: bash
       working-directory: ${{inputs.caller_repo_subfolder}}
       run: |
-        git fetch
-        git fetch --tags
+        git fetch --unshallow || git fetch --all
+        git fetch --tags 
     - name: Install libs
       id: install_libs
       shell: bash
