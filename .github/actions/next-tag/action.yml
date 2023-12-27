@@ -72,35 +72,37 @@ runs:
         path: ${{inputs.caller_repo_subfolder}}
         fetch-tags: true
     - name: Fetch repo content
-      id: fetch_tags      
+      id: fetch  
       shell: bash
       working-directory: ${{inputs.caller_repo_subfolder}}
       run: |
-        current_head=$(git rev-parse HEAD)
-        current_head=${current_head:0:7}
-
         set -eo pipefail
-        git --version
+        # get the sha for the head_ref
+        # this should be the branch being merged to the default branch
+        current_sha=$(git rev-parse HEAD)
+        current_sha=${current_sha:0:7}
+
+        # run fetch to make sure everything is present
         git fetch --quiet --unshallow || git fetch --quiet --all
         git fetch --tags --quiet
         
+        # checkout to the base_ref
+        # this should be the default branch - generally main
         git checkout -f "${{github.base_ref}}" --quiet
         git pull origin "${{github.base_ref}}" --quiet
-        default_head=$(git rev-parse HEAD)
-        default_head=${default_:0:7}
+        # get revision data
+        default_sha=$(git rev-parse HEAD)
+        default_sha=${default_sha:0:7}
         
-        echo "base_branch         >${{github.base_ref}}"
-        echo "head_branch         >${{github.head_ref}}"
-        echo "ref_name            >${{github.ref_name}}"
-        echo "ref_sha             >${{github.sha}}"
-        echo "branch_sha          >${current_head}"
-        echo "default_branch_sha  >${head}"
+        echo "base_branch         = ${{github.base_ref}}"
+        echo "head_branch         = ${{github.head_ref}}"
+        echo "ref_name            = ${{github.ref_name}}"
+        echo "ref_sha             = ${{github.sha}}"
+        echo "current_branch_sha  = ${current_sha}"
+        echo "default_branch_sha  = ${default_sha}"
 
-        git log --oneline -n5
-        git log --oneline "${{github.base_ref}}".."${head}"
-        git log --oneline "${{github.base_ref}}".."${{github.head_ref}}"
+        git log --oneline "${default_sha}".."${current_sha}"
 
-        
     # - name: Install libs
     #   id: install_libs
     #   shell: bash
