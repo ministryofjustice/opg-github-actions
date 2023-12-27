@@ -116,6 +116,8 @@ def main():
     print("NEXT TAG DATA")
     print(f"Majors: [{major}] Minors: [{minor}] Patches: [{patch}]")
     print(f"repository_root={args.repository_root}")
+    print(f"commit_a={args.commit_a}")
+    print(f"commit_b={args.commit_b}")
     print(f"prerelease={args.prerelease}")
     print(f"prerelease_processed={is_prerelease}")
     print(f"default_bump={args.default_bump}")
@@ -130,6 +132,8 @@ def main():
         print("Pushing to GitHub Output")
         with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
             print(f"repository_root={args.repository_root}", file=fh)
+            print(f"commit_a={args.commit_a}", file=fh)
+            print(f"commit_b={args.commit_b}", file=fh)
             print(f"prerelease={args.prerelease}", file=fh)
             print(f"prerelease_processed={is_prerelease}", file=fh)
             print(f"default_bump={args.default_bump}", file=fh)
