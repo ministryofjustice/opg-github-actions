@@ -32,6 +32,12 @@ outputs:
   latest:
     description: "Latest tag found at commitish provided"
     value: ${{steps.tags_found.outputs.latest_tag}}
+  found:
+    description: "If inputted tag_name is created, then this variable should match that"
+    value: ${{steps.tags_found.outputs.found_tag}}
+  all:
+    description: "All tags (comma seperated) that are found to be pointing to inputted commish"
+    value: ${{steps.tags_found.outputs.all_tags}}
 
 runs:
   using: "composite"
@@ -69,9 +75,19 @@ runs:
       shell: bash
       working-directory: ${{inputs.caller_repo_subfolder}}
       run: |        
-        latest_tag=$(git tag --points-at="${{inputs.commitish}}" --sort=creatordate | sort --version-sort -f | tail -n1)
+        all_tags_at_commit=$(git tag --points-at="${{inputs.commitish}}" --sort=creatordate | sort --version-sort -f )
+        latest_tag=$(echo ${all_tags_at_commit} | tail -n1)
+        found_tag=$(echo ${all_tags_at_commit} | grep "${{inputs.tag_name}}$" | |tail -n1)
+        all=$(echo ${all_tags_at_commit} | tr '\n', ',')
+        
+        echo "all_tags=${all_tags}"
         echo "latest_tag=${latest_tag}"
+        echo "found_tag=${found_tag}"
+        
+        echo "all_tags=${all_tags}" >> $GITHUB_OUTPUT
         echo "latest_tag=${latest_tag}" >> $GITHUB_OUTPUT
+        echo "found_tag=${found_tag}" >> $GITHUB_OUTPUT
+
     - name: Push tag
       id: push_tag
       shell: bash
