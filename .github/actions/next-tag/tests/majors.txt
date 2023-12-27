@@ -1,27 +1,28 @@
-e302554 (tag: v1.5.0-moreactions.10) Merge a6704d9070cf214254e63daef7a5bcf08e9398a0 into dab1b63e158b041297802388c23791e725166457
-a6704d9 add summary #minor
-1e3e71b add missing \
-d222472 file path change
-7a666b2 pathing #major
-b06779e debug
-872aea4 testing latest tags #major
-d936501 Split up the semver to own steps (get latest, bump, create tag etc)
-33b220d move tests
-dd7c353 missed new line
-743a3b6 dump to file instead
-e04675b try this
-72781d3 use eof
-0b1b1aa string escape
-20ab14c fix typo
-9978f43 debug
-833f0a4 work on python tag version
-6b01cac overwrite order
-dfc664c remove the secret
-29e0f9a var change
-db7369c working on semver action
-e860531 re-work then branch cleaning
-6055b5c add return params using input values
-3d13177 dont pass that in
-9c13135 fix sub and output
-f1cf0a8 path
-dcb9d31 Add start of a branch_name action 
+~e302554 (tag: v1.5.0-moreactions.10) Merge a6704d9070cf214254e63daef7a5bcf08e9398a0 into dab1b63e158b041297802388c23791e725166457
+~a6704d9 add summary #minor
+~1e3e71b add missing \
+~d222472 file path change
+~7a666b2 pathing #major
+~b06779e debug
+~872aea4 testing latest tags 
+#major
+~d936501 Split up the semver to own steps (get latest, bump, create tag etc)
+~33b220d move tests
+~dd7c353 missed new line
+~743a3b6 dump to file instead
+~e04675b try this
+~72781d3 use eof
+~0b1b1aa string escape
+~20ab14c fix typo
+~9978f43 debug
+~833f0a4 work on python tag version
+~6b01cac overwrite order
+~dfc664c remove the secret
+~29e0f9a var change
+~db7369c working on semver action
+~e860531 re-work then branch cleaning
+~6055b5c add return params using input values
+~3d13177 dont pass that in
+~9c13135 fix sub and output
+~f1cf0a8 path
+~dcb9d31 Add start of a branch_name action 

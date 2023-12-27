@@ -40,7 +40,9 @@ def get_commits(repo_root, commitish_a, commitish_b, test, test_file):
     #use test data
     if test is not None and len(test) > 0 and len(test_file) > 0 :
         print("Commits: Using test data")
-        lines = open(test_file).readlines()
+        with open(test_file) as f:
+            line = "".join([l.rstrip("\n") for l in f])            
+            lines = list(filter(None, line.split('~') ))            
     else:
         g = Git(repo_root) 
         r = Repo(repo_root)
@@ -50,10 +52,11 @@ def get_commits(repo_root, commitish_a, commitish_b, test, test_file):
         print(f"Checking out [{commitish_b}]")
         r.git.checkout(commitish_b)
         print(f"Getting commits between [{commitish_b}]...[{commitish_a}]")
-        commits = g.log("--oneline", f"{commitish_b}...{commitish_a}")        
-        lines = commits.split("\n")        
-    commits = split_commits_from_lines( lines )
-    print(commits, sep="\n")
+        # add a ~ to the start of each commit for easier splitting 
+        # instead of new lines, as commit messages can have many lines
+        commits = g.log("--pretty=format:~%h\ %s%n%b%-", f"{commitish_b}...{commitish_a}")        
+        lines = commits.split("~")        
+    commits = split_commits_from_lines( lines )    
     return commits
 
 def main():
@@ -116,7 +119,7 @@ def main():
         new_tag_str = f"v{new_tag_str}"
 
     print("NEXT TAG DATA")
-    print(f"Majors: [{major}] Minors: [{minor}] Patches: [{patch}]")
+    print(f"majors={major}\nminors={minor}\npatches={patch}")
     print(f"repository_root={args.repository_root}")
     print(f"commitish_a={args.commitish_a}")
     print(f"commitish_b={args.commitish_b}")
@@ -133,6 +136,9 @@ def main():
     if 'GITHUB_OUTPUT' in os.environ:
         print("Pushing to GitHub Output")
         with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+            print(f"majors={major}", file=fh)
+            print(f"minors={minor}", file=fh)
+            print(f"patches={patch}", file=fh)
             print(f"repository_root={args.repository_root}", file=fh)
             print(f"commitish_a={args.commitish_a}", file=fh)
             print(f"commitish_b={args.commitish_b}", file=fh)
@@ -146,7 +152,5 @@ def main():
             print(f"next_tag={new_tag_str}", file=fh)  
             
     
-
-
 if __name__ == "__main__":
     main()

@@ -62,6 +62,15 @@ outputs:
   commitish_b:
     description: "Commit used to look for version bump triggers in messages"
     value: ${{steps.get_next_tag.outputs.commitish_b}}
+  majors:
+    description: "number of #major found."
+    value: ${{steps.get_next_tag.outputs.majors}}
+  minors:
+    description: "number of #minor found."
+    value: ${{steps.get_next_tag.outputs.minors}}    
+  patches:
+    description: "number of #patch found."
+    value: ${{steps.get_next_tag.outputs.patches}}    
 
 
 runs:
