@@ -32,7 +32,6 @@ jobs:
         with:
           test: true
           prerelease: true
-          branch_name: "tf-test"
 
       # - id: test_results
       #   name: Test results
