@@ -1,24 +1,23 @@
-name: "Create semver tag at current github ref using passed branch name as a suffix."
+name: "Create semver tag at current github sha using passed branch name as a suffix."
 description: "Use the branch name passed (can be either refs/heads/name-of-thing or just name-of-thing)."
 inputs:
-  
-  github_token:
-    description: "Github token"
+  test:
+    description: "If set, acts as a dry run without creating items"
+    default: ""
   branch_name:
-    description: "Branch name used as prerelease suffix to create the tag name (so v1.1.0-$branch_name.$index)."    
+    description: "Current branch. The branch name used as prerelease suffix to create the tag name (so v1.1.0-$branch_name.$index)."    
     default: ""
   release_branch:    
-    description: "Release branch main - if branch name matches this the tag change to be a production style v1.1.0 without suffixes."
+    description: "Release branch main - if branch name matches this the tag change to be a production style v1.1.0 without suffixes. (Default: main)"
     default: "main"
   prerelease:
     description: "If set, creates a pre-release (draft)."
     default: ""
   
-  
-  dry_run:
-    description: "If set, acts as a dry run without creating a tag"
-    default: ""
 outputs:
+  test:
+    description: "Inputed test variable."
+    value: ${{ inputs.test }}
   branch_name:
     description: "Inputed branch_name."    
     value: ${{inputs.branch_name}}
@@ -28,69 +27,77 @@ outputs:
   prerelease:
     description: "Inputed prerelease variable."
     value: ${{ inputs.prerelease }}
-  dry_run:
-    description: "Inputed dry_run variable."
-    value: ${{ inputs.dry_run }}
+  
+  branch_original:
+    description: "Output from branch_name safety check - the branch_name return value"
+    value: ${{ steps.branch_name.outputs.branch_name }}  
   branch_full_length:
     description: "Output from branch_name safety check - the full_length return value"
-    value: ${{ steps.safe_branch.outputs.full_length }}  
+    value: ${{ steps.branch_name.outputs.full_length }}  
   branch_safe:
     description: "Output from branch_name safety check  - the safe return value"
-    value: ${{ steps.safe_branch.outputs.safe }}  
+    value: ${{ steps.branch_name.outputs.safe }}  
   
-  # new_tag:
-  #   description: "The value of the newly created tag."
-  #   value: ${{ steps.create_tags.outputs.new_tag }}
-  # tag:
-  #   description: "The value of the latest tag after running this action."
-  #   value: ${{ steps.create_tags.outputs.tag }}
-  # part:
-  #   description: "The part of version which was bumped."
-  #   value: ${{ steps.create_tags.outputs.part }}
+  latest_tag_latest:
+    description: "Output from latest_tag - the latest return value"
+    value: ${{ steps.latest_tag.outputs.latest }}  
+  latest_tag_last_release:
+    description: "Output from latest_tag - the last_release value"
+    value: ${{ steps.latest_tag.outputs.last_release }}  
+
+  next_tag:
+    description: "Output from next_tag - the next_tag value"
+    value: ${{ steps.next_tag.outputs.next_tag }}  
+
+  create_tag_latest:
+    description: "Output from create_tag - the latest value"
+    value: ${{ steps.create_tag.outputs.latest }}  
+  create_tag_created:
+    description: "Output from create_tag - the created value"
+    value: ${{ steps.create_tag.outputs.created }}  
+  create_tag_all:
+    description: "Output from create_tag - the all value"
+    value: ${{ steps.create_tag.outputs.all }}  
+
 
 
 runs:
   using: "composite"
   steps:
-    - id: safe_branch
-      name: "Generate a safe, trimmed branch name"
-      uses: ./.github/actions/branch-name
-      with:
-        ref: ${{ inputs.branch_name }}            
-    - name: "Checkout original repo to set folder"
+    - name: "Checkout this action"
       uses: actions/checkout@v4
       with:
-        repository: ${{ github.repository }}
-        ref: ${{ github.ref }}
-        path: 'target-repo'
-    - name: Listing
-      shell: bash
-      run: |
-        pwd
-        ls -la
-        ls -la target-repo/
-    # - name: Get all tags
-    #   id: get_tags
-    #   shell: bash
-    #   run: |
-    #     git fetch --tags
-    #     pip3 install git+https://github.com/python-semver/python-semver.git@3.0.2
-    #     pip3 install git+https://github.com//gitpython-developers/GitPython.git@3.1.40
-    # - name: Get last tag
-    #   id: last_tag
-    #   shell: bash
-    #   run: |
-    #     src="${{github.action_path}}"
-    #     python ${dir}/.github/actions/semver-tag/latest-tag.py --prerelease=${{inputs.prerelease}}
-    # - name: "Create Tag"
-    #   id: create_tag
-    #   uses: anothrNick/github-tag-action@1.67.0
-    #   env:
-    #     GITHUB_TOKEN: ${{inputs.github_token}}
-    #     INITIAL_VERSION: 0.0.1
-    #     DEFAULT_BUMP: minor
-    #     PRERELEASE_SUFFIX: ${{ steps.safe_branch.outputs.safe }}
-    #     PRERELEASE: ${{ inputs.prerelease != '' }}
-    #     RELEASE_BRANCHES: ${{ inputs.release_branch }}
-    #     WITH_V: "true"
-    #     DRY_RUN: ${{ inputs.dry_run != '' }}
+        repository: ${{ github.action_repository }}
+        ref: ${{ github.action_repository }}
+    - name: "Generate safe branch name"
+      id: branch_name
+      uses: './.github/actions/branch-name'
+      with:
+        ref: "${{github.ref}}"
+        head_ref: "${{github.head_ref}}"
+    - name: "Find latest tag"
+      id: latest_tag
+      uses: './.github/actions/latest-tag'
+      with:
+          test: ${{inputs.test}}
+          branch_name: ${{steps.branch_name.outputs.branch_name}}
+          release_branches: ${{inputs.release_branch}}
+          prerelease: ${{inputs.prerelease}}
+          prerelease_suffix: ${{steps.branch_name.outputs.safe}}
+    - name: "Find next tag"
+      id: next_tag
+      uses: './.github/actions/next-tag'
+      with:
+          test: ${{inputs.test}}
+          prerelease: ${{steps.latest_tag.outputs.prerelease}}
+          prerelease_suffix: ${{steps.latest_tag.outputs.prerelease_suffix}}
+          latest_tag: ${{steps.latest_tag.outputs.latest}}
+          last_release: ${{steps.latest_tag.outputs.last_release}}
+          with_v: true
+    - name: "Create tag"
+      id: create_tag
+      uses: './.github/actions/create-tag'
+      with:
+          test: ${{inputs.test}}
+          commitish: ${{github.sha}}
+          tag_name: ${{steps.next_tag.outputs.next_tag}}
