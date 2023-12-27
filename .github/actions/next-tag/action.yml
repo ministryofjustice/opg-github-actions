@@ -92,7 +92,7 @@ runs:
         RUN_AS_TEST: ${{inputs.test}}
       run: |      
         src="${{github.action_path}}"
-        repo="${{github.workspace}}/target-repo"
+        repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         python ${src}/./next-tag.py \
           --repository_root="${repo}" \
           --default_branch="${{ github.event.repository.default_branch }}" \

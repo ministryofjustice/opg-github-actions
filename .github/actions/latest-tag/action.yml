@@ -78,7 +78,7 @@ runs:
         RUN_AS_TEST: ${{inputs.test}}
       run: |      
         src="${{github.action_path}}"
-        repo="${{github.workspace}}/target-repo"
+        repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         python ${src}/./latest-tag.py \
           --repository_root="${repo}" \
           --branch_name="${{inputs.branch_name}}" \
