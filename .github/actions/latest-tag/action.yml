@@ -53,13 +53,6 @@ runs:
         path: ${{inputs.caller_repo_subfolder}}
         fetch-tags: true
         fetch-depth: 0
-    # - name: Fetch repo content
-    #   id: fetch_tags
-    #   shell: bash
-    #   working-directory: ${{inputs.caller_repo_subfolder}}
-    #   run: |        
-    #     git fetch --quiet --unshallow || git fetch --quiet --all
-    #     git fetch --quiet --tags        
     - name: Install libs
       id: install_libs
       shell: bash
