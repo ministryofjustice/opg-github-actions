@@ -64,11 +64,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: "Checkout this action"
-      uses: actions/checkout@v4
-      with:
-        repository: ${{ github.action_repository }}
-        ref: ${{ github.action_repository }}
     - name: "Generate safe branch name"
       id: branch_name
       uses: './.github/actions/branch-name'
