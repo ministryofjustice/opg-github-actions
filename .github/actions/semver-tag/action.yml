@@ -13,7 +13,9 @@ inputs:
   with_v:
     description: "New tag will start with a v prefix is this is any non-empty value."
     default: "true"
-
+  compare:
+    description: "A comparision tag to see if this matches"
+    default: ""
   
 outputs:
   test:
@@ -66,8 +68,6 @@ outputs:
     description: "Output from create_tag - the all value"
     value: ${{ steps.create_tag.outputs.all }}  
 
-
-
 runs:
   using: "composite"
   steps:    
@@ -101,6 +101,21 @@ runs:
           test: ${{inputs.test}}
           commitish: ${{steps.branch_name.outputs.branch_name}}
           tag_name: ${{steps.next_tag.outputs.next_tag}}
+    - name: compare
+      shell: bash
+      if: ${{ inputs.compare != '' }}
+      run: |
+        set -eo pipefail
+        echo "### Semver comparision" >> $GITHUB_STEP_SUMMARY
+        echo "| &nbsp; | Expected | Actual |" >> $GITHUB_STEP_SUMMARY
+        echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
+        if [ "${{ inputs.compare }}" -eq "${{ steps.next_tag.outputs.next_tag }}" ]; then
+          passfail="✅"
+        else
+          passfail="❌"
+        fi
+        echo "| ${passfail} | ${{ inputs.compare }} | ${{ steps.next_tag.outputs.next_tag }} |"  >> $GITHUB_STEP_SUMMARY
+
     - name: summary
       shell: bash
       if: ${{ (always()) && (inputs.hide_summary == '') }}
