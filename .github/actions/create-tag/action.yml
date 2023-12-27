@@ -47,16 +47,6 @@ runs:
         path: ${{inputs.caller_repo_subfolder}}
         fetch-tags: true
         fetch-depth: 0
-    - name: Fetch and checkout
-      id: fetch
-      shell: bash
-      working-directory: ${{inputs.caller_repo_subfolder}}
-      run: |
-        # # run fetch to make sure everything is present
-        # git fetch --quiet --unshallow || git fetch --quiet --all
-        # git fetch --tags --quiet
-        
-        git checkout -f "${{inputs.commitish}}"
     - name: Create tag
       id: create_tag
       shell: bash
