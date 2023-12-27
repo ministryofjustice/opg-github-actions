@@ -83,9 +83,10 @@ runs:
         echo "head ref>>${{github.head_ref}}"
         echo "ref name>>${{github.ref_name}}"
         echo "sha >>${{github.sha}}"
-        git rev-parse HEAD
-        
-        git log --oneline "${{github.base_ref}}"..."${{github.head_ref}}"
+        head=$(git rev-parse HEAD)
+
+        git log --oneline "${{github.base_ref}}".."${head}"
+        git log --oneline "${{github.base_ref}}".."${{github.head_ref}}"
 
         
     # - name: Install libs
