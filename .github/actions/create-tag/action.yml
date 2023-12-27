@@ -10,7 +10,7 @@ inputs:
   tag_name:
     description: "Name of the tag to create"
     required: true
-  dry_run:
+  test:
     description: "If set, tag is not pushed to the remote."
     default: ""
   caller_repo_subfolder:
@@ -25,9 +25,9 @@ outputs:
   tag_name:
     description: "Inputed tag_name variable."
     value: ${{ inputs.tag_name }}
-  dry_run:
-    description: "Inputed dry_run variable."
-    value: ${{ inputs.dry_run }}
+  test:
+    description: "Inputed test variable."
+    value: ${{ inputs.test }}
 
   latest:
     description: "Latest tag found at commitish provided"
@@ -51,7 +51,7 @@ runs:
         fetch-tags: true
     - name: debug
       shell: bash
-      if: ${{ inputs.dry_run != '' }}
+      if: ${{ inputs.test != '' }}
       run: |
         pwd
         ls -la ./
@@ -93,7 +93,7 @@ runs:
     - name: Push tag
       id: push_tag
       shell: bash
-      if: ${{ inputs.dry_run == '' }}
+      if: ${{ inputs.test == '' }}
       working-directory: ${{inputs.caller_repo_subfolder}}
       run: |
         git push origin "${{inputs.tag_name}}"
