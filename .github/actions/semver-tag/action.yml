@@ -51,11 +51,11 @@ outputs:
   next_tag:
     description: "Output from next_tag - the next_tag value"
     value: ${{ steps.next_tag.outputs.next_tag }}  
-  next_tag_commit_a:
-    description: "Output from next_tag - the commit_a used to look in commits for triggers"
+  next_tag_commitish_a:
+    description: "Output from next_tag - the commitish_a used to look in commits for triggers"
     value: ""
-  next_tag_commit_b:
-    description: "Output from next_tag - the commit_b used to look in commits for triggers"
+  next_tag_commitish_b:
+    description: "Output from next_tag - the commitish_b used to look in commits for triggers"
     value: ""
 
   create_tag_latest:
@@ -133,8 +133,8 @@ runs:
         
         echo "| Next Tag | last_release | ${{ steps.next_tag.outputs.last_release }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| Next Tag | latest_tag | ${{ steps.next_tag.outputs.latest_tag }} |"  >> $GITHUB_STEP_SUMMARY                
-        echo "| Next Tag | commit_a | ${{ steps.next_tag.outputs.commit_a }} |"  >> $GITHUB_STEP_SUMMARY
-        echo "| Next Tag | commit_b | ${{ steps.next_tag.outputs.commit_b }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Next Tag | commitish_a | ${{ steps.next_tag.outputs.commitish_a }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Next Tag | commitish_b | ${{ steps.next_tag.outputs.commitish_b }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| Next Tag | next_tag | ${{ steps.next_tag.outputs.next_tag }} |"  >> $GITHUB_STEP_SUMMARY
         
         echo "| Create Tag | latest | ${{ steps.create_tag.outputs.latest }} |"  >> $GITHUB_STEP_SUMMARY

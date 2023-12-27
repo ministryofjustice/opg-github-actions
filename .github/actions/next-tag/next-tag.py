@@ -11,8 +11,8 @@ def arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--test_file', default="", help="trigger the use of a test file for list of tags")
     
     parser.add_argument('--repository_root', default="./", help="Path to root of repository")    
-    parser.add_argument('--commit_a', default="", help="Commit sha used to compare in log to look for triggers")    
-    parser.add_argument('--commit_b', default="", help="Commit sha used to compare in log to look for triggers")    
+    parser.add_argument('--commitish_a', default="", help="Commit-ish used to compare in log to look for triggers")    
+    parser.add_argument('--commitish_b', default="", help="Commit-ish used to compare in log to look for triggers")    
     
 
     parser.add_argument('--prerelease', default="", help="If set, then this is a pre-release")    
@@ -35,7 +35,7 @@ def split_commits_from_lines(lines):
 def initial_semver_tag(tag):   
     return Version.parse(trim_v(tag))
 
-def get_commits(repo_root, commit_a, commit_b, test, test_file):
+def get_commits(repo_root, commitish_a, commitish_b, test, test_file):
     lines = []    
     #use test data
     if test is not None and len(test) > 0 and len(test_file) > 0 :
@@ -43,13 +43,13 @@ def get_commits(repo_root, commit_a, commit_b, test, test_file):
         lines = open(test_file).readlines()
     else:
         print(f"Commits: Using repository: {repo_root}")
-        print(f"Checking out commits [{commit_a}]...[{commit_b}]")
+        print(f"Checking out commits [{commitish_a}]...[{commitish_b}]")
         g = Git(repo_root) 
         r = Repo(repo_root)
-        r.git.checkout(commit_a)
-        r.git.checkout(commit_b)
-        print(f"Getting commits between [{commit_a}]...[{commit_b}]")
-        commits = g.log("--oneline", f"{commit_a}...{commit_b}")        
+        r.git.checkout(commitish_a)
+        r.git.checkout(commitish_b)
+        print(f"Getting commits between [{commitish_a}]...[{commitish_b}]")
+        commits = g.log("--oneline", f"{commitish_a}...{commitish_b}")        
         lines = commits.split("\n")
     commits = split_commits_from_lines( lines )
     return commits
@@ -71,7 +71,7 @@ def main():
 
     starting_tag = last_release
     # get the commits between shas
-    commits = get_commits(args.repository_root, args.commit_a, args.commit_b, test, test_file)
+    commits = get_commits(args.repository_root, args.commitish_a, args.commitish_b, test, test_file)
     # look for #major, #minor #patch in commits
     # - use the default_bump to always increase one
     major=1 if args.default_bump == "major" else 0
@@ -116,8 +116,8 @@ def main():
     print("NEXT TAG DATA")
     print(f"Majors: [{major}] Minors: [{minor}] Patches: [{patch}]")
     print(f"repository_root={args.repository_root}")
-    print(f"commit_a={args.commit_a}")
-    print(f"commit_b={args.commit_b}")
+    print(f"commitish_a={args.commitish_a}")
+    print(f"commitish_b={args.commitish_b}")
     print(f"prerelease={args.prerelease}")
     print(f"prerelease_processed={is_prerelease}")
     print(f"default_bump={args.default_bump}")
@@ -132,8 +132,8 @@ def main():
         print("Pushing to GitHub Output")
         with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
             print(f"repository_root={args.repository_root}", file=fh)
-            print(f"commit_a={args.commit_a}", file=fh)
-            print(f"commit_b={args.commit_b}", file=fh)
+            print(f"commitish_a={args.commitish_a}", file=fh)
+            print(f"commitish_b={args.commitish_b}", file=fh)
             print(f"prerelease={args.prerelease}", file=fh)
             print(f"prerelease_processed={is_prerelease}", file=fh)
             print(f"default_bump={args.default_bump}", file=fh)
