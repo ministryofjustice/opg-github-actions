@@ -75,16 +75,20 @@ runs:
       id: fetch_tags      
       shell: bash
       working-directory: ${{inputs.caller_repo_subfolder}}
-      run: |     
+      run: |
+        git --versions     
         git fetch --quiet --unshallow || git fetch --quiet --all
         git fetch --tags --quiet
-
-        echo "base ref>>${{github.base_ref}}"
-        echo "head ref>>${{github.head_ref}}"
-        echo "ref name>>${{github.ref_name}}"
-        echo "sha >>${{github.sha}}"
         head=$(git rev-parse HEAD)
+        head=${head:0:7}
 
+        echo "base\t>>${{github.base_ref}}"
+        echo "head\t>>${{github.head_ref}}"
+        echo "ref\t>>${{github.ref_name}}"
+        echo "sha\t>>${{github.sha}}"
+        echo "head\t>>${head}"
+
+        git log --oneline -n5
         git log --oneline "${{github.base_ref}}".."${head}"
         git log --oneline "${{github.base_ref}}".."${{github.head_ref}}"
 
