@@ -88,7 +88,7 @@ runs:
 
         echo "all_tags=${all_tags}" >> $GITHUB_OUTPUT
         echo "latest_tag=${latest_tag}" >> $GITHUB_OUTPUT
-        # echo "found_tag=${found_tag}" >> $GITHUB_OUTPUT
+        echo "found_tag=${found_tag}" >> $GITHUB_OUTPUT
 
     - name: Push tag
       id: push_tag
