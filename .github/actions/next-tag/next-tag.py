@@ -37,12 +37,13 @@ def initial_semver_tag(tag):
 
 def get_commits(repo_root, commitish_a, commitish_b, test, test_file):
     lines = []    
+    newline='⇥'
     #use test data
     if test is not None and len(test) > 0 and len(test_file) > 0 :
         print("Commits: Using test data")
         with open(test_file) as f:
             line = "".join([l.rstrip("\n") for l in f])            
-            lines = list(filter(None, line.split('~') ))            
+            lines = list(filter(None, line.split(newline) ))            
     else:
         g = Git(repo_root) 
         r = Repo(repo_root)
@@ -54,8 +55,8 @@ def get_commits(repo_root, commitish_a, commitish_b, test, test_file):
         print(f"Getting commits between [{commitish_b}]...[{commitish_a}]")
         # add a ~ to the start of each commit for easier splitting 
         # instead of new lines, as commit messages can have many lines
-        log_items = g.log("--pretty=format:~%h %s%n%b%-", f"{commitish_b}...{commitish_a}")        
-        lines = [line for line in log_items.split("~") if line.strip()]       
+        log_items = g.log(f"--pretty=format:{newline}%h %s%n%b%-", f"{commitish_b}...{commitish_a}")        
+        lines = [line for line in log_items.split(newline) if line.strip()]       
         print("LINES:")
         print(*lines, sep="\n")
     commits = split_commits_from_lines( lines )    
