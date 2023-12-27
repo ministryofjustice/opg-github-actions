@@ -19,6 +19,9 @@ outputs:
   test:
     description: "Inputed test variable."
     value: ${{ inputs.test }}
+  hide_summary:
+    description: "Set this to any value to hide the summary output data"
+    value: ""
   release_branch:
     description: "Inputed release_branch variable."
     value: ${{ inputs.release_branch }}
@@ -100,7 +103,7 @@ runs:
           tag_name: ${{steps.next_tag.outputs.next_tag}}
     - name: summary
       shell: bash
-      if: always()
+      if: ${{ (always()) && (inputs.hide_summary == '') }}
       run: |
         set -eo pipefail
         echo "### Semver tag summary" >> $GITHUB_STEP_SUMMARY
