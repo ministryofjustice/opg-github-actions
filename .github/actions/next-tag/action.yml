@@ -101,4 +101,4 @@ runs:
           --latest_tag="${{inputs.latest_tag}}" \
           --last_release=${{inputs.last_release}} \
           --with_v=${{inputs.with_v}} \
-          --test_file=${src}/${{inputs.test_file}} \
+          --test_file=${src}/${{inputs.test_file}}
