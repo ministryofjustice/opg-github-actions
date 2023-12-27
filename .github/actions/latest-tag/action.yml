@@ -52,20 +52,13 @@ runs:
         ref: ${{ github.ref }}
         path: ${{inputs.caller_repo_subfolder}}
         fetch-tags: true
-    - name: debug
-      shell: bash
-      if: ${{ (inputs.test == '') && (inputs.test_file == '' ) }}
-      run: |
-        pwd
-        ls -la
-        ls -la ${{inputs.caller_repo_subfolder}}
     - name: Fetch repo content
       id: fetch_tags
       shell: bash
       working-directory: ${{inputs.caller_repo_subfolder}}
       run: |        
-        git fetch --unshallow || git fetch --all
-        git fetch --tags        
+        git fetch --quiet --unshallow || git fetch --quiet --all
+        git fetch --quiet --tags        
     - name: Install libs
       id: install_libs
       shell: bash
