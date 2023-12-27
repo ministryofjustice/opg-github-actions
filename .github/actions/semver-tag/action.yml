@@ -121,6 +121,7 @@ runs:
         
         echo "| Create Tag | latest | ${{ steps.create_tag.outputs.latest }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| Create Tag | all | ${{ steps.create_tag.outputs.all }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Create Tag | test | ${{ steps.create_tag.outputs.test }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| Create Tag | created | ${{ steps.create_tag.outputs.created }} |"  >> $GITHUB_STEP_SUMMARY
         
 

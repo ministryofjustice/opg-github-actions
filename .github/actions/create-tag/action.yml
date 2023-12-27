@@ -30,7 +30,7 @@ outputs:
     description: "Latest tag found at commitish provided"
     value: ${{steps.tags_found.outputs.latest_tag}}
   created:
-    description: "If inputted tag_name is created, then this variable should match that"
+    description: "If inputted tag_name is created, then this variable should match that. If test is true, then the tag wont actually be created, but this variable will be set correctly."
     value: ${{steps.tags_found.outputs.created_tag}}
   all:
     description: "All tags (comma seperated) that are found to be pointing to inputted commish"
