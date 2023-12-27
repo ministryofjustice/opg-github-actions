@@ -54,8 +54,9 @@ def get_commits(repo_root, commitish_a, commitish_b, test, test_file):
         print(f"Getting commits between [{commitish_b}]...[{commitish_a}]")
         # add a ~ to the start of each commit for easier splitting 
         # instead of new lines, as commit messages can have many lines
-        commits = g.log("--pretty=format:\"~%h %s%n%b%-\"", f"{commitish_b}...{commitish_a}")        
-        lines = commits.split("~")        
+        log_items = g.log("--pretty=format:~%h %s%n%b%-", f"{commitish_b}...{commitish_a}")        
+        lines = log_items.split("~")      
+        print("LINES:")
         print(*lines, sep="\n")
     commits = split_commits_from_lines( lines )    
     print("COMMITS:")
