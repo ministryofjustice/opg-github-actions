@@ -32,9 +32,9 @@ outputs:
   latest:
     description: "Latest tag found at commitish provided"
     value: ${{steps.tags_found.outputs.latest_tag}}
-  found:
+  created:
     description: "If inputted tag_name is created, then this variable should match that"
-    value: ${{steps.tags_found.outputs.found_tag}}
+    value: ${{steps.tags_found.outputs.created_tag}}
   all:
     description: "All tags (comma seperated) that are found to be pointing to inputted commish"
     value: ${{steps.tags_found.outputs.all_tags}}
@@ -80,15 +80,15 @@ runs:
         all_tags_at_commit=$(cat _taglist )
         all_tags=$(cat _taglist | tr '\n', ',')
         latest_tag=$(cat _taglist | tail -n1)
-        found_tag=$(cat _taglist | grep "${{inputs.tag_name}}$" | tail -n1)
+        created_tag=$(cat _taglist | grep "${{inputs.tag_name}}$" | tail -n1)
         
         echo "all_tags=${all_tags}"
         echo "latest_tag=${latest_tag}"
-        echo "found_tag=${found_tag}"
+        echo "created_tag=${found_tag}"
 
         echo "all_tags=${all_tags}" >> $GITHUB_OUTPUT
         echo "latest_tag=${latest_tag}" >> $GITHUB_OUTPUT
-        echo "found_tag=${found_tag}" >> $GITHUB_OUTPUT
+        echo "created_tag=${found_tag}" >> $GITHUB_OUTPUT
 
     - name: Push tag
       id: push_tag

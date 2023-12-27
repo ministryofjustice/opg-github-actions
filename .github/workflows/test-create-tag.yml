@@ -43,13 +43,13 @@ jobs:
           echo "| \# | Expected | Actual | " >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
           echo "| 1a. | ${t1a} | ${{steps.test1.outputs.latest}} | " >> $GITHUB_STEP_SUMMARY
-          echo "| 1b. | ${t1b} | ${{steps.test1.outputs.found}} | " >> $GITHUB_STEP_SUMMARY
+          echo "| 1b. | ${t1b} | ${{steps.test1.outputs.created}} | " >> $GITHUB_STEP_SUMMARY
           
           if [ "${{steps.test1.outputs.latest}}" != "${t1a}" ]; then
             echo "test 1a failed"
             exit 1
           fi
-          if [ "${{steps.test1.outputs.found}}" != "${t1b}" ]; then
+          if [ "${{steps.test1.outputs.created}}" != "${t1b}" ]; then
             echo "test 1b failed"
             exit 1
           fi
