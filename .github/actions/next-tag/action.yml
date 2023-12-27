@@ -80,6 +80,7 @@ runs:
         git fetch --tags --quiet
         if [ ! -z "${{inputs.commitish}}" ]; then
           git checkout -f "${{inputs.commitish}}"
+          git log --oneline ${{ github.event.repository.default_branch }}...${{inputs.commitish}} > commits
         fi
     - name: Install libs
       id: install_libs
@@ -97,7 +98,7 @@ runs:
         repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         python ${src}/./next-tag.py \
           --repository_root="${repo}" \
-          --commitish="${{inputs.commitish}}" \
+          --commits="${{github.workspace}}/${{inputs.caller_repo_subfolder}}/commits" \
           --default_bump="${{inputs.default_bump}}" \
           --default_branch="${{ github.event.repository.default_branch }}" \
           --prerelease="${{inputs.prerelease}}" \
