@@ -78,6 +78,9 @@ runs:
       run: |
         git fetch --quiet --unshallow || git fetch --quiet --all
         git fetch --tags --quiet
+        if [ ! -z "${{inputs.commitish}}" ]; then
+          git checkout -f "${{inputs.commitish}}"
+        fi
     - name: Install libs
       id: install_libs
       shell: bash
