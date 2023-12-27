@@ -51,6 +51,7 @@ runs:
         repository: ${{ github.repository }}
         ref: ${{ github.ref }}
         path: ${{inputs.caller_repo_subfolder}}
+        fetch-tags: true
     - name: debug
       shell: bash
       if: ${{ (inputs.test == '') && (inputs.test_file == '' ) }}
