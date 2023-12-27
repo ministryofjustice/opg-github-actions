@@ -10,6 +10,10 @@ inputs:
   prerelease:
     description: "If set, creates a pre-release (draft)."
     default: ""
+  with_v:
+    description: "New tag will start with a v prefix is this is any non-empty value."
+    default: "true"
+
   
 outputs:
   test:
@@ -80,11 +84,12 @@ runs:
           prerelease_suffix: ${{steps.latest_tag.outputs.prerelease_suffix}}
           latest_tag: ${{steps.latest_tag.outputs.latest}}
           last_release: ${{steps.latest_tag.outputs.last_release}}
-          with_v: true
-    # - name: "Create tag"
-    #   id: create_tag
-    #   uses: './.github/actions/create-tag'
-    #   with:
-    #       test: ${{inputs.test}}
-    #       commitish: ${{steps.branch_name.outputs.branch_name}}
-    #       tag_name: ${{steps.next_tag.outputs.next_tag}}
+          with_v: ${{inputs.with_v}}
+    - name: "Create tag"
+      id: create_tag
+      uses: './.github/actions/create-tag'
+      with:
+          test: ${{inputs.test}}
+          commitish: ${{steps.branch_name.outputs.branch_name}}
+          tag_name: ${{steps.next_tag.outputs.next_tag}}
+          

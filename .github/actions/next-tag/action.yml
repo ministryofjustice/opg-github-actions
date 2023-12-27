@@ -24,7 +24,7 @@ inputs:
     default: "minor"
   with_v:
     description: "New tag will start with a v prefix"
-    default: "false"
+    default: ""
   caller_repo_subfolder:
     description: "Location to checkout active repository into. (Default: ./next-tag-caller-repository)"
     default: "./next-tag-caller-repository"

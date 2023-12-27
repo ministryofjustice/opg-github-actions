@@ -37,10 +37,10 @@ jobs:
     name: "[Test] next-tag"
     uses: './.github/workflows/test-next-tag.yml'
 
-  # # test create-tag
-  # test_create_tag:
-  #   name: "[Test] create-tag"
-  #   uses: './.github/workflows/test-create-tag.yml'
+  # test create-tag
+  test_create_tag:
+    name: "[Test] create-tag"
+    uses: './.github/workflows/test-create-tag.yml'
 
   # test semver-tag
   test_semver:

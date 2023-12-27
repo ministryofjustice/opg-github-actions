@@ -78,38 +78,29 @@ def main():
         minor = minor + 1 if "#minor" in c[1] else minor
         patch = patch + 1 if "#patch" in c[1] else patch
 
-   
-    print(f"Majors: [{major}] Minors: [{minor}] Patches: [{patch}]")
-    
     new_tag = starting_tag
 
     # Bump the tag along based on what was found
     if major > 0:
-        print ("-> major bump")
         new_tag = new_tag.bump_major()
     elif minor > 0:
-        print ("-> minor bump")
         new_tag = new_tag.bump_minor()
     elif patch > 0:
-        print ("-> patch bump")
         new_tag = new_tag.bump_patch()
 
     # If this is a prerelease, and there is a pre-existing tag we should copy over
     # the prerelease information to the new tag
     # existing_tag = v2.0.0-moreactions.0 would become v2.0.0-moreactions.1
     if is_prerelease and latest_tag is not None:
-        print ("-> prerelease bump with tag")
         new_tag = new_tag.replace(prerelease=latest_tag.prerelease).bump_prerelease()
     # If this prerelease is the first of its kind the setup the prerelease segment
     # to use the suffix
     elif is_prerelease and latest_tag is None:
-         print ("-> prerelease bump without tag")
          new_tag = new_tag.replace(prerelease=f"{args.prerelease_suffix}.0")
 
     # if this is the first version of the new major (so latest_tag is v1.5.0-moreactions.1)
     # then reset the prerelease counter
     if major > 0 and latest_tag is not None and latest_tag.major < new_tag.major:
-        print ("-> reset prerelease")
         new_tag = new_tag.replace(prerelease=f"{args.prerelease_suffix}.0") 
 
     # generate the string version for output
@@ -119,6 +110,7 @@ def main():
         new_tag_str = f"v{new_tag_str}"
 
     print("NEXT TAG DATA")
+    print(f"Majors: [{major}] Minors: [{minor}] Patches: [{patch}]")
     print(f"repository_root={args.repository_root}")
     print(f"prerelease={args.prerelease}")
     print(f"prerelease_processed={is_prerelease}")
