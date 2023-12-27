@@ -42,16 +42,18 @@ def get_commits(repo_root, commitish_a, commitish_b, test, test_file):
         print("Commits: Using test data")
         lines = open(test_file).readlines()
     else:
-        print(f"Commits: Using repository: {repo_root}")
-        print(f"Checking out commits [{commitish_a}]...[{commitish_b}]")
         g = Git(repo_root) 
         r = Repo(repo_root)
+        print(f"Commits: Using repository: {repo_root}")
+        print(f"Checking out [{commitish_a}]")
         r.git.checkout(commitish_a)
+        print(f"Checking out [{commitish_b}]")
         r.git.checkout(commitish_b)
-        print(f"Getting commits between [{commitish_a}]...[{commitish_b}]")
-        commits = g.log("--oneline", f"{commitish_a}...{commitish_b}")        
-        lines = commits.split("\n")
+        print(f"Getting commits between [{commitish_b}]...[{commitish_a}]")
+        commits = g.log("--oneline", f"{commitish_b}...{commitish_a}")        
+        lines = commits.split("\n")        
     commits = split_commits_from_lines( lines )
+    print(commits, sep="\n")
     return commits
 
 def main():
