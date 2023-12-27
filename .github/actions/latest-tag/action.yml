@@ -64,8 +64,9 @@ runs:
       shell: bash
       if: ${{ (inputs.test == '') && (inputs.test_file == '' ) }}
       working-directory: ${{inputs.caller_repo_subfolder}}
-      run: |
-        git fetch --tags
+      run: |        
+        git fetch --unshallow || git fetch --all
+        git fetch --tags        
     - name: Install libs
       id: install_libs
       shell: bash
