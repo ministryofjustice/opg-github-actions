@@ -74,8 +74,11 @@ runs:
       id: tags_found
       shell: bash
       working-directory: ${{inputs.caller_repo_subfolder}}
-      run: |        
+      run: |    
+        set -e    
         all_tags_at_commit=$(git tag --points-at="${{inputs.commitish}}" --sort=creatordate | sort --version-sort -f )
+        echo "${all_tags_at_commit}"
+        
         # all_tags=$(echo ${all_tags_at_commit} | tr '\n', ',')
         latest_tag=$(echo ${all_tags_at_commit} | tail -n1)
         # found_tag=$(echo ${all_tags_at_commit} | grep "${{inputs.tag_name}}$" | tail -n1)
@@ -84,6 +87,7 @@ runs:
         echo "latest_tag=${latest_tag}"
         # echo "found_tag=${found_tag}"
 
+        
         # echo "all_tags=${all_tags}" >> $GITHUB_OUTPUT
         echo "latest_tag=${latest_tag}" >> $GITHUB_OUTPUT
         # echo "found_tag=${found_tag}" >> $GITHUB_OUTPUT
