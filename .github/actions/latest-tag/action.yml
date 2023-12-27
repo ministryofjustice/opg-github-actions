@@ -30,13 +30,17 @@ outputs:
     value: ${{inputs.test}}
   prerelease:
     description: "Inputed prerelease variable."
-    value: ${{ inputs.prerelease }}
+    value: ${{ steps.latest.outputs.prerelease }}
   prerelease_suffix:
     description: "Inputed prerelease_suffix variable."
-    value: ${{ inputs.prerelease_suffix }}
+    value: ${{ steps.latest.outputs.prerelease_suffix }}
   latest:
     description: "Latest tag found"
     value: ${{steps.latest.outputs.latest}}
+  last_release:
+    description: "Last release tag found"
+    value: ${{steps.latest.outputs.last_release}}
+
 
 runs:
   using: "composite"
