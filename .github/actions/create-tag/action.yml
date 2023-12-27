@@ -76,12 +76,13 @@ runs:
       working-directory: ${{inputs.caller_repo_subfolder}}
       run: |    
         set -e    
-        all_tags_at_commit=$(git tag --points-at="${{inputs.commitish}}" --sort=creatordate | sort --version-sort -f )
+        git tag --points-at="${{inputs.commitish}}" --sort=creatordate | sort --version-sort -f > _taglist
+        all_tags_at_commit=$(cat _taglist )
         echo "${all_tags_at_commit}"
 
-        # all_tags=$(echo -e ${all_tags_at_commit} | tr '\n', ',')
-        latest_tag=$(echo -e ${all_tags_at_commit} | tail -n1)
-        # found_tag=$(echo -e ${all_tags_at_commit} | grep "${{inputs.tag_name}}$" | tail -n1)
+        # all_tags=$(cat _taglist | tr '\n', ',')
+        latest_tag=$(cat _taglist | tail -n1)
+        # found_tag=$(cat _taglist | grep "${{inputs.tag_name}}$" | tail -n1)
         
         # echo "all_tags=${all_tags}"
         echo "latest_tag=${latest_tag}"
