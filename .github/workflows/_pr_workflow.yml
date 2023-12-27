@@ -52,6 +52,7 @@ jobs:
       - test_branch_name
       - test_latest_tag
       - test_next_tag
+      - test_create_tag
     name: "Branch name"
     uses: ministryofjustice/opg-github-workflows/.github/workflows/data-parse-branch-name.yml@v2.0.0
     secrets: inherit

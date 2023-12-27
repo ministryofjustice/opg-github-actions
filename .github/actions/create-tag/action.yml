@@ -78,18 +78,15 @@ runs:
         set -e    
         git tag --points-at="${{inputs.commitish}}" --sort=creatordate | sort --version-sort -f > _taglist
         all_tags_at_commit=$(cat _taglist )
-        echo "${all_tags_at_commit}"
-
-        # all_tags=$(cat _taglist | tr '\n', ',')
+        all_tags=$(cat _taglist | tr '\n', ',')
         latest_tag=$(cat _taglist | tail -n1)
-        # found_tag=$(cat _taglist | grep "${{inputs.tag_name}}$" | tail -n1)
+        found_tag=$(cat _taglist | grep "${{inputs.tag_name}}$" | tail -n1)
         
-        # echo "all_tags=${all_tags}"
+        echo "all_tags=${all_tags}"
         echo "latest_tag=${latest_tag}"
-        # echo "found_tag=${found_tag}"
+        echo "found_tag=${found_tag}"
 
-        
-        # echo "all_tags=${all_tags}" >> $GITHUB_OUTPUT
+        echo "all_tags=${all_tags}" >> $GITHUB_OUTPUT
         echo "latest_tag=${latest_tag}" >> $GITHUB_OUTPUT
         # echo "found_tag=${found_tag}" >> $GITHUB_OUTPUT
 
