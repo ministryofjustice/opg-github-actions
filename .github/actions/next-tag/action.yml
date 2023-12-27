@@ -75,11 +75,12 @@ runs:
       id: fetch_tags      
       shell: bash
       working-directory: ${{inputs.caller_repo_subfolder}}
-      run: |
+      run: |        
         git fetch --quiet --unshallow || git fetch --quiet --all
         git fetch --tags --quiet
         if [ ! -z "${{inputs.commitish}}" ]; then
           git checkout -f "${{inputs.commitish}}"
+          git pull --all
           git log --oneline ${{ github.event.repository.default_branch }}...${{inputs.commitish}} > commits
         fi
     - name: Install libs
