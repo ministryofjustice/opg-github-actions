@@ -88,6 +88,7 @@ def main():
         last = last.get("raw")        
 
     # summary for shell
+    print(f"tags={tags}")
     print(f"test={is_test}")
     print(f"prerelease_argument={args.prerelease}")
     print(f"prerelease_calculated={prerelease_by_branch}")
