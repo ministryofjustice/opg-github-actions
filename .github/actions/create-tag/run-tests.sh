@@ -59,6 +59,16 @@ test_val=$(test_output_value "created_tag" "${out}")
 test_should_equal "${COUNT}" "v24.0.0" "${test_val}"
 removeTag "${test_val}"
 
+# Test non-semver tag
+COUNT=$((COUNT+1))
+out=$(python ./create-tag.py \
+    --repository_root="${REPO_ROOT}" \
+    --commitish="${COMMITISH1}" \
+    --tag_name="test_tag")
+test_val=$(test_output_value "created_tag" "${out}")
+test_should_contain "${COUNT}" "test_tag." "${test_val}"
+
+
 tearDown
 
 if [ -n "${TEST_ERR}" ]; then
