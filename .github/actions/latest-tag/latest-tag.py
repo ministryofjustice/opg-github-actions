@@ -62,7 +62,7 @@ def run(
     prerelease_by_branch = is_prerelease(prerelease, branch_name, release_branches)
     # use test content
     is_test = False
-    if test is not None and len(test) > 0 and len(test_file) > 0:
+    if test == True and len(test_file) > 0:
         print("Using test data")
         is_test = True
         tags = tags_from_file(test_file)
