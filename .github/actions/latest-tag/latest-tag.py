@@ -4,6 +4,19 @@ import re
 import semver
 import argparse
 from semver.version import Version
+import importlib.util
+
+# local imports
+parent_dir_name = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+# load cli helper
+cli_mod = importlib.util.spec_from_file_location("clih", parent_dir_name + '/_shared/python/shared/pkg/cli/helpers.py')
+cli = importlib.util.module_from_spec(cli_mod)  
+cli_mod.loader.exec_module(cli)
+# load semver helpers
+semver_mod = importlib.util.spec_from_file_location("semverh", parent_dir_name + '/_shared/python/shared/pkg/semver/helpers.py')
+svh = importlib.util.module_from_spec(semver_mod)  
+semver_mod.loader.exec_module(svh)
+
 
 
 def arg_parser() -> argparse.ArgumentParser:
@@ -19,28 +32,17 @@ def arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--release_branches', default="main,master", help="List of branches that are considered a release")
     return parser
 
-def to_valid_dict(tag) -> dict|None:
-    t = (tag[1:] if tag.startswith('v') else tag)    
-    if Version.is_valid(t):            
-        return {tag: Version.parse(t)}
-    return None
 
 def tags_from_file(file) -> dict:
     lines=[[str(i) for i in line.strip().split(" ", 1)] for line in open(file).readlines()]
     tags={}    
     for line in lines:
-        d = to_valid_dict(line[0])
+        d = svh.to_valid_dict(line[0])
         if d is not None:
             tags.update(d)        
     return tags
 
-def semver_list(tags) -> dict:
-    semver_tags = {}
-    for tag in tags:
-        d = to_valid_dict(f"{tag}")
-        if d is not None:
-            semver_tags.update(d)
-    return semver_tags
+
 
 def is_prerelease(prerelease, branch_name, release_branches) -> bool:
     if branch_name in release_branches.split(","):
@@ -48,15 +50,17 @@ def is_prerelease(prerelease, branch_name, release_branches) -> bool:
     return len(prerelease) > 0
 
 
-def main():
-    args = arg_parser().parse_args()
-    test_file = args.test_file
-    repo_root = args.repository_root
-    prerelease_by_branch = is_prerelease(args.prerelease, args.branch_name, args.release_branches)
-    prerelease_suffix = args.prerelease_suffix
-
+def run(
+        test:bool, 
+        test_file:str, 
+        repo_root:str, 
+        branch_name:str, 
+        release_branches,
+        prerelease, 
+        prerelease_suffix:str) -> dict:
+    
+    prerelease_by_branch = is_prerelease(prerelease, branch_name, release_branches)
     # use test content
-    test = os.getenv("RUN_AS_TEST")
     is_test = False
     if test is not None and len(test) > 0 and len(test_file) > 0:
         print("Using test data")
@@ -64,7 +68,7 @@ def main():
         tags = tags_from_file(test_file)
     else:
         repo = Repo(repo_root)    
-        tags = semver_list(repo.tags)
+        tags = svh.semver_list(repo.tags)
         
     last_release = ""
     latest = ""
@@ -84,30 +88,36 @@ def main():
     else:
         matching = releases
 
-    # print(*matching, sep="\n")
     if len(matching) > 0:        
         latest_val = max(matching.values())        
         latest_items = [k for k,v in matching.items() if f"{v}" == latest_val]
         latest = latest_items.pop()
 
-    # summary for shell
-    print("LATEST TAG DATA")
-    print(f"test={is_test}")
-    print(f"prerelease_argument={args.prerelease}")
-    print(f"prerelease_calculated={prerelease_by_branch}")
-    print(f"prerelease_suffix={prerelease_suffix}")
-    print(f"latest={latest}")
-    print(f"last_release={last_release}")
+    return {
+        'test': is_test,
+        'prerelease_argument': prerelease,
+        'prerelease_calculated': prerelease_by_branch,
+        'prerelease_suffix': prerelease_suffix,
+        'latest': f"{latest}",
+        'last_release': f"{last_release}"
+    }
 
-    if 'GITHUB_OUTPUT' in os.environ:
-        print("Pushing to GitHub Output")
-        with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
-            print(f'test={is_test}', file=fh)
-            print(f'prerelease={prerelease_by_branch}', file=fh)
-            print(f'prerelease_suffix={prerelease_suffix}', file=fh)
-            print(f'latest={latest}', file=fh)
-            print(f'last_release={last_release}', file=fh)
-    
+
+def main():
+    args = arg_parser().parse_args()
+
+    outputs = run(
+        len(os.getenv("RUN_AS_TEST")) > 0,
+        args.test_file,
+        args.repository_root,
+        args.branch_name,
+        args.release_branches,
+        args.prerelease
+    )
+
+    print("LATEST TAG DATA")    
+    cli.results(outputs, 'GITHUB_OUTPUT' in os.environ)
+
 
 if __name__ == "__main__":
     main()
