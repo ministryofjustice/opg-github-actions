@@ -60,3 +60,8 @@ test_should_equal "${COUNT}" "v24.0.0" "${test_val}"
 removeTag "${test_val}"
 
 tearDown
+
+if [ -n "${TEST_ERR}" ]; then
+    echo "ERROR"
+    exit 1
+fi

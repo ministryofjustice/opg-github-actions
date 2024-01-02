@@ -10,6 +10,7 @@ header(){
 
 fail() {
     echo "| ${1} | ${2} | ${3} | ${4} | ❌ |"
+    TEST_ERR="true"
 }
 
 pass() {

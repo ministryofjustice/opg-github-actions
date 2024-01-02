@@ -7,6 +7,8 @@ COMMITISH1="dab1b63"
 COUNT="0"
 # for local
 REPO_ROOT="./repo-test/"
+#error flag
+TEST_ERR=""
 
 # generate these tags for tests
 declare -a dummy_tags=(
@@ -24,7 +26,6 @@ declare -a dummy_tags=(
     v1.5.0-clash.1
     v9999.1.0
 )
-
 
 
 setUp() {
