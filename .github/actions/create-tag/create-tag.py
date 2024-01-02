@@ -53,9 +53,9 @@ def main():
     outputs={
         'all_tags': ','.join(all_tags),
         'all_tags_here': ','.join(all_tags_here),
-        'latest_tag': latest_tag,
-        'requested_tag': tag_name,
-        'created_tag': tag_to_create
+        'latest_tag': f"{latest_tag}",
+        'requested_tag': f"{tag_name}",
+        'created_tag': f"{tag_to_create}"
     }
 
     print("CREATE TAG DATA")    
