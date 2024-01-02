@@ -81,7 +81,7 @@ def main():
     # if this isnt a test, push to remote
     if test != True:
         print(f"Pushing {tag_to_create} to remote")
-        #repo.git.push('origin', tag_to_create)
+        repo.git.push('origin', tag_to_create)
 
     all_tags = tags(repo, "--list")    
     all_tags_here = tags(repo, f"--points-at={commitish}")
