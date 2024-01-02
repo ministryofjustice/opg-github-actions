@@ -13,30 +13,27 @@ def tags(repo, param:str) -> list:
     return natsorted(all)
 
 
-def header(to_github) -> None:
-    print("## Test Information")
+def header(fh) -> None:
+    print("## Test")
     print("| A | condition | B | Pass |")
     print("| --- | --- | --- | --- |")
-    if to_github:
-        with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
-            print("## Test Information", file=fh)
-            print("| A | condition | B | Pass |", file=fh)
-            print("| --- | --- | --- | --- |", file=fh)
 
-def result(a, condition, b, passed, to_github) -> None:
-    if passed:
-        passing(a, condition, b, to_github)
-    else:
-        failing(a, condition, b, to_github)
-
-def failing(a, condition, b, to_github) -> None:
-    result_line(a, condition, b, to_github, "❌")
-
-def passing(a, condition, b, to_github) -> None:
-    result_line(a, condition, b, to_github, "✅")
+    fh.writelines(["## Test Information\n", "| A | condition | B | Pass |\n", "| --- | --- | --- | --- |\n"])
     
-def result_line(a, condition, b, to_github, char) -> None:
+
+def result(a, condition, b, passed, fh) -> None:
+    if passed:
+        passing(a, condition, b, fh)
+    else:
+        failing(a, condition, b, fh)
+
+def failing(a, condition, b, fh) -> None:
+    result_line(a, condition, b, fh, "❌")
+
+def passing(a, condition, b, fh) -> None:
+    result_line(a, condition, b, fh, "✅")
+    
+def result_line(a, condition, b, fh, char) -> None:
     print (f"| {a} | {condition} | {b} | {char}  |")
-    if to_github:
-        with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
-            print (f"| {a} | {condition} | {b} | {char}  |", file=fh)
+    fh.writelines ([f"| {a} | {condition} | {b} | {char}  |\n"])
+    
