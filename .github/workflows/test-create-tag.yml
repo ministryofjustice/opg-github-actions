@@ -18,38 +18,21 @@ permissions:
 
 
 jobs:
-  test:
+  test_script:
     runs-on: 'ubuntu-latest'
-    name: "Test create-tag"
+    name: "Test create-tag [shell test]"
     steps:
-      - uses: actions/checkout@v4
+      - name: "Checkout"
+        uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
-      - id: test1
-        name: "1. Test a known ref that should return a preexisting semver tag"
-        uses: './.github/actions/create-tag'
-        with:
-          test: true
-          commitish: "dab1b63"
-          tag_name: "test_tag_wont_be_latest"
-      - id: test_results
-        name: Test results
+      - name: "Test shell"        
+        shell: bash
+        env:
+          RUN_AS_TEST: "true"
         run: |
-          t1a="v1.4.0"
-          t1b="test_tag_wont_be_latest"
-
-          echo "### Test Information" >> $GITHUB_STEP_SUMMARY
-          echo "| \# | Expected | Actual | " >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
-          echo "| 1a. | ${t1a} | ${{steps.test1.outputs.latest}} | " >> $GITHUB_STEP_SUMMARY
-          echo "| 1b. | ${t1b} | ${{steps.test1.outputs.created}} | " >> $GITHUB_STEP_SUMMARY
-          
-          if [ "${{steps.test1.outputs.latest}}" != "${t1a}" ]; then
-            echo "test 1a failed"
-            exit 1
-          fi
-          if [ "${{steps.test1.outputs.created}}" != "${t1b}" ]; then
-            echo "test 1b failed"
-            exit 1
-          fi
+          pip3 install git+https://github.com/python-semver/python-semver.git@3.0.2
+          pip3 install git+https://github.com//gitpython-developers/GitPython.git@3.1.40
+          cd .github/actions/create-tag/
+          ./run-tests.sh >> $GITHUB_STEP_SUMMARY
