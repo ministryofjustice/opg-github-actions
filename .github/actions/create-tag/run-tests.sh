@@ -4,7 +4,6 @@ source $(dirname $0)/../_shared/bash/output.sh
 source $(dirname $0)/../_shared/bash/testresults.sh
 source $(dirname $0)/test-setup.sh
 
-
 setUp
 header
 

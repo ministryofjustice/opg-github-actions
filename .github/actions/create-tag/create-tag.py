@@ -28,16 +28,9 @@ def arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main():
-    # get the args
-    args = arg_parser().parse_args()
-    repo_root = args.repository_root
-    commitish = args.commitish
-    tag_name = args.tag_name
-    
-    test = len( os.getenv("RUN_AS_TEST") ) > 0
-
-    # get all tags    
+def run(repo_root:str, commitish:str, tag_name:str, test:bool) -> dict:
+    """Run groups all calls together to allow testing from other file"""
+     # get all tags    
     all_tags = taghelper.repo_tags(repo_root, "--list")  
     all_tags_here = taghelper.repo_tags(repo_root, f"--points-at={commitish}") 
     
@@ -57,7 +50,19 @@ def main():
         'requested_tag': f"{tag_name}",
         'created_tag': f"{tag_to_create}"
     }
+    return outputs
 
+def main():
+    # get the args
+    args = arg_parser().parse_args()
+    # call the runner directly
+    outputs = run(
+        args.repository_root, 
+        args.commitish, 
+        args.tag_name,
+        len( os.getenv("RUN_AS_TEST") ) > 0
+    )
+   
     print("CREATE TAG DATA")    
     cli.results(outputs, 'GITHUB_OUTPUT' in os.environ)
 
