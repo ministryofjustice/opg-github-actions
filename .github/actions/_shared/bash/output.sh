@@ -2,9 +2,9 @@
 set -e
 
 header(){
-    echo "## Test Information"
-    echo "| \# | &nbsp; | &nbsp; | &nbsp; | &nbsp; |"
-    echo "| --- | A | condition | B | Pass |"
+    echo "## Test Information"    
+    echo "| \# | A | condition | B | Pass |"
+    echo "| --- | --- | --- | --- | --- |"
 }
 
 

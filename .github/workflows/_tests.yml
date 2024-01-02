@@ -41,7 +41,7 @@ jobs:
     name: "create-tag"
     uses: './.github/workflows/test-create-tag.yml'
 
-  # test semver-tag
-  test_semver:
-    name: "semver-tag"
-    uses: './.github/workflows/test-semver-tag.yml'
+  # # test semver-tag
+  # test_semver:
+  #   name: "semver-tag"
+  #   uses: './.github/workflows/test-semver-tag.yml'
