@@ -19,7 +19,7 @@ outputs:
   commitish:
     description: "Inputed commitish variable."
     value: ${{ inputs.commitish }}
-  tag_name:
+  original_tag_name:
     description: "Inputed tag_name variable."
     value: ${{ inputs.tag_name }}
   test:
@@ -27,14 +27,18 @@ outputs:
     value: ${{ inputs.test }}
 
   latest:
-    description: "Latest tag found at commitish provided"
-    value: ${{steps.tags_found.outputs.latest_tag}}
+    description: "Latest tag found at commitish provided. This will be the 'biggest' release number and may not match the created tag."
+    value: ${{steps.create_tag.outputs.latest_tag}}
   created:
-    description: "If inputted tag_name is created, then this variable should match that. If test is true, then the tag wont actually be created, but this variable will be set correctly."
-    value: ${{steps.tags_found.outputs.created_tag}}
+    description: "The tag name that is created. It may differ from inputs.tag_name if this tag already exists. Compare to requested variable to see if these match"
+    value: ${{steps.create_tag.outputs.created_tag}}
+  requested:
+    description: "The tag name that was requested to be created. May differ from the created tag if there is a name clash."
+    value: ${{steps.create_tag.outputs.requested_tag}}
+
   all:
     description: "All tags (comma seperated) that are found to be pointing to inputted commish"
-    value: ${{steps.tags_found.outputs.all_tags}}
+    value: ${{steps.create_tag.outputs.all_tags}}
 
 runs:
   using: "composite"
@@ -47,36 +51,22 @@ runs:
         path: ${{inputs.caller_repo_subfolder}}
         fetch-tags: true
         fetch-depth: 0
+    - name: Install libs
+      id: install_libs
+      shell: bash
+      run: |
+        pip3 install git+https://github.com/python-semver/python-semver.git@3.0.2 -q -q
+        pip3 install git+https://github.com//gitpython-developers/GitPython.git@3.1.40 -q -q
+        pip3 install git+https://github.com//SethMMorton/natsort@8.4.0 -q -q
     - name: Create tag
       id: create_tag
       shell: bash
-      working-directory: ${{inputs.caller_repo_subfolder}}
-      run: |
-        git tag "${{inputs.tag_name}}" "${{inputs.commitish}}"
-    - name: Tags for commit
-      id: tags_found
-      shell: bash
-      working-directory: ${{inputs.caller_repo_subfolder}}
-      run: |    
-        set -e    
-        git tag --points-at="${{inputs.commitish}}" --sort=creatordate | sort --version-sort -f > _taglist
-        all_tags_at_commit=$(cat _taglist )
-        all_tags=$(cat _taglist | tr '\n', ',')
-        latest_tag=$(cat _taglist | tail -n1)
-        created_tag=$(cat _taglist | grep "${{inputs.tag_name}}$" | tail -n1)
-        
-        echo "all_tags=${all_tags}"
-        echo "latest_tag=${latest_tag}"
-        echo "created_tag=${created_tag}"
-
-        echo "all_tags=${all_tags}" >> $GITHUB_OUTPUT
-        echo "latest_tag=${latest_tag}" >> $GITHUB_OUTPUT
-        echo "created_tag=${created_tag}" >> $GITHUB_OUTPUT
-
-    - name: Push tag
-      id: push_tag
-      shell: bash
-      if: ${{ inputs.test == '' }}
-      working-directory: ${{inputs.caller_repo_subfolder}}
-      run: |
-        git push origin "${{inputs.tag_name}}"
+      env:
+        RUN_AS_TEST: ${{inputs.test}}
+      run: |      
+        src="${{github.action_path}}"
+        repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
+        python ${src}/./latest-tag.py \
+          --repository_root="${repo}" \
+          --commitish="${{inputs.branch_name}}" \
+          --tag_name="${src}/${{inputs.tag_name}}"
