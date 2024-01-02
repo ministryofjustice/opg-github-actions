@@ -20,9 +20,7 @@ semver_mod.loader.exec_module(svh)
 
 
 def arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser("latest-tag")
-    parser.add_argument('--test_file', default="", help="trigger the use of a test file for list of tags. Requires ENV RUN_AS_TEST to be set as well.")
-    
+    parser = argparse.ArgumentParser("latest-tag")    
     parser.add_argument('--repository_root', default="./", help="Path to root of repository")
     
     parser.add_argument('--prerelease', default="", help="If set, then this is a pre-release. Can be overridden if branch_name matches a release_branches item.")
@@ -32,15 +30,6 @@ def arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('--release_branches', default="main,master", help="List of branches that are considered a release")
     return parser
 
-
-def tags_from_file(file) -> dict:
-    lines=[[str(i) for i in line.strip().split(" ", 1)] for line in open(file).readlines()]
-    tags={}    
-    for line in lines:
-        d = svh.to_valid_dict(line[0])
-        if d is not None:
-            tags.update(d)        
-    return tags
 
 
 
@@ -52,8 +41,7 @@ def is_prerelease(prerelease, branch_name, release_branches) -> bool:
 
 def run(
         test:bool, 
-        test_file:str, 
-        repo_root:str, 
+        tags:list, 
         branch_name:str, 
         release_branches,
         prerelease, 
@@ -61,14 +49,11 @@ def run(
     
     prerelease_by_branch = is_prerelease(prerelease, branch_name, release_branches)
     # use test content
-    is_test = False
-    if test == True and len(test_file) > 0:
+    is_test = test
+    if test == True:
         print("Using test data")
         is_test = True
-        tags = tags_from_file(test_file)
-    else:
-        repo = Repo(repo_root)    
-        tags = svh.semver_list(repo.tags)
+    tags = svh.semver_list(tags)
         
     last_release = ""
     latest = ""
@@ -106,10 +91,11 @@ def run(
 def main():
     args = arg_parser().parse_args()
 
+    repo = Repo(args.repository_root)    
+    tags = svh.semver_list(repo.tags)
     outputs = run(
         len(os.getenv("RUN_AS_TEST")) > 0,
-        args.test_file,
-        args.repository_root,
+        tags,
         args.branch_name,
         args.release_branches,
         args.prerelease,
