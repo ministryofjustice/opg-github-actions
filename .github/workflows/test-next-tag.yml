@@ -37,6 +37,7 @@ jobs:
         env:
           RUN_AS_TEST: "true"
         run: |
+          pip install -r ./requirements.txt
           cd .github/actions/next-tag/
           ./run-tests.sh >> $GITHUB_STEP_SUMMARY
 
