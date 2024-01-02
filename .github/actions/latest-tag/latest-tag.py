@@ -112,7 +112,8 @@ def main():
         args.repository_root,
         args.branch_name,
         args.release_branches,
-        args.prerelease
+        args.prerelease,
+        args.prerelease_suffix
     )
 
     print("LATEST TAG DATA")    
