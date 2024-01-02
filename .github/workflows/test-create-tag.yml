@@ -41,6 +41,7 @@ jobs:
           # pip3 install git+https://github.com//gitpython-developers/GitPython.git@3.1.40  -q -q
           # pip3 install git+https://github.com//SethMMorton/natsort@8.4.0 -q -q
           # pip3 install git+https://github.com/pytest-dev/pytest@6.2.5 -q -q
+          pip install -r ./requirements.txt
           cd .github/actions/create-tag/          
           pytest ./test_create_tag.py
           echo "$(cat ./results.md)" >> $GITHUB_STEP_SUMMARY
