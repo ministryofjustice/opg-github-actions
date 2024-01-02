@@ -68,5 +68,5 @@ runs:
         repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         python ${src}/./create-tag.py \
           --repository_root="${repo}" \
-          --commitish="${{inputs.branch_name}}" \
+          --commitish="${{inputs.commitish}}" \
           --tag_name="${src}/${{inputs.tag_name}}"
