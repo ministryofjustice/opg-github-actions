@@ -7,7 +7,7 @@ from semver.version import Version
 
 
 def arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser("parse-tags")
+    parser = argparse.ArgumentParser("latest-tag")
     parser.add_argument('--test_file', default="", help="trigger the use of a test file for list of tags. Requires ENV RUN_AS_TEST to be set as well.")
     
     parser.add_argument('--repository_root', default="./", help="Path to root of repository")
