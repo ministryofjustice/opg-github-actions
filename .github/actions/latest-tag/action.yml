@@ -4,9 +4,6 @@ inputs:
   test:
     description: "If set, run test versions of data"
     default: ""
-  test_file:
-    description: "If test is set, then use the content of this file"
-    default: "./tests/tags.txt"
   prerelease:
     description: "If set, looks for pre-release tag patterns (v1.1.1-${suffix}.${count})"
     default: ""
@@ -72,5 +69,4 @@ runs:
           --branch_name="${{inputs.branch_name}}" \
           --release_branches="${{inputs.release_branches}}" \
           --prerelease="${{inputs.prerelease}}" \
-          --prerelease_suffix="${{inputs.prerelease_suffix}}" \
-          --test_file="${src}/${{inputs.test_file}}"
+          --prerelease_suffix="${{inputs.prerelease_suffix}}"
