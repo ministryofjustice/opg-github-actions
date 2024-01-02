@@ -7,9 +7,6 @@ COMMITISH1="dab1b63"
 COUNT="0"
 # for local
 REPO_ROOT="./repo-test/"
-LOCAL="true"
-# for real
-#REPO_ROOT="../../../"
 
 # generate these tags for tests
 declare -a dummy_tags=(
@@ -31,12 +28,11 @@ declare -a dummy_tags=(
 
 
 setUp() {
-    if [ "${LOCAL}" == "true" ] && [ -d "${REPO_ROOT}" ]; then
+    if [ -d "${REPO_ROOT}" ]; then
         rm -Rf "${REPO_ROOT}"        
     fi
-    if [ "${LOCAL}" == "true" ]; then
-        git clone https://github.com/ministryofjustice/opg-github-actions.git ./repo-test/ &>/dev/null
-    fi
+    git clone https://github.com/ministryofjustice/opg-github-actions.git ${REPO_ROOT} &>/dev/null
+    
     # create some dummy tags
     cd ${REPO_ROOT} 
     for tag in "${dummy_tags[@]}"; do
@@ -54,7 +50,7 @@ tearDown() {
     done
     
     cd - &>/dev/null
-    if [ "${LOCAL}" == "true" ] && [ -d "${REPO_ROOT}" ]; then
+    if [ -d "${REPO_ROOT}" ]; then
         rm -Rf "${REPO_ROOT}"
     fi
 }

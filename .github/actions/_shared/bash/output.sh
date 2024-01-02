@@ -4,7 +4,7 @@ set -e
 header(){
     echo "## Test Information"
     echo "| \# | &nbsp; | &nbsp; | &nbsp; | &nbsp; |"
-    echo "| --- | --- | --- | --- | --- |"
+    echo "| --- | A | condition | B | Pass / Fail |"
 }
 
 
