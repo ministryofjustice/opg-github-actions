@@ -20,14 +20,14 @@ permissions:
 jobs:
   test_script:
     runs-on: 'ubuntu-latest'
-    name: "Test create-tag [shell test]"
+    name: "Test create-tag"
     steps:
       - name: "Checkout"
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
-      - name: "Test shell"        
+      - name: "Setup and run pytest"        
         shell: bash
         env:
           RUN_AS_TEST: "true"
