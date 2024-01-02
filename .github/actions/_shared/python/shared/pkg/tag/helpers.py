@@ -33,7 +33,7 @@ def generate_tag_to_create(tag_name: str, all_tags: list) -> str:
     rand_length = 3
     original_tag = tag_name
     with_v = svh.has_v(original_tag)
-    valid_semver = Version.parse(svh.trim_v(original_tag))
+    valid_semver = Version.is_valid(svh.trim_v(original_tag))
     # if this is semver, then parse and update it
     if valid_semver:
         parsed_tag = Version.parse(svh.trim_v(tag_name) if with_v else tag_name)
