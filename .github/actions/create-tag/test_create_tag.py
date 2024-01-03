@@ -5,18 +5,26 @@ import pytest
 import shutil
 
 ### local imports
-parent_dir_name = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+app_root_dir = os.path.dirname(
+    os.path.dirname(
+        os.path.dirname( 
+            os.path.dirname(os.path.realpath(__file__))
+        )
+    )
+)
+dir_name = os.path.dirname(os.path.realpath(__file__))
 # load cmd helper
-mod = importlib.util.spec_from_file_location("create-tag", parent_dir_name + '/create-tag/create-tag.py')
+mod = importlib.util.spec_from_file_location("create-tag", dir_name + '/create-tag.py')
 cmd = importlib.util.module_from_spec(mod)  
 mod.loader.exec_module(cmd)
-# load gh helper
-gmod = importlib.util.spec_from_file_location("gh", parent_dir_name + '/_shared/python/shared/pkg/github/helpers.py')
-gh = importlib.util.module_from_spec(gmod)  
-gmod.loader.exec_module(gh)
+# load output helper
+gmod = importlib.util.spec_from_file_location("gh", app_root_dir + '/app/python/outputhelper.py')
+g = importlib.util.module_from_spec(gmod)  
+gmod.loader.exec_module(g)
 
 ### logic
 fh = open("./results.md", "a+")
+gh = g.OutputHelper(False)
 gh.header(fh)
 fh.close()
 

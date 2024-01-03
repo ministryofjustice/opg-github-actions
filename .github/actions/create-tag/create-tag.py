@@ -7,17 +7,23 @@ import argparse
 import string
 from semver.version import Version
 
-# local imports
-parent_dir_name = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-# load cli helper
-cli_mod = importlib.util.spec_from_file_location("clih", parent_dir_name + '/_shared/python/shared/pkg/cli/helpers.py')
-cli = importlib.util.module_from_spec(cli_mod)  
-cli_mod.loader.exec_module(cli)
-
-# load rand helper
-tag_mod = importlib.util.spec_from_file_location("tagh", parent_dir_name + '/_shared/python/shared/pkg/tag/helpers.py')
-taghelper = importlib.util.module_from_spec(tag_mod)  
-tag_mod.loader.exec_module(taghelper)
+## LOCAL IMPORTS
+# up 4 levels to root or repo?
+app_root_dir = os.path.dirname(
+    os.path.dirname(
+        os.path.dirname( 
+            os.path.dirname(os.path.realpath(__file__))
+        )
+    )
+)
+# git helper
+git_mod = importlib.util.spec_from_file_location("githelper", app_root_dir + '/app/python/githelper.py')
+ghm = importlib.util.module_from_spec(git_mod)  
+git_mod.loader.exec_module(ghm)
+# github output helper
+gh_mod = importlib.util.spec_from_file_location("outputhelper", app_root_dir + '/app/python/outputhelper.py')
+gh = importlib.util.module_from_spec(gh_mod)  
+gh_mod.loader.exec_module(gh)
 
 
 def arg_parser() -> argparse.ArgumentParser:
@@ -31,16 +37,17 @@ def arg_parser() -> argparse.ArgumentParser:
 def run(repo_root:str, commitish:str, tag_name:str, test:bool) -> dict:
     """Run groups all calls together to allow testing from other file"""
      # get all tags    
-    all_tags = taghelper.repo_tags(repo_root, "--list")  
-    all_tags_here = taghelper.repo_tags(repo_root, f"--points-at={commitish}") 
+    r = ghm.GitHelper(repo_root)
+    all_tags = r.tags("--list")
+    all_tags_here = r.tags(f"--points-at={commitish}") 
     
     # looks for clashing tags in the existing set
-    tag_to_create = taghelper.generate_tag_to_create(tag_name, all_tags)
+    tag_to_create = r.tag_to_create(tag_name, all_tags)
     # create the tag 
-    taghelper.create_tag(repo_root, commitish, tag_to_create, (test != True))
-
-    all_tags = taghelper.repo_tags(repo_root, "--list")  
-    all_tags_here = taghelper.repo_tags(repo_root, f"--points-at={commitish}") 
+    r.create_tag(tag_to_create, commitish, (test != True))
+    # refresh the tags for returning
+    all_tags = r.tags("--list")
+    all_tags_here = r.tags(f"--points-at={commitish}") 
     latest_tag = all_tags_here[-1]
 
     outputs={
@@ -62,9 +69,9 @@ def main():
         args.tag_name,
         len( os.getenv("RUN_AS_TEST") ) > 0
     )
-   
-    print("CREATE TAG DATA")    
-    cli.results(outputs, 'GITHUB_OUTPUT' in os.environ)
+    print("CREATE TAG DATA") 
+    g = gh.OutputHelper(('GITHUB_OUTPUT' in os.environ))   
+    g.out(outputs)
 
 if __name__ == "__main__":
     main()
