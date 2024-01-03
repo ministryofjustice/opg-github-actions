@@ -29,14 +29,6 @@ sv = importlib.util.module_from_spec(sv_mod)
 sv_mod.loader.exec_module(sv)
 
 
-parent_dir_name = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-# load semver helpers
-semver_mod = importlib.util.spec_from_file_location("semverh", parent_dir_name + '/_shared/python/shared/pkg/semver/helpers.py')
-svh = importlib.util.module_from_spec(semver_mod)  
-semver_mod.loader.exec_module(svh)
-
-
-
 def arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser("latest-tag")    
     parser.add_argument('--repository_root', default="./", help="Path to root of repository")

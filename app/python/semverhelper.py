@@ -44,10 +44,13 @@ class SemverHelper:
         """Determine if tag is valid semver. Handles trimming of prefix"""
         return Version.is_valid(self.without_prefix())
     
-    def parse(self) -> Version|None:
+    def parse(self, default:str = None) -> Version|None:
         """If the tag passed is a valid semver tag then return a version, otherwise return None"""
         if self.valid():
             self._parsed = Version.parse(self.without_prefix())
+            return self._parsed
+        elif default is not None:
+            self._parsed = Version.parse(default)
             return self._parsed
         return None
     
@@ -65,6 +68,10 @@ class SemverHelper:
         self._parsed = self.parse()
 
     ## STATICS
+    @staticmethod
+    def default(tag:str = "0.0.0") -> Version:
+        return Version.parse(tag)
+    
     @staticmethod
     def to_dict(tag:str) -> dict:
         """
