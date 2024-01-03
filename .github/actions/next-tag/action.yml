@@ -107,5 +107,4 @@ runs:
           --latest_tag="${{inputs.latest_tag}}" \
           --last_release="${{inputs.last_release}}" \
           --with_v="${{inputs.with_v}}" \
-          --default_bump="${{inputs.default_bump}}" \
-          --test_file="${src}/${{inputs.test_file}}"
+          --default_bump="${{inputs.default_bump}}"
