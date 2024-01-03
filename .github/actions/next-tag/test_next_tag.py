@@ -9,7 +9,7 @@ import shutil
 ### local imports
 app_root_dir = os.path.dirname(
     os.path.dirname(
-        os.path.dirname( 
+        os.path.dirname(
             os.path.dirname(os.path.realpath(__file__))
         )
     )
@@ -18,11 +18,11 @@ dir_name = os.path.dirname(os.path.realpath(__file__))
 
 # load cmd helper
 mod = importlib.util.spec_from_file_location("latest-tag", dir_name + '/next-tag.py')
-cmd = importlib.util.module_from_spec(mod)  
+cmd = importlib.util.module_from_spec(mod)
 mod.loader.exec_module(cmd)
 # load output helper
 ohmod = importlib.util.spec_from_file_location("gh", app_root_dir + '/app/python/outputhelper.py')
-oh = importlib.util.module_from_spec(ohmod)  
+oh = importlib.util.module_from_spec(ohmod)
 ohmod.loader.exec_module(oh)
 
 ### RESULT FILE
@@ -273,27 +273,26 @@ def test_next_tag_result_matches(
     Check that the config passed results in the
     next_tag matching the expected value.
 
-    Use a parameterised test to reduce the 
+    Use a parameterised test to reduce the
     setup burden
     """
     outputs = cmd.run(
-        test = True, 
-        last_release = last_release, 
-        latest_tag = latest_tag, 
-        prerelease = prerelease, 
-        prerelease_suffix = prerelease_suffix, 
-        default_bump = default_bump, 
+        test = True,
+        last_release = last_release,
+        latest_tag = latest_tag,
+        prerelease = prerelease,
+        prerelease_suffix = prerelease_suffix,
+        default_bump = default_bump,
         with_v = with_v,
         commits = commits
-    )    
-    t1 = (outputs['next_tag'] == expected)    
+    )
+    t1 = (outputs['next_tag'] == expected)
     # dump data for debugging
     print(f"Expected {expected} Actual {outputs['next_tag']}")
     print(outputs, sep="\n")
     fh = open("./results.md", "a+")
     o = oh.OutputHelper(False)
-    o.result(expected, "==", outputs['next_tag'], t1 == True, fh)  
+    o.result(expected, "==", outputs['next_tag'], t1 == True, fh)
     fh.close()
 
     assert t1 == True
-

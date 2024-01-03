@@ -8,7 +8,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'terraform/**'      
+      - 'terraform/**'
 
 permissions:
   contents: read
@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        shell: bash        
+        shell: bash
     env:
       tf_dir: "./terraform/account"
       TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}

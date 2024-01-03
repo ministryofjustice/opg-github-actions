@@ -2,10 +2,10 @@ name: "Branch Name"
 description: "Use GITHUB_HEAD_REF or GITHUB_REF to get the branch name. Example: ref/heads/main-123-456-789 => main-123-456-789. Also return safe-strings versions."
 inputs:
   head_ref:
-    description: "Pass in ${GITHUB_HEAD_REF}"    
+    description: "Pass in ${GITHUB_HEAD_REF}"
     default: ""
   ref:
-    description: "Pass in ${GITHUB_REF}"    
+    description: "Pass in ${GITHUB_REF}"
     default: ""
 outputs:
   head_ref:
@@ -13,7 +13,7 @@ outputs:
     value: ${{ inputs.head_ref }}
   ref:
     description: "Original ref"
-    value: ${{ inputs.ref }}    
+    value: ${{ inputs.ref }}
   branch_name:
     description: "Branch name"
     value: ${{ steps.setup.outputs.branch }}
@@ -28,9 +28,9 @@ runs:
   using: "composite"
   steps:
     - id: setup
-      name: "Workout base branch value"      
+      name: "Workout base branch value"
       shell: bash
-      run: |      
+      run: |
           b=""
           if [ ! -z "${{inputs.ref}}" ]; then
             echo "Using ref: [${{inputs.ref}}]"
@@ -48,7 +48,3 @@ runs:
       with:
         original: ${{steps.setup.outputs.branch}}
         length: 12
-      
-
-      
-

@@ -67,7 +67,7 @@ runs:
         # and overwrite the trimmed / safe values
         if [ ! -z "${conditional_match}" ] && [ "${str}" = "${conditional_match}" ]; then
             full_length="${conditional_value}"
-            safe="${conditional_value}"  
+            safe="${conditional_value}"
         fi
 
         echo "original=${str}"
@@ -79,4 +79,3 @@ runs:
         echo "length=${max_len}" >> $GITHUB_OUTPUT
         echo "full_length=${full_length}" >> $GITHUB_OUTPUT
         echo "safe=${safe}" >> $GITHUB_OUTPUT
-

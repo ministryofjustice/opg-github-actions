@@ -7,7 +7,7 @@ import shutil
 ### local imports
 app_root_dir = os.path.dirname(
     os.path.dirname(
-        os.path.dirname( 
+        os.path.dirname(
             os.path.dirname(os.path.realpath(__file__))
         )
     )
@@ -15,11 +15,11 @@ app_root_dir = os.path.dirname(
 dir_name = os.path.dirname(os.path.realpath(__file__))
 # load cmd helper
 mod = importlib.util.spec_from_file_location("create-tag", dir_name + '/create-tag.py')
-cmd = importlib.util.module_from_spec(mod)  
+cmd = importlib.util.module_from_spec(mod)
 mod.loader.exec_module(cmd)
 # load output helper
 ohmod = importlib.util.spec_from_file_location("gh", app_root_dir + '/app/python/outputhelper.py')
-oh = importlib.util.module_from_spec(ohmod)  
+oh = importlib.util.module_from_spec(ohmod)
 ohmod.loader.exec_module(oh)
 
 ### logic
@@ -36,7 +36,7 @@ def setup_tags(request) -> tuple:
     repo_root = "./repo-test/"
     commitish = "dab1b63"
     url = "https://github.com/ministryofjustice/opg-github-actions.git"
-    
+
     Repo.clone_from(url, repo_root)
     repo = Repo(repo_root)
     # create all the test tags locally
@@ -55,12 +55,12 @@ def setup_tags(request) -> tuple:
         'v1.5.0-clash.1',
         'v9999.1.0'
     ]
-    for t in test_tags:        
+    for t in test_tags:
         repo.git.tag(t, commitish)
 
     yield repo_root, commitish, fh
-   
-    print("\nPerforming teardown...")    
+
+    print("\nPerforming teardown...")
     try:
         shutil.rmtree(repo_root)
         fh.close()
@@ -70,9 +70,9 @@ def setup_tags(request) -> tuple:
 
 def test_clashing_prerelease_tag_generates_new_tag(setup_tags) -> None:
     """
-    We created v1.5.0-clash.0 v1.5.0-clash.1 already, so this 
-    should return a different tag as a prerelease the new tag 
-    should contain most of the original tag with the 
+    We created v1.5.0-clash.0 v1.5.0-clash.1 already, so this
+    should return a different tag as a prerelease the new tag
+    should contain most of the original tag with the
     prerelease segment changing.
     """
     repo_root, commitish, fh = setup_tags
@@ -81,12 +81,12 @@ def test_clashing_prerelease_tag_generates_new_tag(setup_tags) -> None:
     outputs = cmd.run( repo_root, commitish, tag, True )
     # the created tag should not match the request tag, as that already exists
     t1 = (tag != outputs['created_tag'])
-    assert t1 == True    
+    assert t1 == True
     # should have created a new tag based off the existing version
     t2 = (pre in outputs['created_tag'])
     assert t2 == True
-    # output to gh    
-    o.result(tag, "!=", outputs['created_tag'], t1 == True, fh)    
+    # output to gh
+    o.result(tag, "!=", outputs['created_tag'], t1 == True, fh)
     o.result(pre, "in", outputs['created_tag'], t2 == True, fh)
 
 
@@ -100,8 +100,8 @@ def test_brand_new_tag_matches(setup_tags) -> None:
     outputs = cmd.run( repo_root, commitish, tag, True )
     # the created tag should not match the request tag, as that already exists
     t1 = (tag == outputs['created_tag'])
-    assert t1 == True  
-    o.result(tag, "==", outputs['created_tag'], t1 == True, fh)    
+    assert t1 == True
+    o.result(tag, "==", outputs['created_tag'], t1 == True, fh)
 
 
 def test_release_version_already_exists(setup_tags) -> None:
@@ -114,13 +114,13 @@ def test_release_version_already_exists(setup_tags) -> None:
     expected = "v10000.0.0"
     outputs = cmd.run( repo_root, commitish, tag, True )
     t1 = (expected == outputs['created_tag'])
-    assert t1 == True  
-    o.result(expected, "==", outputs['created_tag'], t1 == True, fh)  
+    assert t1 == True
+    o.result(expected, "==", outputs['created_tag'], t1 == True, fh)
 
 
 def test_release_version_multiple_increaments(setup_tags) -> None:
     """
-    This release version already exists, as do several others 
+    This release version already exists, as do several others
     in this space, so the tag should jump ahead to an
     unused number.
     """
@@ -129,8 +129,8 @@ def test_release_version_multiple_increaments(setup_tags) -> None:
     expected = "v24.0.0"
     outputs = cmd.run( repo_root, commitish, tag, True )
     t1 = (expected == outputs['created_tag'])
-    assert t1 == True  
-    o.result(expected, "==", outputs['created_tag'], t1 == True, fh)  
+    assert t1 == True
+    o.result(expected, "==", outputs['created_tag'], t1 == True, fh)
 
 
 def test_non_semver_tag_match(setup_tags) -> None:
@@ -139,9 +139,9 @@ def test_non_semver_tag_match(setup_tags) -> None:
     should contain the original tag plus a random string
     """
     repo_root, commitish, fh = setup_tags
-    tag = "test_tag"    
+    tag = "test_tag"
     match = f"{tag}."
     outputs = cmd.run( repo_root, commitish, tag, True )
     t1 = (match in outputs['created_tag'])
-    assert t1 == True  
-    o.result(match, "in", outputs['created_tag'], t1 == True, fh)  
+    assert t1 == True
+    o.result(match, "in", outputs['created_tag'], t1 == True, fh)

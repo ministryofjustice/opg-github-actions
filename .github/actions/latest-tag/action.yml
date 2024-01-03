@@ -20,10 +20,10 @@ inputs:
     description: "Location to checkout active repository into. (Default: ./latest-tag-caller-repository)"
     default: "./latest-tag-caller-repository"
 
-  
+
 outputs:
   test:
-    description: "Inputed test."    
+    description: "Inputed test."
     value: ${{inputs.test}}
   prerelease:
     description: "Inputed prerelease variable."
@@ -60,7 +60,7 @@ runs:
       shell: bash
       env:
         RUN_AS_TEST: ${{inputs.test}}
-      run: |      
+      run: |
         pip install -r ./requirements.txt
         src="${{github.action_path}}"
         repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"

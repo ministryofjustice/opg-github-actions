@@ -10,13 +10,13 @@ import shutil
 dir_name = os.path.dirname(os.path.realpath(__file__))
 # load semver helpers
 git_mod = importlib.util.spec_from_file_location("githelper", dir_name + '/githelper.py')
-ghm = importlib.util.module_from_spec(git_mod)  
+ghm = importlib.util.module_from_spec(git_mod)
 git_mod.loader.exec_module(ghm)
 
 
 @pytest.fixture()
-def setup_repo(request) -> tuple:    
-    print("\nSetting up resources...")   
+def setup_repo(request) -> tuple:
+    print("\nSetting up resources...")
     # download repo
     repo_root = "./githelper-test/"
     url = "https://github.com/ministryofjustice/opg-github-actions.git"
@@ -42,7 +42,7 @@ def setup_repo(request) -> tuple:
         '5.0.1-test.0',
         '5.0.1'
     ]
-    for t in test_tags:        
+    for t in test_tags:
         repo.git.tag(t, commitish)
 
     yield repo_root, commitish, test_tags
@@ -55,8 +55,8 @@ def setup_repo(request) -> tuple:
 
 @pytest.fixture()
 def setup_tags(request) -> tuple:
-    print("\nSetting up resources...")   
-    
+    print("\nSetting up resources...")
+
     semver_non_clashing_tags = {
         'v1.6.0-': 'v1.6.0-beta.0+rb1',
         'v10.0.1': 'v10.0.1',
@@ -73,9 +73,9 @@ def setup_tags(request) -> tuple:
     clashing_tags = {
         'test_tag':'test_tag'
     }
-    
+
     yield semver_non_clashing_tags, semver_clashing_tags, non_clashing_tags, clashing_tags
-    print("\nPerforming teardown...")    
+    print("\nPerforming teardown...")
 
 
 def test_tags_at_point(setup_repo) -> None:
@@ -86,7 +86,7 @@ def test_tags_at_point(setup_repo) -> None:
     path, commitish, test_tags = setup_repo
     r = ghm.GitHelper(path)
 
-    tags = r.tags(f"--points-at={commitish}")    
+    tags = r.tags(f"--points-at={commitish}")
     # find only the test tags
     found_tests = list (filter(lambda x: (x in test_tags), tags))
     assert (len(found_tests) > 0) == True
@@ -100,7 +100,7 @@ def test_tags_full(setup_repo) -> None:
     path, commitish, test_tags = setup_repo
     r = ghm.GitHelper(path)
 
-    tags = r.tags("--list")    
+    tags = r.tags("--list")
     # find only the test tags
     found_tests = list (filter(lambda x: (x in test_tags), tags))
     assert (len(found_tests) > 0) == True
@@ -108,7 +108,7 @@ def test_tags_full(setup_repo) -> None:
 
 def test_tag_to_create(setup_repo, setup_tags) -> None:
     """
-    Test the logical loops in the create tag to make sure clean ones 
+    Test the logical loops in the create tag to make sure clean ones
     work and a clash is dealt with correctly by increamenting
     """
     path, commitish, test_tags = setup_repo
@@ -158,7 +158,7 @@ def test_tag_creation_fails(setup_repo) -> None:
     except Exception:
         assert True
 
-    
+
 def test_commits(setup_repo) -> None:
     """
     Check that commits are found in the test repo and
@@ -169,8 +169,8 @@ def test_commits(setup_repo) -> None:
     # some commits are found
     commitish = "b5df8ff"
     r = ghm.GitHelper(path)
-    commits = r.commits("main", commitish)   
-    # should be some commits 
+    commits = r.commits("main", commitish)
+    # should be some commits
     assert (len(commits) > 0) == True
     # grab a commit, make sure its a dict with certain keys
     sample = commits.pop()

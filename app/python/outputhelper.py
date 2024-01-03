@@ -9,10 +9,10 @@ class OutputHelper:
 
     def __init__(self, enabled: bool):
         self.enabled = enabled
-    
+
     def out(self, outputs:dict) -> None:
         """
-        Helper to output a dict of key/value pairs to stdout as 
+        Helper to output a dict of key/value pairs to stdout as
         well as to github output if the env var exists
         """
         for k,v in outputs.items():
@@ -39,7 +39,7 @@ class OutputHelper:
 
     def passing(self, a, condition, b, fh) -> None:
         self.result_line(a, condition, b, fh, "✅")
-        
+
     def result_line(self, a, condition, b, fh, char) -> None:
         print (f"| {a} | {condition} | {b} | {char}  |")
         fh.writelines ([f"| {a} | {condition} | {b} | {char}  |\n"])

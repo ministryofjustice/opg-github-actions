@@ -1,6 +1,6 @@
 name: "Create a new git tag at the commitish passed"
 description: "Create a new git tag at the commitish passed"
-inputs:  
+inputs:
   commitish:
     description: "The github commit reference to checkout to and create the tag at"
     required: true
@@ -61,7 +61,7 @@ runs:
       shell: bash
       env:
         RUN_AS_TEST: ${{inputs.test}}
-      run: |      
+      run: |
         src="${{github.action_path}}"
         repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         pip install -r ./requirements.txt

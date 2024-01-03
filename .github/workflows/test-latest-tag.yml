@@ -32,14 +32,12 @@ jobs:
         with:
           python-version: '3.10'
           cache: 'pip'
-      - name: "Setup and run pytest"        
+      - name: "Setup and run pytest"
         shell: bash
         env:
           RUN_AS_TEST: "true"
         run: |
           pip install -r ./requirements.txt
-          cd .github/actions/latest-tag/          
+          cd .github/actions/latest-tag/
           pytest ./test_latest_tag.py
           echo "$(cat ./results.md)" >> $GITHUB_STEP_SUMMARY
-  
-          

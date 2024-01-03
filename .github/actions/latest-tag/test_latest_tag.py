@@ -7,7 +7,7 @@ import shutil
 ### local imports
 app_root_dir = os.path.dirname(
     os.path.dirname(
-        os.path.dirname( 
+        os.path.dirname(
             os.path.dirname(os.path.realpath(__file__))
         )
     )
@@ -16,11 +16,11 @@ dir_name = os.path.dirname(os.path.realpath(__file__))
 
 # load cmd helper
 mod = importlib.util.spec_from_file_location("latest-tag", dir_name + '/latest-tag.py')
-cmd = importlib.util.module_from_spec(mod)  
+cmd = importlib.util.module_from_spec(mod)
 mod.loader.exec_module(cmd)
 # load output helper
 ohmod = importlib.util.spec_from_file_location("gh", app_root_dir + '/app/python/outputhelper.py')
-oh = importlib.util.module_from_spec(ohmod)  
+oh = importlib.util.module_from_spec(ohmod)
 ohmod.loader.exec_module(oh)
 
 ### logic
@@ -36,7 +36,7 @@ def setup(request) -> tuple:
     print("\nSetting up resources...")
     # clone the repo
     repo_root = "./repo-test/"
-    
+
     # create all the test tags locally
     test_tags = [
         'v0.1.0',
@@ -79,11 +79,11 @@ def setup(request) -> tuple:
         'v1.4.0-updatetfversionl.0',
         'v1.5.0-moreactions.0'
     ]
-    
+
     yield repo_root, test_tags, fh
-   
-    print("\nPerforming teardown...")    
-    try:    
+
+    print("\nPerforming teardown...")
+    try:
         fh.close()
     except OSError as e:
         print("Error: %s - %s." % (e.filename, e.strerror))
@@ -100,7 +100,7 @@ def test_moreactions_found(setup) -> None:
     outputs = cmd.run(True, test_tags, branch, release_branches, "true", "moreactions")
     t1 = (outputs['latest'] == expected)
     assert True == t1
-    o.result(expected, "==", outputs['latest'], t1 == True, fh) 
+    o.result(expected, "==", outputs['latest'], t1 == True, fh)
 
 def test_123rand123_not_found_latest_empty(setup) -> None:
     """
@@ -113,7 +113,7 @@ def test_123rand123_not_found_latest_empty(setup) -> None:
     outputs = cmd.run(True, test_tags, branch, release_branches, "true", "123rand123")
     t1 = (outputs['latest'] == expected)
     assert True == t1
-    o.result(expected, "==", outputs['latest'], t1 == True, fh)     
+    o.result(expected, "==", outputs['latest'], t1 == True, fh)
 
 def test_last_release_version_with_empties(setup) -> None:
     """
@@ -126,7 +126,7 @@ def test_last_release_version_with_empties(setup) -> None:
     outputs = cmd.run(True, test_tags, branch, release_branches, "true", "")
     t1 = (outputs['last_release'] == expected)
     assert True == t1
-    o.result(expected, "==", outputs['last_release'], t1 == True, fh)     
+    o.result(expected, "==", outputs['last_release'], t1 == True, fh)
 
 def test_branch_matches_release_branch_forces_a_release(setup) -> None:
     """
@@ -139,4 +139,4 @@ def test_branch_matches_release_branch_forces_a_release(setup) -> None:
     outputs = cmd.run(True, test_tags, branch, release_branches, "true", "123rand123")
     t1 = (outputs['last_release'] == expected)
     assert True == t1
-    o.result(expected, "==", outputs['last_release'], t1 == True, fh)    
+    o.result(expected, "==", outputs['last_release'], t1 == True, fh)

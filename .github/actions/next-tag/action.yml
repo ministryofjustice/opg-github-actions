@@ -29,13 +29,13 @@ inputs:
     description: "Location to checkout active repository into. (Default: ./next-tag-caller-repository)"
     default: "./next-tag-caller-repository"
 
-  
+
 outputs:
   test:
-    description: "Inputed test variable."    
+    description: "Inputed test variable."
     value: ${{inputs.test}}
   test_file:
-    description: "Inputed test_file variable."    
+    description: "Inputed test_file variable."
     value: ${{inputs.test_file}}
   prerelease:
     description: "Inputed prerelease variable."
@@ -52,7 +52,7 @@ outputs:
   with_v:
     description: "Inputed with_v variable."
     value: ${{inputs.with_v}}
-  
+
   next_tag:
     description: "Next tag that should be created."
     value: ${{steps.get_next_tag.outputs.next_tag}}
@@ -67,10 +67,10 @@ outputs:
     value: ${{steps.get_next_tag.outputs.majors}}
   minors:
     description: "number of #minor found."
-    value: ${{steps.get_next_tag.outputs.minors}}    
+    value: ${{steps.get_next_tag.outputs.minors}}
   patches:
     description: "number of #patch found."
-    value: ${{steps.get_next_tag.outputs.patches}}    
+    value: ${{steps.get_next_tag.outputs.patches}}
 
 
 runs:
@@ -94,8 +94,8 @@ runs:
       shell: bash
       env:
         RUN_AS_TEST: ${{inputs.test}}
-      run: |     
-        pip install -r ./requirements.txt 
+      run: |
+        pip install -r ./requirements.txt
         src="${{github.action_path}}"
         repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         python ${src}/./next-tag.py \

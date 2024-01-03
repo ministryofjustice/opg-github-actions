@@ -10,18 +10,18 @@ import json
 dir_name = os.path.dirname(os.path.realpath(__file__))
 # load semver helpers
 semver_mod = importlib.util.spec_from_file_location("semverhelper", dir_name + '/semverhelper.py')
-svh = importlib.util.module_from_spec(semver_mod)  
+svh = importlib.util.module_from_spec(semver_mod)
 semver_mod.loader.exec_module(svh)
 # load rand helpers
 rand_mod = importlib.util.spec_from_file_location("randhelper", dir_name + '/randhelper.py')
-rnd = importlib.util.module_from_spec(rand_mod)  
+rnd = importlib.util.module_from_spec(rand_mod)
 rand_mod.loader.exec_module(rnd)
 
 
 
 class GitHelper:
     """
-    """    
+    """
     repository_path = ''
     repository = None
 
@@ -49,17 +49,17 @@ class GitHelper:
         except Exception as err:
             print(f"Fatal error: could not create [{tag}] locally", file=sys.stderr)
             raise Exception(f"Fatal error: could not create [{tag}] locally")
-        
+
         if push == True:
             print(f"Pushing tag [{tag}] to remote")
             self.repository.push('origin', tag)
         return tag
-    
+
     def tag_to_create(self, tag:str, all_tags:list) -> str:
         """
-        Return a tag name that can be created in the repository. 
+        Return a tag name that can be created in the repository.
         For semver formatted tag_names we use a truncated version
-        of the branch name, the tag may already exist due to matching substrings 
+        of the branch name, the tag may already exist due to matching substrings
         (update-somethings-please would try and create the same as update-somethings)
         so when that happens create a new branch name.
         When its a non-semver branch that exists, attach a new random segment on the
@@ -68,7 +68,7 @@ class GitHelper:
         sv = svh.SemverHelper(tag)
         prefix = sv.has_prefix()
         random_length = 3
-        original_tag = tag        
+        original_tag = tag
         # If this is semver tag, then update it
         if sv.valid():
             prerelease = (sv.parsed().prerelease != None)
@@ -100,7 +100,7 @@ class GitHelper:
         # make it look like an array
         log_data = f"[{log_data}]"
         return log_data
-    
+
     def commits(self, commitish_a:str, commitish_b:str) -> list:
         """
         Fetch all commits between commitish_a and commitish_b
@@ -127,13 +127,5 @@ class GitHelper:
         except Exception:
             print("Failed to load commits as json")
             raise Exception("Failed to load commits as json")
-        
+
         return logs
-
-
-        
-
-
-
-
-

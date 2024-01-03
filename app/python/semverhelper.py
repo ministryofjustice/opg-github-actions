@@ -9,13 +9,13 @@ class SemverHelper:
     """
     prefix:str = 'v'
     original:str = None
-    _tag:str = None    
+    _tag:str = None
     _parsed:Version = None
 
     def __init__(self, tag:str):
         self.original = tag
         self._tag = tag
-        self._parsed = self.parse()                
+        self._parsed = self.parse()
 
     def __str__(self):
         return self.tag()
@@ -37,19 +37,19 @@ class SemverHelper:
         return self._tag.startswith(self.prefix)
 
     def without_prefix(self) -> str|None:
-        """Trim a prefix from the start of tag string.""" 
+        """Trim a prefix from the start of tag string."""
         if self._tag is None:
             return None
         else:
             return (self._tag[1:] if self.has_prefix() else self._tag)
-    
+
     def valid(self) -> bool:
         """Determine if tag is valid semver. Handles trimming of prefix"""
         if self._tag is None:
             return False
         else:
             return Version.is_valid(self.without_prefix())
-    
+
     def parse(self, default:str = None) -> Version|None:
         """If the tag passed is a valid semver tag then return a version, otherwise return None"""
         if self.valid():
@@ -59,7 +59,7 @@ class SemverHelper:
             self._parsed = SemverHelper.default(default)
             return self._parsed
         return None
-    
+
     def parsed(self) -> Version|None:
         """Return the active version thats been processed"""
         return self._parsed
@@ -77,14 +77,14 @@ class SemverHelper:
     @staticmethod
     def default(tag:str = "0.0.0") -> Version:
         return Version.parse(tag)
-    
+
     @staticmethod
     def to_dict(tag:str) -> dict:
         """
         Returns a dict containing a semver parsed version of the string tag passed.
         If the tag is not a valid semver, then the dict.tag will be None
         Uses the tag string passed as the key in the dict
-        """        
+        """
         s = SemverHelper(tag)
         return {tag: s.parse() }
 
