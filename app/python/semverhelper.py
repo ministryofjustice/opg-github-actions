@@ -50,7 +50,7 @@ class SemverHelper:
             self._parsed = Version.parse(self.without_prefix())
             return self._parsed
         elif default is not None:
-            self._parsed = Version.parse(default)
+            self._parsed = SemverHelper.default(default)
             return self._parsed
         return None
     

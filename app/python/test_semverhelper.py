@@ -90,6 +90,19 @@ def test_parse(setup_valid_invalid) -> None:
         assert (isinstance(svh.SemverHelper(t).parse(), Version) == False) == True
         assert (svh.SemverHelper(t).parse() == None) == True
 
+def test_parse_uses_default() -> None:    
+    """
+    Check that call to parse with a bad tag and a default
+    returns the default
+    """
+    bad = "test-tag-not-real"
+    # use the __str__ method to check
+    assert ( f"{svh.SemverHelper(bad).parse('0.0.0') }" == "0.0.0") == True
+    # check against the return
+    tester = svh.SemverHelper(bad).parse('0.0.0')
+    dummy = Version.parse('0.0.0')
+    assert (tester == dummy) == True
+
 def test_parsed_changes_with_update(setup_valid_invalid) -> None:
     """
     Test how the updating of _parsed class attr is 
