@@ -36,13 +36,19 @@ class SemverHelper:
         """Determine if the string (s) passed starts with a v prefix for semver parsing."""
         return self._tag.startswith(self.prefix)
 
-    def without_prefix(self) -> str:
-        """Trim a prefix from the start of tag string."""        
-        return (self._tag[1:] if self.has_prefix() else self._tag)
+    def without_prefix(self) -> str|None:
+        """Trim a prefix from the start of tag string.""" 
+        if self._tag is None:
+            return None
+        else:
+            return (self._tag[1:] if self.has_prefix() else self._tag)
     
     def valid(self) -> bool:
         """Determine if tag is valid semver. Handles trimming of prefix"""
-        return Version.is_valid(self.without_prefix())
+        if self._tag is None:
+            return False
+        else:
+            return Version.is_valid(self.without_prefix())
     
     def parse(self, default:str = None) -> Version|None:
         """If the tag passed is a valid semver tag then return a version, otherwise return None"""
