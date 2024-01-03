@@ -18,14 +18,14 @@ mod = importlib.util.spec_from_file_location("create-tag", dir_name + '/create-t
 cmd = importlib.util.module_from_spec(mod)  
 mod.loader.exec_module(cmd)
 # load output helper
-gmod = importlib.util.spec_from_file_location("gh", app_root_dir + '/app/python/outputhelper.py')
-g = importlib.util.module_from_spec(gmod)  
-gmod.loader.exec_module(g)
+ohmod = importlib.util.spec_from_file_location("gh", app_root_dir + '/app/python/outputhelper.py')
+oh = importlib.util.module_from_spec(ohmod)  
+ohmod.loader.exec_module(oh)
 
 ### logic
 fh = open("./results.md", "a+")
-gh = g.OutputHelper(False)
-gh.header(fh)
+o = oh.OutputHelper(False)
+o.header(fh)
 fh.close()
 
 @pytest.fixture()
@@ -86,8 +86,8 @@ def test_clashing_prerelease_tag_generates_new_tag(setup_tags) -> None:
     t2 = (pre in outputs['created_tag'])
     assert t2 == True
     # output to gh    
-    gh.result(tag, "!=", outputs['created_tag'], t1 == True, fh)    
-    gh.result(pre, "in", outputs['created_tag'], t2 == True, fh)
+    o.result(tag, "!=", outputs['created_tag'], t1 == True, fh)    
+    o.result(pre, "in", outputs['created_tag'], t2 == True, fh)
 
 
 def test_brand_new_tag_matches(setup_tags) -> None:
@@ -101,7 +101,7 @@ def test_brand_new_tag_matches(setup_tags) -> None:
     # the created tag should not match the request tag, as that already exists
     t1 = (tag == outputs['created_tag'])
     assert t1 == True  
-    gh.result(tag, "==", outputs['created_tag'], t1 == True, fh)    
+    o.result(tag, "==", outputs['created_tag'], t1 == True, fh)    
 
 
 def test_release_version_already_exists(setup_tags) -> None:
@@ -115,7 +115,7 @@ def test_release_version_already_exists(setup_tags) -> None:
     outputs = cmd.run( repo_root, commitish, tag, True )
     t1 = (expected == outputs['created_tag'])
     assert t1 == True  
-    gh.result(expected, "==", outputs['created_tag'], t1 == True, fh)  
+    o.result(expected, "==", outputs['created_tag'], t1 == True, fh)  
 
 
 def test_release_version_multiple_increaments(setup_tags) -> None:
@@ -130,7 +130,7 @@ def test_release_version_multiple_increaments(setup_tags) -> None:
     outputs = cmd.run( repo_root, commitish, tag, True )
     t1 = (expected == outputs['created_tag'])
     assert t1 == True  
-    gh.result(expected, "==", outputs['created_tag'], t1 == True, fh)  
+    o.result(expected, "==", outputs['created_tag'], t1 == True, fh)  
 
 
 def test_non_semver_tag_match(setup_tags) -> None:
@@ -144,4 +144,4 @@ def test_non_semver_tag_match(setup_tags) -> None:
     outputs = cmd.run( repo_root, commitish, tag, True )
     t1 = (match in outputs['created_tag'])
     assert t1 == True  
-    gh.result(match, "in", outputs['created_tag'], t1 == True, fh)  
+    o.result(match, "in", outputs['created_tag'], t1 == True, fh)  

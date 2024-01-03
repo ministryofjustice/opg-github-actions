@@ -8,7 +8,7 @@ import string
 from semver.version import Version
 
 ## LOCAL IMPORTS
-# up 4 levels to root or repo?
+# up 4 levels to root or repo
 app_root_dir = os.path.dirname(
     os.path.dirname(
         os.path.dirname( 

@@ -6,12 +6,30 @@ import argparse
 from semver.version import Version
 import importlib.util
 
-# local imports
+## LOCAL IMPORTS
+# up 4 levels to root or repo
+app_root_dir = os.path.dirname(
+    os.path.dirname(
+        os.path.dirname( 
+            os.path.dirname(os.path.realpath(__file__))
+        )
+    )
+)
+# git helper
+git_mod = importlib.util.spec_from_file_location("githelper", app_root_dir + '/app/python/githelper.py')
+ghm = importlib.util.module_from_spec(git_mod)  
+git_mod.loader.exec_module(ghm)
+# output helper
+out_mod = importlib.util.spec_from_file_location("outputhelper", app_root_dir + '/app/python/outputhelper.py')
+oh = importlib.util.module_from_spec(out_mod)  
+out_mod.loader.exec_module(oh)
+# semver helper
+sv_mod = importlib.util.spec_from_file_location("semverhelper", app_root_dir + '/app/python/semverhelper.py')
+sv = importlib.util.module_from_spec(sv_mod)  
+sv_mod.loader.exec_module(sv)
+
+
 parent_dir_name = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-# load cli helper
-cli_mod = importlib.util.spec_from_file_location("clih", parent_dir_name + '/_shared/python/shared/pkg/cli/helpers.py')
-cli = importlib.util.module_from_spec(cli_mod)  
-cli_mod.loader.exec_module(cli)
 # load semver helpers
 semver_mod = importlib.util.spec_from_file_location("semverh", parent_dir_name + '/_shared/python/shared/pkg/semver/helpers.py')
 svh = importlib.util.module_from_spec(semver_mod)  
@@ -53,7 +71,7 @@ def run(
     if test == True:
         print("Using test data")
         is_test = True
-    tags = svh.semver_list(tags)
+    tags = sv.SemverHelper.list_to_dict(tags) #svh.semver_list(tags)
         
     last_release = ""
     latest = ""
@@ -90,12 +108,13 @@ def run(
 
 def main():
     args = arg_parser().parse_args()
-
-    repo = Repo(args.repository_root)    
-    tags = svh.semver_list(repo.tags)
+    
+    r = ghm.GitHelper(args.repository_root)
+    all_tags = r.tags("--list")
+    
     outputs = run(
         len(os.getenv("RUN_AS_TEST")) > 0,
-        tags,
+        all_tags,
         args.branch_name,
         args.release_branches,
         args.prerelease,
@@ -103,7 +122,8 @@ def main():
     )
 
     print("LATEST TAG DATA")    
-    cli.results(outputs, 'GITHUB_OUTPUT' in os.environ)
+    o = oh.OutputHelper(('GITHUB_OUTPUT' in os.environ))   
+    o.out(outputs)
 
 
 if __name__ == "__main__":
