@@ -31,9 +31,7 @@ sv_mod.loader.exec_module(sv)
 
 
 def arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser("next-tag")
-    parser.add_argument('--test_file', default="", help="trigger the use of a test file for list of tags")
-    
+    parser = argparse.ArgumentParser("next-tag")    
     parser.add_argument('--repository_root', default="./", help="Path to root of repository")    
     parser.add_argument('--commitish_a', default="", help="Commit-ish used to compare in log to look for triggers")    
     parser.add_argument('--commitish_b', default="", help="Commit-ish used to compare in log to look for triggers")    
@@ -49,58 +47,45 @@ def arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def split_commits_from_lines(lines):
-    split_lines = [[str(i) for i in line.strip().split(" ", 1)] for line in lines]
-    return split_lines
-
-def get_commits(repo_root, commitish_a, commitish_b, test, test_file):
-    lines = []    
-    newline='⇥'
-    #use test data
-    if test == True and len(test_file) > 0 :
-        print("Commits: Using test data")
-        with open(test_file) as f:
-            line = "".join([l.rstrip("\n") for l in f])            
-            lines = list(filter(None, line.split(newline) ))            
-    else:
-        g = Git(repo_root) 
-        r = Repo(repo_root)
-        print(f"Commits: Using repository data: {repo_root}")
-        print(f"Checking out [{commitish_a}]")
-        r.git.checkout(commitish_a)
-        print(f"Checking out [{commitish_b}]")
-        r.git.checkout(commitish_b)
-        print(f"Getting commits between [{commitish_b}]...[{commitish_a}]")
-        # add a ~ to the start of each commit for easier splitting 
-        # instead of new lines, as commit messages can have many lines
-        log_items = g.log(f"--pretty=format:{newline}%h %s%n%b%-", f"{commitish_b}...{commitish_a}")        
-        lines = [line for line in log_items.split(newline) if line.strip()]       
-    commits = split_commits_from_lines( lines )    
-    return commits
-
 def get_increaments(commits:list, default_bump:str) -> tuple:
     majors=1 if default_bump == "major" else 0
     minors=1 if default_bump == "minor" else 0
     patches=1 if default_bump == "patch" else 0
     for c in commits:
-        majors = majors + 1 if "#major" in c[1] else majors
-        minors = minors + 1 if "#minor" in c[1] else minors
-        patches = patches + 1 if "#patch" in c[1] else patches
+        # check each field in the dict
+        for k in ['subject', 'notes', 'body']:
+            majors = majors + 1 if "#major" in c[k] else majors
+            minors = minors + 1 if "#minor" in c[k] else minors
+            patches = patches + 1 if "#patch" in c[k] else patches
 
     return majors, minors, patches
 
 def run(
         test: bool,        
-        last_release: Version,
-        latest_tag: Version,
-        prerelease: str,
+        last_release: Version|str|None,
+        latest_tag: Version|str|None,
+        prerelease: str|bool|None,
         prerelease_suffix: str,
         default_bump: str,
-        with_v:bool,
+        with_v:bool|str,
         commits:list
 ) -> dict:
     
-    is_prerelease = (len(prerelease) > 0) 
+     # get the last release version from a string, default to 0.0.0
+    if type(last_release) is str or last_release is None:        
+        print("converting last_release from string or None")
+        last_release = sv.SemverHelper(last_release).parse("0.0.0")
+    # convert latest tag as well
+    if type(latest_tag) is str:
+        print("converting latest_tag from string")
+        latest_tag = sv.SemverHelper(latest_tag).parse()
+    
+    # allow bool True|False as well as string values
+    if type(prerelease) is bool:
+        is_prerelease = prerelease
+    else:
+        is_prerelease = (len(prerelease) > 0) if prerelease is not None else False
+
     major, minor, patch = get_increaments(commits, default_bump)
 
     tag = None
@@ -113,7 +98,7 @@ def run(
     print(f"tag is set: [{tag}]")
 
     new_tag = tag 
-    # work out what to bump
+    # update the new tag
     if major > 0:
         # Last release of v1.4.0
         # is a prerelease
@@ -140,7 +125,6 @@ def run(
         else:
             print("major 4")
             new_tag = new_tag.bump_major()
-
     elif minor > 0:
         # Last release of v1.4.0
         # is a prerelease
@@ -182,10 +166,12 @@ def run(
 
     # generate the string version for output
     new_tag_str = f"{new_tag}"
-    # prepend the v if enabled
-    if len(with_v) > 0 and with_v == "true":
-        new_tag_str = f"v{new_tag_str}"
 
+    # prepend the v if enabled
+    if type(with_v) is bool and with_v == True:
+        new_tag_str = f"v{new_tag_str}"
+    elif type(with_v) is str and len(with_v) > 0 and with_v == "true":
+        new_tag_str = f"v{new_tag_str}"
 
     return {
         'default_bump': default_bump,
@@ -210,13 +196,11 @@ def main():
     latest_tag = lt.parse()
 
     test = (len(os.getenv("RUN_AS_TEST")) > 0)
-    test_file = args.test_file
-
-    commits = get_commits(args.repository_root, args.commitish_a, args.commitish_b, test, test_file)
+    r = ghm.GitHelper(args.repository_root)
+    commits = r.commits(args.commitish_a, args.commitish_b)
 
     config = {
         'test': test,
-        'test_file': args.test_file,
         'repository_root': args.repository_root,
         'commitish_a': args.commitish_a,
         'commitish_b': args.commitish_b,
