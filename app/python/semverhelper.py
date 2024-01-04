@@ -111,65 +111,45 @@ class SemverHelper:
         print(f"tag is set: [{tag}]")
         # update the new tag
         if major_bump > 0:
-            # Last release of v1.4.0
-            # is a prerelease
-            # has a major flag
+            # Last release of v1.4.0 + is a prerelease + has a major flag
             # => v2.0.0-beta.0
             if is_prerelease and tag.major <= last_release.major:
                 new_tag = new_tag.bump_major().replace(prerelease = f"{prerelease_suffix}.0")
-            # Last release of v1.4.0
-            # is a prerelease
-            # has a major flag
-            # has latest_tag of v2.0.0-beta.1
+            # Last release of v1.4.0 + is a prerelease + has a major flag + latest_tag of v2.0.0-beta.1
             # => v2.0.0-beta.2
             elif is_prerelease and latest_tag is not None:
                 new_tag = new_tag.bump_prerelease()
-            # Last release of v2.0.0
-            # is a prerelease
-            # has a major flag
+            # Last release of v2.0.0 + is a prerelease + has a major flag
             # => v2.0.0-beta.0
             elif is_prerelease:
                 new_tag = new_tag.replace(prerelease = f"{prerelease_suffix}.0")
-            # Last release of v2.0.0
-            # has a major flag
+            # Last release of v2.0.0 + has a major flag
             # => v3.0.0
             else:
                 new_tag = new_tag.bump_major()
         elif minor_bump > 0:
-            # Last release of v1.4.0
-            # is a prerelease
-            # has a minor flag
-            # has latest_tag of v1.5.0-beta.0
+            # Last release of v1.4.0 + is a prerelease + has a minor flag + latest_tag of v1.5.0-beta.0
             # => v1.5.0-beta.1
             if is_prerelease and latest_tag is not None:
                 new_tag = new_tag.bump_prerelease()
-            # Last release of v1.4.0
-            # is a prerelease
-            # has a minor flag
+            # Last release of v1.4.0 + is a prerelease + has a minor flag
             # => v1.5.0-beta.0
             elif is_prerelease:
                 new_tag = new_tag.bump_minor().replace(prerelease = f"{prerelease_suffix}.0")
-            # Last release of v1.4.0
-            # has a minor flag
+            # Last release of v1.4.0 + has a minor flag
             # => v1.5.0
             else:
                 new_tag = new_tag.bump_minor()
         elif patch_bump > 0:
-            # Last release of v1.4.0
-            # is a prerelease
-            # has a minor flag
-            # has latest_tag of v1.4.1-beta.0
+            # Last release of v1.4.0 + is a prerelease + has a minor flag + latest_tag of v1.4.1-beta.0
             # => v1.4.1-beta.1
             if is_prerelease and latest_tag is not None:
                 new_tag = new_tag.bump_prerelease()
-            # Last release of v1.4.0
-            # is a prerelease
-            # has a minor flag
+            # Last release of v1.4.0 + is a prerelease + has a minor flag
             # => v1.4.1-beta.0
             elif is_prerelease:
                 new_tag = new_tag.bump_patch().replace(prerelease = f"{prerelease_suffix}.0")
-            # Last release of v1.4.0
-            # has a minor flag
+            # Last release of v1.4.0 + has a minor flag
             # => v1.4.1
             else:
                 new_tag = new_tag.bump_patch()
