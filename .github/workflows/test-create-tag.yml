@@ -37,7 +37,7 @@ jobs:
         env:
           RUN_AS_TEST: "true"
         run: |
-          pip install -r ./requirements.txt
+          pip install -q -r ./requirements.txt
           cd .github/actions/create-tag/
           pytest ./test_create_tag.py
           echo "$(cat ./results.md)" >> $GITHUB_STEP_SUMMARY

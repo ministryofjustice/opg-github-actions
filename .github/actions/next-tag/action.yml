@@ -95,7 +95,7 @@ runs:
       env:
         RUN_AS_TEST: ${{inputs.test}}
       run: |
-        pip install -r ./requirements.txt
+        pip install -q -r ./requirements.txt
         src="${{github.action_path}}"
         repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         python ${src}/./next-tag.py \

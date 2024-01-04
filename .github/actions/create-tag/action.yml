@@ -64,7 +64,7 @@ runs:
       run: |
         src="${{github.action_path}}"
         repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
-        pip install -r ./requirements.txt
+        pip install -q -r ./requirements.txt
         python ${src}/./create-tag.py \
           --repository_root="${repo}" \
           --commitish="${{inputs.commitish}}" \
