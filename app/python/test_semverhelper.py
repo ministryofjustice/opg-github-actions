@@ -282,3 +282,88 @@ def test_max(expected:str, tag_list:list) -> None:
     actual = svh.SemverHelper.max(tags)
 
     assert (expected == actual) == True
+
+### SETUP NEXT TAG GENERATION TESTS
+testconfig = [
+    {
+        "expected": "2.0.0",
+        "major_bump": 1,
+        "minor_bump": 0,
+        "patch_bump": 0,
+        "is_prerelease": False,
+        "prerelease_suffix": "beta",
+        "latest_tag": "2.0.0-beta.0",
+        "last_release": "1.0.1"
+    },
+    {
+        "expected": "1.1.0",
+        "major_bump": 0,
+        "minor_bump": 1,
+        "patch_bump": 0,
+        "is_prerelease": False,
+        "prerelease_suffix": "beta",
+        "latest_tag": "1.1.0-beta.0",
+        "last_release": "1.0.0"
+    },
+    {
+        "expected": "1.1.0-beta.1",
+        "major_bump": 0,
+        "minor_bump": 1,
+        "patch_bump": 0,
+        "is_prerelease": True,
+        "prerelease_suffix": "beta",
+        "latest_tag": "1.1.0-beta.0",
+        "last_release": "1.0.0"
+    },
+    {
+        "expected": "0.1.0-beta.0",
+        "major_bump": 0,
+        "minor_bump": 1,
+        "patch_bump": 0,
+        "is_prerelease": True,
+        "prerelease_suffix": "beta",
+        "latest_tag": None,
+        "last_release": None
+    },
+    {
+        "expected": "1.0.0",
+        "major_bump": 1,
+        "minor_bump": 0,
+        "patch_bump": 0,
+        "is_prerelease": False,
+        "prerelease_suffix": "beta",
+        "latest_tag": None,
+        "last_release": None
+    },
+]
+# generate fields string from the keys
+fields = ','.join(testconfig[0].keys())
+# generate test tuple from config items
+tests = [(v.values()) for v in testconfig]
+@pytest.mark.parametrize(fields, tests)
+def test_next_tag(
+    expected:str|Version,
+    major_bump:int,
+    minor_bump:int,
+    patch_bump:int,
+    is_prerelease:bool,
+    prerelease_suffix:str,
+    latest_tag:str,
+    last_release:str
+) -> None:
+    """
+    Test that the generated tag matches what we would expect
+    """
+    latest_tag:Version = Version.parse(latest_tag) if type(latest_tag) is str else latest_tag
+    last_release:Version = Version.parse(last_release) if type(last_release) is str else last_release
+
+    actual = svh.SemverHelper.next_tag(
+        major_bump=major_bump,
+        minor_bump=minor_bump,
+        patch_bump=patch_bump,
+        is_prerelease=is_prerelease,
+        prerelease_suffix=prerelease_suffix,
+        latest_tag=latest_tag,
+        last_release=last_release
+    )
+    assert (f"{expected}" == f"{actual}")
