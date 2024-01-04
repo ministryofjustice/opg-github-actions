@@ -21,6 +21,7 @@ rand_mod.loader.exec_module(rnd)
 
 class GitHelper:
     """
+    Class to provider some commonly used calls to the gitpython lib
     """
     repository_path = ''
     repository = None

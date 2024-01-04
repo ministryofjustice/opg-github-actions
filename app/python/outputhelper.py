@@ -4,6 +4,8 @@ import os
 
 class OutputHelper:
     """
+    Handles output to stdout and file
+    Used for test results and pipelines summaries
     """
     enabled = False
 
