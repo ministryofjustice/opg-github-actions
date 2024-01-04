@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from semver.version import Version
+import re
 
 class SemverHelper:
     """
@@ -22,7 +23,7 @@ class SemverHelper:
 
     def tag(self) -> str:
         """Return the string version of the parsed version tag"""
-        parsed = self.parse()
+        parsed:Version|None = self.parse()
         # if there is a parsed version, and it came with a prefix
         # then respect that prefix and return with it
         # otherwise return without a prefix
@@ -33,7 +34,9 @@ class SemverHelper:
         return self._tag
 
     def has_prefix(self) -> bool:
-        """Determine if the string (s) passed starts with a v prefix for semver parsing."""
+        """
+        Determine if the string (s) passed starts with a v prefix for semver parsing.
+        """
         return self._tag.startswith(self.prefix)
 
     def without_prefix(self) -> str|None:
@@ -69,14 +72,85 @@ class SemverHelper:
         Use the new tag thats passed in to update the current values.
         This is to allow increasing parts of the tag
         """
-        new_tag = f"v{tag}" if with_prefix else f"{tag}"
+        new_tag:str = f"v{tag}" if with_prefix else f"{tag}"
         self._tag = new_tag
         self._parsed = self.parse()
 
     ## STATICS
     @staticmethod
     def default(tag:str = "0.0.0") -> Version:
+        """Generate a default Version instance, using tag (should not contain a prefix)."""
         return Version.parse(tag)
+
+    @staticmethod
+    def is_prerelease(branch_name:str, release_branches:str|list, stated_prerelease_state:bool) -> bool:
+        """
+        Look at possibly overwriting if this is a prerelease or not - as in branch is main, but
+        accidently set prerelease as false.
+
+        Check if the branch_name is within the set of release_branches, if so return true.
+        Otherwise, return the currently set value - likely from original command input
+        """
+        # convert to list from string
+        release_branches:list = release_branches.split(',') if type(release_branches) is str else release_branches
+        # if the branch is in the release branch set, return True, otherwise return current
+        if branch_name in release_branches:
+            return False
+        return stated_prerelease_state
+
+
+    @staticmethod
+    def prereleases_filtered(tag_list:list, filter:str) -> dict:
+        """
+        Find all semver prereleases that match the filter pattern passed in.
+        Designed to find specific ones relating to a branch (ie mybranch.0, mybranch.1 etc).
+        """
+        tags:dict = SemverHelper.list_to_dict(tag_list)
+        pattern = re.compile(filter)
+        prereleases:dict = {k:v for k,v in tags.items() if pattern.match(f"{v.prerelease}")}
+        return prereleases
+
+    @staticmethod
+    def prereleases(tag_list:list) -> dict:
+        """
+        Find all semver prereleases from a set of strings (likely tags from git) and
+        return a dict whose key is the tag and value is a Version instance
+        """
+        tags:dict = SemverHelper.list_to_dict(tag_list)
+        prereleases:dict = {k:v for k,v in tags.items() if v.prerelease is not None}
+        return prereleases
+
+    @staticmethod
+    def releases(tag_list:list) -> dict:
+        """
+        Find all semver releases from a set of strings (likely tags from git) and
+        return a dict whose key is the tag and value is a Version instance
+        """
+        tags:dict = SemverHelper.list_to_dict(tag_list)
+        releases:dict = {k:v for k,v in tags.items() if v.prerelease is None}
+        return releases
+
+    @staticmethod
+    def max(versions:dict|list) -> Version|None:
+        """
+        Take a dict of Version instances (tag->Version) and return the max (natural ordering)
+        version
+
+        If there is a release and pre-release that match, release is used
+        >>> SemverHelper.max(['v1.0.0-beta.9', 'v1.0.0-beta.10', '100.0.0', '100.0.0-test.0'])
+        Version('100.0.0')
+        """
+        if type(versions) is list:
+            versions:dict = SemverHelper.list_to_dict(versions)
+
+        if len(versions) > 0:
+            max_value = max(versions.values())
+            max_items = [k for k,v in versions.items() if f"{v}" == max_value]
+            if len(max_items) > 0:
+                return max_items.pop()
+        return None
+
+
 
     @staticmethod
     def to_dict(tag:str) -> dict:
@@ -96,7 +170,7 @@ class SemverHelper:
         of it and append
         - tag = '1.2.3-test.0' => {'1.2.3-test.0' => Version() }
         """
-        as_dict = {}
+        as_dict:dict = {}
         for tag in tags:
             d = SemverHelper.to_dict(tag)
             if d and d[tag] is not None:

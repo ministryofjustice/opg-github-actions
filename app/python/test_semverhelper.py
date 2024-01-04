@@ -179,3 +179,106 @@ def test_list_to_dict(setup_valid_invalid) -> None:
     all = svh.SemverHelper.list_to_dict(invalid)
     real = {k:v for k, v in all.items() if v is not None}
     assert (len(real) == 0 ) == True
+
+
+@pytest.mark.parametrize(
+    "expected,branch_name,release_branches,prerelease",
+    [
+        (True, "test", "main", True),
+        (True, "v1.5.0-beta.0", "main,master", True),
+        (False, "main", "main,master", True)
+    ]
+)
+def test_is_prerelease(
+    expected:bool,
+    branch_name:str,
+    release_branches:str|list,
+    prerelease:bool|str,
+) -> None:
+    """
+    Check the logic of is_prerelese matches expected
+    """
+    actual = svh.SemverHelper.is_prerelease(
+        branch_name=branch_name,
+        release_branches=release_branches,
+        stated_prerelease_state=prerelease
+    )
+    print(f"branch_name={branch_name}\nrelease_branches={release_branches}\nstated_prerelease_state={prerelease}")
+    print(f"Expected [{expected}] Actual [{actual}]")
+    assert (expected == actual) == True
+
+
+@pytest.mark.parametrize(
+    "expected,search,tag_list",
+    [
+        (1, "dummy", ["v1.5.0-dummy.0", "1.2.0-test.0", "test_tag", "1.0.0"]),
+        (2, "beta", ["v1.5.0-beta.0", "1.2.0-beta.0", "test_tag", "1.0.0"]),
+        (0, "beta", ["v1.5.0-dummy.0", "1.2.0-test.0", "test_tag", "1.0.0"]),
+    ]
+)
+def test_prereleases_filtered(expected:int, search:str, tag_list:list) -> None:
+    """
+    Check various tag lists to make sure the prerelease style filter
+    find the correct amount
+    """
+    filter = f"{search}.[0-9]+$"
+    found = svh.SemverHelper.prereleases_filtered(tag_list, filter)
+    actual = len(found)
+
+    assert (expected == actual) == True
+
+
+@pytest.mark.parametrize(
+    "expected,tag_list",
+    [
+        (2, ["v1.5.0-dummy.0", "1.2.0-test.0", "test_tag", "1.0.0"]),
+        (1, ["v1.5.0-beta.0+b1", "1.2.0", "test_tag", "1.0.0"]),
+        (0, ["v1.5.0", "1.2.0", "test_tag", "1.0.0", "weirdprefix1.2.0-test.0"]),
+    ]
+)
+def test_prereleases(expected:int, tag_list:list) -> None:
+    """
+    Check prereleases finds correct tags out of a set
+    """
+    found = svh.SemverHelper.prereleases(tag_list)
+    actual = len(found)
+
+    assert (expected == actual) == True
+
+@pytest.mark.parametrize(
+    "expected,tag_list",
+    [
+        (1, ["v1.5.0-dummy.0", "1.2.0-test.0", "test_tag", "1.0.0"]),
+        (2, ["v1.5.0-beta.0+b1", "1.2.0", "test_tag", "1.0.0"]),
+        (3, ["v1.5.0", "1.2.0", "test_tag", "1.0.0", "weirdprefix1.2.0-test.0"]),
+        (0, ["v1.5.0-b", "1.2.0-beta.0", "test_tag", "not-a-relealse-1.0.0", "weirdprefix1.2.0-test.0"]),
+    ]
+)
+def test_releases(expected:int, tag_list:list) -> None:
+    """
+    Check releases finds correct tags out of a set
+    """
+    found = svh.SemverHelper.releases(tag_list)
+    actual = len(found)
+
+    assert (expected == actual) == True
+
+
+@pytest.mark.parametrize(
+    "expected,tag_list",
+    [
+        ("1.0.0-beta.10", ["1.0.0-beta.9", "1.0.0-beta.10"]),
+        ("v1.0.0-beta.10", ["v1.0.0-beta.9", "v1.0.0-beta.10"]),
+        # If there is a release and pre-release that match, release is used
+        ("100.0.0", ["v1.0.0-beta.9", "v1.0.0-beta.10", "100.0.0", "100.0.0-test.0"]),
+        ("100.5.0-test.0", ["v1.0.0-beta.9", "v1.0.0-beta.10", "100.1.0", "100.5.0-test.0"]),
+    ]
+)
+def test_max(expected:str, tag_list:list) -> None:
+    """
+    Check releases finds correct tags out of a set
+    """
+    tags:dict = svh.SemverHelper.list_to_dict(tag_list)
+    actual = svh.SemverHelper.max(tags)
+
+    assert (expected == actual) == True

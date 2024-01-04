@@ -27,6 +27,10 @@ out_mod.loader.exec_module(oh)
 sv_mod = importlib.util.spec_from_file_location("semverhelper", app_root_dir + '/app/python/semverhelper.py')
 sv = importlib.util.module_from_spec(sv_mod)
 sv_mod.loader.exec_module(sv)
+# string helper
+st_mod = importlib.util.spec_from_file_location("strhelper", app_root_dir + '/app/python/strhelper.py')
+st = importlib.util.module_from_spec(st_mod)
+st_mod.loader.exec_module(st)
 
 
 def arg_parser() -> argparse.ArgumentParser:
@@ -43,60 +47,64 @@ def arg_parser() -> argparse.ArgumentParser:
 
 
 
-def is_prerelease(prerelease:bool, branch_name:str, release_branches:str) -> bool:
-    """Check if the branch is a listed release branch, if so overwrite and flag as release."""
-    if branch_name in release_branches.split(","):
-        return False
-    return prerelease
-
 
 def run(
         test:bool,
-        tags:list,
+        tag_list:list,
         branch_name:str,
         release_branches:str,
         prerelease:bool|str,
         prerelease_suffix:str) -> dict:
+    """
+    Use the data passed to determine the following states:
+        - test:bool
+        - prerelease:bool
+        - last_release: str
+        - latest: str
+    In order to do that we first confirm if the prerelease param passed is accurate
+    (might be passsed true but on main branch).
 
-    # convert prerelease to a bool
-    if type(prerelease) is str:
-        if len(prerelease) > 0 and prerelease.lower() == "true":
-            prerelease = True
-        else:
-            prerelease = False
+    Convert the tag_list from a set of strings to a dict with its original value as key
+    and the value being a Version instance, returning only semver valid ones.
 
-    prerelease_by_branch = is_prerelease(prerelease, branch_name, release_branches)
+    Fetch all releases from the set of tags and the last one (natural ordering)
 
-    tags = sv.SemverHelper.list_to_dict(tags)
+    If this is a prerelease, then find all other prerelease that are for this branch and
+    then determine the last one of those.
 
+    Return the data.
+
+    """
+    # set these to an empty string by default
     last_release = ""
     latest = ""
-
-    # get the releases, and track last one in particular
-    releases = {k:v for k,v in tags.items() if v.prerelease is None}
+    # convert prerelease to a bool
+    prerelease:bool = st.StrHelper.str_to_bool(prerelease)
+    # ensure prerelease_calculated true if this is a release branch
+    prerelease_calculated:bool = sv.SemverHelper.is_prerelease(branch_name, release_branches, prerelease)
+    # convert list of strings to a dict of str->Version of semver releases only
+    tags:dict = sv.SemverHelper.list_to_dict(tag_list)
+    # get the releases
+    releases:dict = sv.SemverHelper.releases(tag_list)
+    # get last release
     if len(releases) > 0:
-        max_release_val = max(releases.values())
-        release_items = [k for k,v in releases.items() if f"{v}" == max_release_val]
-        last_release = release_items.pop()
+        last_release:Version|None = sv.SemverHelper.max(releases)
 
     # if pre release, find all that match the semver pattern with this suffix
-    matching = []
-    if prerelease_by_branch:
-        pattern = re.compile(f"{prerelease_suffix}.[0-9]+$")
-        matching = {k:v for k,v in tags.items() if pattern.match(f"{v.prerelease}")}
+    matching:dict = {}
+    if prerelease_calculated:
+        matching = sv.SemverHelper.prereleases_filtered(tags, f"{prerelease_suffix}.[0-9]+$")
     else:
         matching = releases
 
     # fetch the latest tag
     if len(matching) > 0:
-        latest_val = max(matching.values())
-        latest_items = [k for k,v in matching.items() if f"{v}" == latest_val]
-        latest = latest_items.pop()
+        latest:Version|None = sv.SemverHelper.max(matching)
 
     return {
         'test': test,
         'prerelease_argument': prerelease,
-        'prerelease_calculated': prerelease_by_branch,
+        'prerelease_calculated': prerelease_calculated,
         'prerelease_suffix': prerelease_suffix,
         'latest': f"{latest}",
         'last_release': f"{last_release}"
