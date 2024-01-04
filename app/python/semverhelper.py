@@ -83,6 +83,98 @@ class SemverHelper:
         self._tag = new_tag
         self._parsed = self.parse()
 
+    @staticmethod
+    def next_tag(
+                 major_bump:int,
+                 minor_bump:int,
+                 patch_bump:int,
+                 is_prerelease:bool,
+                 prerelease_suffix:str,
+                 latest_tag:Version|None,
+                 last_release:Version|None
+                 ) -> Version:
+        """
+        Using the current tag and passed information work out what the
+        next tag should be
+
+        See tests for examples!
+        """
+        if last_release is None:
+            last_release = SemverHelper.default()
+
+        if is_prerelease:
+            tag = latest_tag if latest_tag is not None else last_release
+        else:
+            tag = last_release
+
+        new_tag = tag
+        print(f"tag is set: [{tag}]")
+        # update the new tag
+        if major_bump > 0:
+            # Last release of v1.4.0
+            # is a prerelease
+            # has a major flag
+            # => v2.0.0-beta.0
+            if is_prerelease and tag.major <= last_release.major:
+                new_tag = new_tag.bump_major().replace(prerelease = f"{prerelease_suffix}.0")
+            # Last release of v1.4.0
+            # is a prerelease
+            # has a major flag
+            # has latest_tag of v2.0.0-beta.1
+            # => v2.0.0-beta.2
+            elif is_prerelease and latest_tag is not None:
+                new_tag = new_tag.bump_prerelease()
+            # Last release of v2.0.0
+            # is a prerelease
+            # has a major flag
+            # => v2.0.0-beta.0
+            elif is_prerelease:
+                new_tag = new_tag.replace(prerelease = f"{prerelease_suffix}.0")
+            # Last release of v2.0.0
+            # has a major flag
+            # => v3.0.0
+            else:
+                new_tag = new_tag.bump_major()
+        elif minor_bump > 0:
+            # Last release of v1.4.0
+            # is a prerelease
+            # has a minor flag
+            # has latest_tag of v1.5.0-beta.0
+            # => v1.5.0-beta.1
+            if is_prerelease and latest_tag is not None:
+                new_tag = new_tag.bump_prerelease()
+            # Last release of v1.4.0
+            # is a prerelease
+            # has a minor flag
+            # => v1.5.0-beta.0
+            elif is_prerelease:
+                new_tag = new_tag.bump_minor().replace(prerelease = f"{prerelease_suffix}.0")
+            # Last release of v1.4.0
+            # has a minor flag
+            # => v1.5.0
+            else:
+                new_tag = new_tag.bump_minor()
+        elif patch_bump > 0:
+            # Last release of v1.4.0
+            # is a prerelease
+            # has a minor flag
+            # has latest_tag of v1.4.1-beta.0
+            # => v1.4.1-beta.1
+            if is_prerelease and latest_tag is not None:
+                new_tag = new_tag.bump_prerelease()
+            # Last release of v1.4.0
+            # is a prerelease
+            # has a minor flag
+            # => v1.4.1-beta.0
+            elif is_prerelease:
+                new_tag = new_tag.bump_patch().replace(prerelease = f"{prerelease_suffix}.0")
+            # Last release of v1.4.0
+            # has a minor flag
+            # => v1.4.1
+            else:
+                new_tag = new_tag.bump_patch()
+
+        return new_tag
     ## STATICS
     @staticmethod
     def default(tag:str = "0.0.0") -> Version:
@@ -104,7 +196,6 @@ class SemverHelper:
         if branch_name in release_branches:
             return False
         return stated_prerelease_state
-
 
     @staticmethod
     def prereleases_filtered(tag_list:list, filter:str) -> dict:
@@ -156,8 +247,6 @@ class SemverHelper:
             if len(max_items) > 0:
                 return max_items.pop()
         return None
-
-
 
     @staticmethod
     def to_dict(tag:str) -> dict:

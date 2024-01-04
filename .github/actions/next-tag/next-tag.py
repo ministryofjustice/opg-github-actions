@@ -27,6 +27,10 @@ out_mod.loader.exec_module(oh)
 sv_mod = importlib.util.spec_from_file_location("semverhelper", app_root_dir + '/app/python/semverhelper.py')
 sv = importlib.util.module_from_spec(sv_mod)
 sv_mod.loader.exec_module(sv)
+# str helper
+st_mod = importlib.util.spec_from_file_location("strhelper", app_root_dir + '/app/python/strhelper.py')
+st = importlib.util.module_from_spec(st_mod)
+st_mod.loader.exec_module(st)
 
 
 
@@ -47,24 +51,7 @@ def arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def get_increments(commits:list, default_bump:str) -> tuple:
-    """
-    Scan all fields in the commits passed looking for triggers of each type.
-    Return counter of each.
-    The count for default_bump starts at 1 instead of 0 to ensure something is
-    always increased.
-    """
-    majors=1 if default_bump == "major" else 0
-    minors=1 if default_bump == "minor" else 0
-    patches=1 if default_bump == "patch" else 0
-    for c in commits:
-        # check each field in the dict
-        for k in ['subject', 'notes', 'body']:
-            majors = majors + 1 if "#major" in c[k] else majors
-            minors = minors + 1 if "#minor" in c[k] else minors
-            patches = patches + 1 if "#patch" in c[k] else patches
 
-    return majors, minors, patches
 
 def run(
         test: bool,
@@ -80,103 +67,34 @@ def run(
      # get the last release version from a string, default to 0.0.0
     if type(last_release) is str or last_release is None:
         print("converting last_release from string or None")
-        last_release = sv.SemverHelper(last_release).parse("0.0.0")
+        last_release:Version = sv.SemverHelper(last_release).parse("0.0.0")
     # convert latest tag as well
     if type(latest_tag) is str:
         print("converting latest_tag from string")
-        latest_tag = sv.SemverHelper(latest_tag).parse()
+        latest_tag:Version = sv.SemverHelper(latest_tag).parse()
+
 
     # allow bool True|False as well as string values
-    if type(prerelease) is bool:
-        is_prerelease = prerelease
-    else:
-        is_prerelease = (len(prerelease) > 0 and prerelease.lower() == "true") if prerelease is not None else False
+    is_prerelease = st.StrHelper.str_to_bool(prerelease)
+    with_v:bool = st.StrHelper.str_to_bool(with_v)
+    # find the major, minor, pathc bump counters from the commits
+    major, minor, patch = ghm.GitHelper.find_bumps_from_commits(commits, default_bump)
 
-    major, minor, patch = get_increments(commits, default_bump)
-
-    tag = None
-    # work out base tag
-    if is_prerelease:
-        tag = latest_tag if latest_tag is not None else last_release
-    else:
-        tag = last_release
-
-    print(f"tag is set: [{tag}]")
-
-    new_tag = tag
-    # update the new tag
-    if major > 0:
-        # Last release of v1.4.0
-        # is a prerelease
-        # has a major flag
-        # => v2.0.0-beta.0
-        if is_prerelease and tag.major <= last_release.major:
-            new_tag = new_tag.bump_major().replace(prerelease = f"{prerelease_suffix}.0")
-        # Last release of v1.4.0
-        # is a prerelease
-        # has a major flag
-        # has latest_tag of v2.0.0-beta.1
-        # => v2.0.0-beta.2
-        elif is_prerelease and latest_tag is not None:
-            new_tag = new_tag.bump_prerelease()
-        # Last release of v2.0.0
-        # is a prerelease
-        # has a major flag
-        # => v2.0.0-beta.0
-        elif is_prerelease:
-            new_tag = new_tag.replace(prerelease = f"{prerelease_suffix}.0")
-        # Last release of v2.0.0
-        # has a major flag
-        # => v3.0.0
-        else:
-            print("major 4")
-            new_tag = new_tag.bump_major()
-    elif minor > 0:
-        # Last release of v1.4.0
-        # is a prerelease
-        # has a minor flag
-        # has latest_tag of v1.5.0-beta.0
-        # => v1.5.0-beta.1
-        if is_prerelease and latest_tag is not None:
-            new_tag = new_tag.bump_prerelease()
-        # Last release of v1.4.0
-        # is a prerelease
-        # has a minor flag
-        # => v1.5.0-beta.0
-        elif is_prerelease:
-            new_tag = new_tag.bump_minor().replace(prerelease = f"{prerelease_suffix}.0")
-        # Last release of v1.4.0
-        # has a minor flag
-        # => v1.5.0
-        else:
-            new_tag = new_tag.bump_minor()
-    elif patch > 0:
-        # Last release of v1.4.0
-        # is a prerelease
-        # has a minor flag
-        # has latest_tag of v1.4.1-beta.0
-        # => v1.4.1-beta.1
-        if is_prerelease and latest_tag is not None:
-            new_tag = new_tag.bump_prerelease()
-        # Last release of v1.4.0
-        # is a prerelease
-        # has a minor flag
-        # => v1.4.1-beta.0
-        elif is_prerelease:
-            new_tag = new_tag.bump_patch().replace(prerelease = f"{prerelease_suffix}.0")
-        # Last release of v1.4.0
-        # has a minor flag
-        # => v1.4.1
-        else:
-            new_tag = new_tag.bump_patch()
+    new_tag = sv.SemverHelper.next_tag(
+        major_bump=major,
+        minor_bump=minor,
+        patch_bump=patch,
+        is_prerelease=is_prerelease,
+        prerelease_suffix=prerelease_suffix,
+        latest_tag=latest_tag,
+        last_release=last_release
+    )
 
     # generate the string version for output
     new_tag_str = f"{new_tag}"
 
     # prepend the v if enabled
-    if type(with_v) is bool and with_v == True:
-        new_tag_str = f"v{new_tag_str}"
-    elif type(with_v) is str and len(with_v) > 0 and with_v == "true":
+    if with_v == True:
         new_tag_str = f"v{new_tag_str}"
 
     return {
