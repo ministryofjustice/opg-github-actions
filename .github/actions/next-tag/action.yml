@@ -17,8 +17,8 @@ inputs:
     description: "Last release tag"
     default: ""
   default_bump:
-    description: "Bump version along by this. (Default: minor)"
-    default: "minor"
+    description: "Bump version along by this. (Default: patch)"
+    default: "patch"
   with_v:
     description: "New tag will start with a v prefix"
     default: ""

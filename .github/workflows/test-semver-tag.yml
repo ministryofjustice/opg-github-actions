@@ -27,7 +27,7 @@ jobs:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
       - id: test1
-        name: "1. Test pre-release tag construction"
+        name: "1. Test semver against current data"
         uses: './.github/actions/semver-tag'
         with:
           test: true
