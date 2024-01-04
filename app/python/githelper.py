@@ -127,7 +127,7 @@ class GitHelper:
             logs = json.loads(log_data)
         except Exception:
             print(f"Failed to load commits as json: [{range}]")
-            raise Exception("Failed to load commits as json")
+            raise Exception(f"Error: Failed to load commits as json [{range}]")
 
         return logs
 
