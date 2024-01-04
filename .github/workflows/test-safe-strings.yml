@@ -26,71 +26,19 @@ jobs:
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
-      - id: test1
-        name: "1. Test clean"
-        uses: './.github/actions/safe-strings'
+      - name: "Setup python"
+        uses: actions/setup-python@v5
         with:
-          original: "bot/likes/slashes-and-dashes"
-      - id: test2
-        name: "2. Test trim"
-        uses: './.github/actions/safe-strings'
-        with:
-          original: "a-very-very-very-very-long-string-that-should-not-be-used"
-          length: 5
-      - id: test3
-        name: "3. Test suffix"
-        uses: './.github/actions/safe-strings'
-        with:
-          original: "branch"
-          suffix: "1"
-      - id: test4
-        name: "4. Test trim and suffix"
-        uses: './.github/actions/safe-strings'
-        with:
-          original: "branchname-to-shortern"
-          length: 7
-          suffix: "1"
-      - id: test5
-        name: "5. Test conditional overwite"
-        uses: './.github/actions/safe-strings'
-        with:
-          original: "main"
-          conditional_match: "main"
-          conditional_value: "production"
-      - id: results
-        name: Test results
+          python-version: '3.10'
+          cache: 'pip'
+      - name: "Setup pip"
         run: |
-          t1="botlikesslashesanddashes"
-          t2="avery"
-          t3="branch1"
-          t4="branch1"
-          t5="production"
-          echo "### Test Information" >> $GITHUB_STEP_SUMMARY
-          echo "| \#  | Original | Expected | Actual |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
-          echo "| 1. | ${{steps.test1.outputs.original}} | ${t1} | ${{steps.test1.outputs.safe}} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 2. | ${{steps.test2.outputs.original}} | ${t2} | ${{steps.test2.outputs.safe}} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 3. | ${{steps.test3.outputs.original}} | ${t3} | ${{steps.test3.outputs.safe}} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 4. | ${{steps.test4.outputs.original}} | ${t4} | ${{steps.test4.outputs.safe}} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 5. | ${{steps.test5.outputs.original}} | ${t5} | ${{steps.test5.outputs.safe}} |" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{steps.test1.outputs.safe}}" != "${t1}" ]; then
-            echo "test 1 failed"
-            exit 1
-          fi
-          if [ "${{steps.test2.outputs.safe}}" != "${t2}" ]; then
-            echo "test 2 failed"
-            exit 1
-          fi
-          if [ "${{steps.test3.outputs.safe}}" != "${t3}" ]; then
-            echo "test 3 failed"
-            exit 1
-          fi
-          if [ "${{steps.test4.outputs.safe}}" != "${t4}" ]; then
-            echo "test 4 failed"
-            exit 1
-          fi
-          if [ "${{steps.test5.outputs.safe}}" != "${t5}" ]; then
-            echo "test 5 failed"
-            exit 1
-          fi
+          pip install -q -r ./requirements.txt
+      - name: "Setup and run pytest"
+        shell: bash
+        env:
+          RUN_AS_TEST: "true"
+        run: |
+          cd .github/actions/safe-strings/
+          pytest ./test_safe_strings.py
+          echo "$(cat ./results.md)" >> $GITHUB_STEP_SUMMARY

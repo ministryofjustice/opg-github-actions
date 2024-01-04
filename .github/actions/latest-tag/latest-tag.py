@@ -36,16 +36,11 @@ st_mod.loader.exec_module(st)
 def arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser("latest-tag")
     parser.add_argument('--repository_root', default="./", help="Path to root of repository")
-
     parser.add_argument('--prerelease', default="", help="If set, then this is a pre-release. Can be overridden if branch_name matches a release_branches item.")
     parser.add_argument("--prerelease_suffix", default="beta", help="Prerelease naming")
-
     parser.add_argument("--branch_name", required=True, help="Current branch name. Used to double check if this is a release or not.")
     parser.add_argument('--release_branches', default="main,master", help="List of branches that are considered a release")
     return parser
-
-
-
 
 
 def run(

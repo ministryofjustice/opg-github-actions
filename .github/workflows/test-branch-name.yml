@@ -26,57 +26,19 @@ jobs:
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
-      - id: test1
-        name: "1. Test empty head_ref, set ref"
-        uses: './.github/actions/branch-name'
+      - name: "Setup python"
+        uses: actions/setup-python@v5
         with:
-          ref: "refs/heads/main"
-          head_ref: ""
-      - id: test2
-        name: "2. Test head_ref set, set ref"
-        uses: './.github/actions/branch-name'
-        with:
-          ref: "refs/heads/main"
-          head_ref: "t2"
-      - id: test3
-        name: "2. Test long branch"
-        uses: './.github/actions/branch-name'
-        with:
-          ref: "refs/heads/qwerty-123-456-789-wasd-0"
-      - id: test_results
-        name: Test results
+          python-version: '3.10'
+          cache: 'pip'
+      - name: "Setup pip"
         run: |
-          t1="main"
-          t2="t2"
-          t3a="qwerty-123-456-789-wasd-0"
-          t3b="qwerty123456789wasd0"
-          t3c="qwerty123456"
-          echo "### Test Information" >> $GITHUB_STEP_SUMMARY
-          echo "| \# | Expected | Branch | Safe | Full |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- | --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
-          echo "| 1. | ${t1} | ${{steps.test1.outputs.branch_name}} | ${{steps.test1.outputs.safe}} | ${{steps.test1.outputs.full_length}} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 2. | ${t2} | ${{steps.test2.outputs.branch_name}} | ${{steps.test2.outputs.safe}} | ${{steps.test2.outputs.full_length}} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 3a. | ${t3a} | ${{steps.test3.outputs.branch_name}} | ${{steps.test3.outputs.safe}} | ${{steps.test3.outputs.full_length}} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 3b. | ${t3b} | ${{steps.test3.outputs.branch_name}} | ${{steps.test3.outputs.safe}} | ${{steps.test3.outputs.full_length}} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 3c. | ${t3c} | ${{steps.test3.outputs.branch_name}} | ${{steps.test3.outputs.safe}} | ${{steps.test3.outputs.full_length}} |" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{steps.test1.outputs.branch_name}}" != "${t1}" ]; then
-            echo "test 1 failed"
-            exit 1
-          fi
-          if [ "${{steps.test2.outputs.branch_name}}" != "${t2}" ]; then
-            echo "test 2 failed"
-            exit 1
-          fi
-          if [ "${{steps.test3.outputs.branch_name}}" != "${t3a}" ]; then
-            echo "test 3a failed"
-            exit 1
-          fi
-          if [ "${{steps.test3.outputs.full_length}}" != "${t3b}" ]; then
-            echo "test 3b failed"
-            exit 1
-          fi
-          if [ "${{steps.test3.outputs.safe}}" != "${t3c}" ]; then
-            echo "test 3c failed"
-            exit 1
-          fi
+          pip install -q -r ./requirements.txt
+      - name: "Setup and run pytest"
+        shell: bash
+        env:
+          RUN_AS_TEST: "true"
+        run: |
+          cd .github/actions/branch-name/
+          pytest ./test_branch_name.py
+          echo "$(cat ./results.md)" >> $GITHUB_STEP_SUMMARY

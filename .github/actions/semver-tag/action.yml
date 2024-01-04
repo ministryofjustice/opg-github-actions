@@ -74,9 +74,6 @@ runs:
     - name: "Generate safe branch name"
       id: branch_name
       uses: './.github/actions/branch-name'
-      with:
-        ref: "${{github.ref}}"
-        head_ref: "${{github.head_ref}}"
     - name: "Find latest tag"
       id: latest_tag
       uses: './.github/actions/latest-tag'
@@ -94,6 +91,8 @@ runs:
           latest_tag: ${{steps.latest_tag.outputs.latest}}
           last_release: ${{steps.latest_tag.outputs.last_release}}
           with_v: ${{inputs.with_v}}
+          commitish_a: ${{steps.branch_name.outputs.source_commitish}}
+          commitish_b: ${{steps.branch_name.outputs.destination_commitish}}
     - name: "Create tag"
       id: create_tag
       uses: './.github/actions/create-tag'
