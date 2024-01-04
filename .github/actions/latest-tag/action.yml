@@ -27,7 +27,7 @@ outputs:
     value: ${{inputs.test}}
   prerelease:
     description: "Inputed prerelease variable."
-    value: ${{ steps.latest.outputs.prerelease }}
+    value: ${{ steps.latest.outputs.prerelease_calculated }}
   prerelease_suffix:
     description: "Inputed prerelease_suffix variable."
     value: ${{ steps.latest.outputs.prerelease_suffix }}

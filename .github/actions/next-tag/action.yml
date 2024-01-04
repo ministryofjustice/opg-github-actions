@@ -100,8 +100,8 @@ runs:
         repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         python ${src}/./next-tag.py \
           --repository_root="${repo}" \
-          --commitish_a="${{ github.head_ref }}" \
-          --commitish_b="${{github.base_ref}}" \
+          --commitish_a="${{github.base_ref}}" \
+          --commitish_b="${{ github.head_ref }}" \
           --prerelease="${{inputs.prerelease}}" \
           --prerelease_suffix="${{inputs.prerelease_suffix}}" \
           --latest_tag="${{inputs.latest_tag}}" \
