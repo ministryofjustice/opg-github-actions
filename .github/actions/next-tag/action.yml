@@ -79,7 +79,7 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: ${{ github.repository }}
-        ref: ${{ github.ref_name}}
+        ref: ${{ github.ref}}
         path: ${{inputs.caller_repo_subfolder}}
         fetch-tags: true
         fetch-depth: 0
