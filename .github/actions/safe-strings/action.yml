@@ -5,7 +5,7 @@ inputs:
     description: "Original string (such as branch name) to make safe for tag usage etc"
     required: true
   suffix:
-    description: "Directory where terraform will be run from. Looks for versions.tf file in this path."
+    description: "Additional string at the end"
     default: ""
   conditional_match:
     description: "If the original string matches this value, then use the conditional_value directly."
@@ -36,46 +36,22 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - id: make_safe
-      name: "Create tag-safe strings"
+    - name: "Setup python"
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+    - name: Create Safe tags
+      id: make_safe
       shell: bash
+      env:
+        RUN_AS_TEST: ${{inputs.test}}
       run: |
-        set -e
-
-        str="${{inputs.original}}"
-        suffix="${{inputs.suffix}}"
-        max_len="${{inputs.length}}"
-        conditional_match="${{inputs.conditional_match}}"
-        conditional_value="${{inputs.conditional_value}}"
-
-        suffix_len="${#suffix}"
-
-        lower=$(echo ${str} | tr '[:upper:]' '[:lower:]')
-        safe=$( echo "${lower}" | tr -cd '[:alnum:]')
-        full_length=${safe}
-
-        # If a max length as been set, then trim the string down
-        if [ ! -z "${max_len}" ]; then
-            sub_len="$((max_len - suffix_len))"
-            trimmed="${safe:0:$sub_len}${suffix}"
-            safe=${trimmed}
-        else
-          safe="${safe}${suffix}"
-        fi
-
-        # If conditional match equals the original string, then use the value directly
-        # and overwrite the trimmed / safe values
-        if [ ! -z "${conditional_match}" ] && [ "${str}" = "${conditional_match}" ]; then
-            full_length="${conditional_value}"
-            safe="${conditional_value}"
-        fi
-
-        echo "original=${str}"
-        echo "suffix=${suffix}"
-        echo "length=${max_len}"
-        echo "full_length=${full_length}"
-        echo "safe=${safe}"
-
-        echo "length=${max_len}" >> $GITHUB_OUTPUT
-        echo "full_length=${full_length}" >> $GITHUB_OUTPUT
-        echo "safe=${safe}" >> $GITHUB_OUTPUT
+        pip install -q -r ./requirements.txt
+        src="${{github.action_path}}"
+        python ${src}/./safe-strings.py \
+          --string="${{inputs.original}}" \
+          --suffix="${{inputs.suffix}}" \
+          --length="${{inputs.length}}" \
+          --conditional_match="${{inputs.conditional_match}}" \
+          --conditional_value="${{inputs.conditional_value}}"
