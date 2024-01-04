@@ -189,5 +189,5 @@ def github_branch_data(event_name:str, event_data:dict) -> tuple:
         source_commitish = event_data['before']
         destination_commitish = event_data['after']
 
-    branch_name = branch_name.replace('refs/head/', '')
+    branch_name = branch_name.replace('refs/head/', '').replace('refs/heads/', '')
     return (branch_name, source_commitish, destination_commitish)
