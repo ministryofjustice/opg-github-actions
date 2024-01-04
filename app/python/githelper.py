@@ -137,3 +137,32 @@ class GitHelper:
                 patches = patches + 1 if "#patch" in c[k] else patches
 
         return majors, minors, patches
+
+
+## NON CLASS FUNCTIONS
+
+def github_branch_data(event_name:str, event_data:dict) -> tuple:
+    """
+    Use the event name and data from github env to workout
+    branch name to use and commitish references for comparison
+    later on
+    """
+    source_commitish = ''
+    destination_commitish = ''
+    branch_name = ''
+    # for pull requests we do this
+    if event_name == "pull_request":
+        # this is branch that started the pull request (test-123)
+        source_commitish = event_data['pull_request']['head']['ref']
+        # this should be something like main / master
+        destination_commitish = event_data['pull_request']['base']['ref']
+        # active branch is the same as source_branch on a pr
+        branch_name = source_commitish
+    elif event_name == "push":
+        branch_name = event_data['ref']
+        # use the before and after properties
+        source_commitish = event_data['before']
+        destination_commitish = event_data['after']
+
+    branch_name = branch_name.replace('refs/head/', '')
+    return (branch_name, source_commitish, destination_commitish)

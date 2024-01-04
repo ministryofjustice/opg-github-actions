@@ -94,6 +94,8 @@ runs:
           latest_tag: ${{steps.latest_tag.outputs.latest}}
           last_release: ${{steps.latest_tag.outputs.last_release}}
           with_v: ${{inputs.with_v}}
+          commitish_a: ${{steps.branch_name.outputs.source_commitish}}
+          commitish_b: ${{steps.branch_name.outputs.destination_commitish}}
     - name: "Create tag"
       id: create_tag
       uses: './.github/actions/create-tag'

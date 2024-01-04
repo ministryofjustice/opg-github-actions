@@ -83,7 +83,7 @@ class SemverHelper:
         self._tag = new_tag
         self._parsed = self.parse()
 
-## NON-CLASS METHODS
+## NON-CLASS FUNCTIONS
 
 def next_tag(
                 major_bump:int,

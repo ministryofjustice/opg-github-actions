@@ -25,7 +25,12 @@ inputs:
   caller_repo_subfolder:
     description: "Location to checkout active repository into. (Default: ./next-tag-caller-repository)"
     default: "./next-tag-caller-repository"
-
+  commitish_a:
+    description: "Commit used to look for version bump triggers in messages"
+    required: true
+  commitish_b:
+    description: "Commit used to look for version bump triggers in messages"
+    required: true
 
 outputs:
   test:
@@ -83,19 +88,22 @@ runs:
       with:
         python-version: '3.10'
         cache: 'pip'
+    - name: "Setup pip"
+      shell: bash
+      run: |
+        pip install -q -r ./requirements.txt
     - name: Get new Tag
       id: get_next_tag
       shell: bash
       env:
         RUN_AS_TEST: ${{inputs.test}}
       run: |
-        pip install -q -r ./requirements.txt
         src="${{github.action_path}}"
         repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         python ${src}/./next-tag.py \
           --repository_root="${repo}" \
-          --commitish_a="${{github.event.repository.default_branch}}" \
-          --commitish_b="${{ github.ref_name }}" \
+          --commitish_a="${{inputs.commitish_a}}" \
+          --commitish_b="${{inputs.commitish_b}}" \
           --prerelease="${{inputs.prerelease}}" \
           --prerelease_suffix="${{inputs.prerelease_suffix}}" \
           --latest_tag="${{inputs.latest_tag}}" \
