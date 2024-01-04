@@ -158,10 +158,10 @@ def test_to_dict(setup_valid_invalid) -> None:
     """
     valid, invalid = setup_valid_invalid
     for t in valid:
-        d = svh.SemverHelper.to_dict(t)
+        d = svh.to_dict(t)
         assert (d[t] is not None) == True
     for t in invalid:
-        d = svh.SemverHelper.to_dict(t)
+        d = svh.to_dict(t)
         assert (d[t] is None) == True
 
 
@@ -172,11 +172,11 @@ def test_list_to_dict(setup_valid_invalid) -> None:
     """
     valid, invalid = setup_valid_invalid
     # check that all valid items are returned, but invalid are not
-    all = svh.SemverHelper.list_to_dict(valid + invalid)
+    all = svh.list_to_dict(valid + invalid)
     real = {k:v for k, v in all.items() if v is not None}
     assert (len(real) == len(valid) ) == True
 
-    all = svh.SemverHelper.list_to_dict(invalid)
+    all = svh.list_to_dict(invalid)
     real = {k:v for k, v in all.items() if v is not None}
     assert (len(real) == 0 ) == True
 
@@ -198,7 +198,7 @@ def test_is_prerelease(
     """
     Check the logic of is_prerelese matches expected
     """
-    actual = svh.SemverHelper.is_prerelease(
+    actual = svh.is_prerelease(
         branch_name=branch_name,
         release_branches=release_branches,
         stated_prerelease_state=prerelease
@@ -222,7 +222,7 @@ def test_prereleases_filtered(expected:int, search:str, tag_list:list) -> None:
     find the correct amount
     """
     filter = f"{search}.[0-9]+$"
-    found = svh.SemverHelper.prereleases_filtered(tag_list, filter)
+    found = svh.prereleases_filtered(tag_list, filter)
     actual = len(found)
 
     assert (expected == actual) == True
@@ -240,7 +240,7 @@ def test_prereleases(expected:int, tag_list:list) -> None:
     """
     Check prereleases finds correct tags out of a set
     """
-    found = svh.SemverHelper.prereleases(tag_list)
+    found = svh.prereleases(tag_list)
     actual = len(found)
 
     assert (expected == actual) == True
@@ -258,7 +258,7 @@ def test_releases(expected:int, tag_list:list) -> None:
     """
     Check releases finds correct tags out of a set
     """
-    found = svh.SemverHelper.releases(tag_list)
+    found = svh.releases(tag_list)
     actual = len(found)
 
     assert (expected == actual) == True
@@ -278,8 +278,8 @@ def test_max(expected:str, tag_list:list) -> None:
     """
     Check releases finds correct tags out of a set
     """
-    tags:dict = svh.SemverHelper.list_to_dict(tag_list)
-    actual = svh.SemverHelper.max(tags)
+    tags:dict = svh.list_to_dict(tag_list)
+    actual = svh.max_version(tags)
 
     assert (expected == actual) == True
 
@@ -288,8 +288,8 @@ testconfig = [
     {
         "expected": "2.0.0",
         "major_bump": 1,
-        "minor_bump": 0,
-        "patch_bump": 0,
+        "minor_bump": 1,
+        "patch_bump": 1,
         "is_prerelease": False,
         "prerelease_suffix": "beta",
         "latest_tag": "2.0.0-beta.0",
@@ -357,7 +357,7 @@ def test_next_tag(
     latest_tag:Version = Version.parse(latest_tag) if type(latest_tag) is str else latest_tag
     last_release:Version = Version.parse(last_release) if type(last_release) is str else last_release
 
-    actual = svh.SemverHelper.next_tag(
+    actual = svh.next_tag(
         major_bump=major_bump,
         minor_bump=minor_bump,
         patch_bump=patch_bump,

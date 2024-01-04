@@ -79,27 +79,27 @@ def run(
     last_release = ""
     latest = ""
     # convert prerelease to a bool
-    prerelease:bool = st.StrHelper.str_to_bool(prerelease)
+    prerelease:bool = st.str_to_bool(prerelease)
     # ensure prerelease_calculated true if this is a release branch
-    prerelease_calculated:bool = sv.SemverHelper.is_prerelease(branch_name, release_branches, prerelease)
+    prerelease_calculated:bool = sv.is_prerelease(branch_name, release_branches, prerelease)
     # convert list of strings to a dict of str->Version of semver releases only
-    tags:dict = sv.SemverHelper.list_to_dict(tag_list)
+    tags:dict = sv.list_to_dict(tag_list)
     # get the releases
-    releases:dict = sv.SemverHelper.releases(tag_list)
+    releases:dict = sv.releases(tag_list)
     # get last release
     if len(releases) > 0:
-        last_release:Version|None = sv.SemverHelper.max(releases)
+        last_release:Version|None = sv.max_version(releases)
 
     # if pre release, find all that match the semver pattern with this suffix
     matching:dict = {}
     if prerelease_calculated:
-        matching = sv.SemverHelper.prereleases_filtered(tags, f"{prerelease_suffix}.[0-9]+$")
+        matching = sv.prereleases_filtered(tags, f"{prerelease_suffix}.[0-9]+$")
     else:
         matching = releases
 
     # fetch the latest tag
     if len(matching) > 0:
-        latest:Version|None = sv.SemverHelper.max(matching)
+        latest:Version|None = sv.max_version(matching)
 
     return {
         'test': test,

@@ -75,12 +75,12 @@ def run(
 
 
     # allow bool True|False as well as string values
-    is_prerelease = st.StrHelper.str_to_bool(prerelease)
-    with_v:bool = st.StrHelper.str_to_bool(with_v)
+    is_prerelease = st.str_to_bool(prerelease)
+    with_v:bool = st.str_to_bool(with_v)
     # find the major, minor, pathc bump counters from the commits
     major, minor, patch = ghm.GitHelper.find_bumps_from_commits(commits, default_bump)
 
-    new_tag = sv.SemverHelper.next_tag(
+    new_tag = sv.next_tag(
         major_bump=major,
         minor_bump=minor,
         patch_bump=patch,
