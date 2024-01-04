@@ -4,9 +4,6 @@ inputs:
   test:
     description: "If set, run test versions of data"
     default: ""
-  test_file:
-    description: "If test is set, then use the content of this file"
-    default: ""
   prerelease:
     description: "If set, looks for pre-release tag patterns (v1.1.1-${suffix}.${count})"
     default: ""
@@ -34,12 +31,6 @@ outputs:
   test:
     description: "Inputed test variable."
     value: ${{inputs.test}}
-  test_file:
-    description: "Inputed test_file variable."
-    value: ${{inputs.test_file}}
-  prerelease:
-    description: "Inputed prerelease variable."
-    value: ${{ inputs.prerelease }}
   prerelease_suffix:
     description: "Inputed prerelease_suffix variable."
     value: ${{ inputs.prerelease_suffix }}
@@ -53,6 +44,9 @@ outputs:
     description: "Inputed with_v variable."
     value: ${{inputs.with_v}}
 
+  prerelease:
+    description: "Calculated prerelease variable."
+    value: ${{ steps.get_next_tag.outputs.prerelease_calculated }}
   next_tag:
     description: "Next tag that should be created."
     value: ${{steps.get_next_tag.outputs.next_tag}}
@@ -80,7 +74,7 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: ${{ github.repository }}
-        ref: ${{ github.head_ref }}
+        ref: ${{ github.ref_name}}
         path: ${{inputs.caller_repo_subfolder}}
         fetch-tags: true
         fetch-depth: 0
@@ -100,8 +94,8 @@ runs:
         repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         python ${src}/./next-tag.py \
           --repository_root="${repo}" \
-          --commitish_a="${{github.base_ref}}" \
-          --commitish_b="${{ github.head_ref }}" \
+          --commitish_a="${{github.event.repository.default_branch}}" \
+          --commitish_b="${{ github.ref_name }}" \
           --prerelease="${{inputs.prerelease}}" \
           --prerelease_suffix="${{inputs.prerelease_suffix}}" \
           --latest_tag="${{inputs.latest_tag}}" \
