@@ -41,13 +41,16 @@ runs:
       with:
         python-version: '3.10'
         cache: 'pip'
+    - name: "Setup pip"
+      shell: bash
+      run: |
+        pip install -q -r ./requirements.txt
     - name: Create Safe tags
       id: make_safe
       shell: bash
       env:
         RUN_AS_TEST: ${{inputs.test}}
       run: |
-        pip install -q -r ./requirements.txt
         src="${{github.action_path}}"
         python ${src}/./safe-strings.py \
           --string="${{inputs.original}}" \
