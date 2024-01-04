@@ -18,8 +18,7 @@ jobs:
           echo -e "before=${{github.event.before}}"
           echo -e "after=${{github.event.after}}"
           echo -e "ref=${{github.event.ref}}"
-
-          echo -e "before=${{github.before}}"
-          echo -e "after=${{github.after}}"
           echo -e "ref=${{github.ref}}"
+
+          echo -e "default_branch=${{github.event.repository.default_branch}}"
           more $GITHUB_EVENT_PATH
