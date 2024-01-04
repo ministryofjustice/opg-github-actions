@@ -4,7 +4,8 @@ import sys
 from git import Repo
 from natsort import natsorted
 import importlib.util
-import json
+import xmltodict
+import re
 
 # CUSTOM PATH LOADING
 dir_name = os.path.dirname(os.path.realpath(__file__))
@@ -88,25 +89,13 @@ class GitHelper:
 
         return tag
 
-    def log_output_clean(self, log_data:str) -> str:
-        """
-        Take the log data and clean out possible problems
-        so it can be loaded as json
-        """
-        # remove the last , and new lines for validation as json
-        log_data = log_data.rstrip(',')
-        log_data = log_data.strip()
-        log_data = log_data.replace("\n", "")
-        log_data = log_data.replace("\\", "")
-        # make it look like an array
-        log_data = f"[{log_data}]"
-        return log_data
-
     def commits(self, commitish_a:str, commitish_b:str) -> list:
         """
         Fetch all commits between commitish_a and commitish_b
-        in a json like format for easier parsing
-        Convert log into a list of dict using json.loads
+        in an xml like format for easier parsing and handling
+        of sepcial chars in commit messages (like quotes and
+        slashes)
+        Convert log into a list
         """
         logs = []
         # checkout between the locations to ensure we have logs
@@ -118,17 +107,15 @@ class GitHelper:
             raise Exception("Failed to checkout to a commit")
 
         # get data from the log in an almost json format
-        jsonish='{"commit": "%H", "subject": "%s", "notes": "%n", "body": "%b"},'
-        param = f"--pretty=format:{jsonish}"
+        xmlish = "<commit><hash>%H</hash><subject>%s</subject><notes>%s</notes><body>%s</body></commit>"
+        param = f"--pretty=format:{xmlish}"
         range = f"{commitish_a}...{commitish_b}"
         log_data = self.repository.git.log(param, range)
-        log_data = self.log_output_clean(log_data)
-        try:
-            logs = json.loads(log_data)
-        except Exception:
-            print(f"Failed to load commits as json: [{range}]")
-            raise Exception(f"Error: Failed to load commits as json [{range}]")
-
+        # wrap log data in container tag for parsing
+        log_data = f"<commits>\n{log_data.strip()}</commits>"
+        logs = xmltodict.parse(log_data)
+        # grab the list
+        logs = logs['commits']['commit']
         return logs
 
     @staticmethod

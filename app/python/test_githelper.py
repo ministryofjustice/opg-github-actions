@@ -167,15 +167,16 @@ def test_commits(setup_repo) -> None:
     path, sha, test_tags = setup_repo
     # use a known commit thats not on main to make sure
     # some commits are found
-    commitish = "b5df8ff"
     r = ghm.GitHelper(path)
-    commits = r.commits("main", commitish)
-    # should be some commits
-    assert (len(commits) > 0) == True
-    # grab a commit, make sure its a dict with certain keys
-    sample = commits.pop()
-    # should have a commit key with content
-    assert (len(sample['commit']) > 0) == True
-    # should have a commit, subject, notes and body keys
-    for f in ['commit', 'subject', 'notes', 'body']:
-        assert (f in sample.keys() ) == True
+    commitishs = ["b5df8ff"]
+    for commitish in commitishs:
+        commits = r.commits(commitish, "main")
+        # should be some commits
+        assert (len(commits) > 0) == True
+        # grab a commit, make sure its a dict with certain keys
+        sample = commits.pop()
+        # should have a commit key with content
+        assert (len(sample['hash']) > 0) == True
+        # should have a commit, subject, notes and body keys
+        for f in ['hash', 'subject', 'notes', 'body']:
+            assert (f in sample.keys() ) == True

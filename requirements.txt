@@ -2,3 +2,4 @@ GitPython @ git+https://github.com//gitpython-developers/GitPython.git@44102f30e
 natsort @ git+https://github.com//SethMMorton/natsort.git@d9503c08f8f83ce8a89bfcc45fec136868756243
 pytest @ git+https://github.com/pytest-dev/pytest.git@1569fac603d9a50022e1474b494eebf970a2a3af
 semver @ git+https://github.com/python-semver/python-semver.git@ec9348aefd8e9f287f451fcf2e837621a40e3ca4
+xmltodict @ git+https://github.com/martinblech/xmltodict@096db4ad337e4168ef891551814cdd829716192b
