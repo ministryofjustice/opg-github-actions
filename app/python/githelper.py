@@ -89,6 +89,28 @@ class GitHelper:
 
         return tag
 
+    def commits_as_xml(self, commitish_a, commitish_b) -> str:
+        """
+        Get the commits with an xml formatted output from git
+        and return the resulting string
+        <commits>
+            <commit>
+                <hash>asdsd123</hash>
+                <subject></subject>
+                <notes></notes>
+                <body></body>
+            </commit>
+        </commits>
+        """
+        # get data from the log in an almost json format
+        xmlish = "<commit><hash>%H</hash><subject>%s</subject><notes>%s</notes><body>%s</body></commit>"
+        param = f"--pretty=format:{xmlish}"
+        range = f"{commitish_a}...{commitish_b}"
+        log_data = self.repository.git.log(param, range)
+        # wrap log data in container tag for parsing
+        log_data = f"<commits>\n{log_data.strip()}</commits>"
+        return log_data
+
     def commits(self, commitish_a:str, commitish_b:str) -> list:
         """
         Fetch all commits between commitish_a and commitish_b
@@ -97,7 +119,7 @@ class GitHelper:
         slashes)
         Convert log into a list
         """
-        logs = []
+        logs:list = []
         # checkout between the locations to ensure we have logs
         try:
             self.repository.git.checkout(commitish_a)
@@ -106,16 +128,13 @@ class GitHelper:
             print("Failed to checkout")
             raise Exception("Failed to checkout to a commit")
 
-        # get data from the log in an almost json format
-        xmlish = "<commit><hash>%H</hash><subject>%s</subject><notes>%s</notes><body>%s</body></commit>"
-        param = f"--pretty=format:{xmlish}"
-        range = f"{commitish_a}...{commitish_b}"
-        log_data = self.repository.git.log(param, range)
-        # wrap log data in container tag for parsing
-        log_data = f"<commits>\n{log_data.strip()}</commits>"
-        logs = xmltodict.parse(log_data)
+        log_data:str = self.commits_as_xml(commitish_a, commitish_b)
+        logs:dict = xmltodict.parse(log_data)
         # grab the list
         logs = logs['commits']['commit']
+        # if there is only one commit xml does not make a list
+        if type(logs) is dict:
+            logs:list = [logs]
         return logs
 
     @staticmethod
