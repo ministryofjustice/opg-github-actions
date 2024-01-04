@@ -63,7 +63,7 @@ def main():
 
     output = run(
         event_name=args.event_name,
-        event_data=args.event_data,
+        event_data=event_data,
     )
 
     print("BRANCH NAME DATA")
