@@ -26,6 +26,5 @@ jobs:
           echo -e "${GITHUB_EVENT_PULLREQUEST_BASE_REF}"
           echo -e "${GITHUB_EVENT_PULL_REQUEST_BASE_REF}"
 
-
           echo -e "default_branch=${{github.event.repository.default_branch}}"
           more $GITHUB_EVENT_PATH
