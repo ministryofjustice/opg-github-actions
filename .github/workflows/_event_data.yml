@@ -14,10 +14,12 @@ jobs:
     runs-on: 'ubuntu-latest'
     steps:
       - run: |
-          echo -e "github.event.pull_request.base.ref=${{github.event.pull_request.base.ref}}"
-          echo -e "github.event.pull_request.head.ref=${{github.event.pull_request.base.ref}}"
-          echo -e "github.event.pull_request.repository.default_branch=${{github.event.pull_request.repository.default_branch}}"
+          echo -e "PUSH"
+          echo -e "before=${{github.event.before}}"
+          echo -e "after=${{github.event.after}}"
+          echo -e "ref=${{github.event.ref}}"
 
-          echo -e "github.event.push.ref=${{github.event.push.ref}}"
-          echo -e "github.event.push.repository.default_branch=${{github.event.push.repository.default_branch}}"
+          echo -e "before=${{github.before}}"
+          echo -e "after=${{github.after}}"
+          echo -e "ref=${{github.ref}}"
           more $GITHUB_EVENT_PATH
