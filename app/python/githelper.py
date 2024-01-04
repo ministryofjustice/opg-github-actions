@@ -129,3 +129,23 @@ class GitHelper:
             raise Exception("Failed to load commits as json")
 
         return logs
+
+    @staticmethod
+    def find_bumps_from_commits(commits:list, default_bump:str) -> tuple:
+        """
+        Scan all fields in the commits passed looking for triggers of each type.
+        Return counter of each.
+        The count for default_bump starts at 1 instead of 0 to ensure something is
+        always increased.
+        """
+        majors=1 if default_bump == "major" else 0
+        minors=1 if default_bump == "minor" else 0
+        patches=1 if default_bump == "patch" else 0
+        for c in commits:
+            # check each field in the dict
+            for k in ['subject', 'notes', 'body']:
+                majors = majors + 1 if "#major" in c[k] else majors
+                minors = minors + 1 if "#minor" in c[k] else minors
+                patches = patches + 1 if "#patch" in c[k] else patches
+
+        return majors, minors, patches
