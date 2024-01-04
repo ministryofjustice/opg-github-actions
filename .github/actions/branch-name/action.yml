@@ -39,4 +39,4 @@ runs:
         src="${{github.action_path}}"
         python ${src}/./branch-name.py \
           --event_name="${GITHUB_EVENT_NAME}" \
-          --event_data_file="${$GITHUB_EVENT_PATH}"
+          --event_data_file="${GITHUB_EVENT_PATH}"
