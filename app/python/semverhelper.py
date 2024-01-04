@@ -13,10 +13,17 @@ class SemverHelper:
     _tag:str = None
     _parsed:Version = None
 
-    def __init__(self, tag:str):
-        self.original = tag
-        self._tag = tag
-        self._parsed = self.parse()
+    def __init__(self, tag:str|Version):
+        # allow for both semver and string versions to be
+        # put as tag
+        if type(tag) is Version:
+            self.original = f"{tag}"
+            self._tag =  f"{tag}"
+            self._parsed = tag
+        else:
+            self.original = tag
+            self._tag = tag
+            self._parsed = self.parse()
 
     def __str__(self):
         return self.tag()
