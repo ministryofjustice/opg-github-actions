@@ -1,0 +1,110 @@
+name: "Create semver tag at current github ref using passed branch name as a suffix."
+description: "Use the branch name passed (can be either refs/heads/name-of-thing or just name-of-thing)."
+inputs:
+  test:
+    description: "If set, run test versions of data"
+    default: ""
+  test_file:
+    description: "If test is set, then use the content of this file"
+    default: ""
+  prerelease:
+    description: "If set, looks for pre-release tag patterns (v1.1.1-${suffix}.${count})"
+    default: ""
+  prerelease_suffix:
+    description: "If prerelease is set, this string is used as the ${suffix} in the tag pattern. (Default: beta)"
+    default: "beta"
+  latest_tag:
+    description: "Lastest tag to bump from."
+    default: ""
+  last_release:
+    description: "Last release tag"
+    default: ""
+  default_bump:
+    description: "Bump version along by this. (Default: minor)"
+    default: "minor"
+  with_v:
+    description: "New tag will start with a v prefix"
+    default: ""
+  caller_repo_subfolder:
+    description: "Location to checkout active repository into. (Default: ./next-tag-caller-repository)"
+    default: "./next-tag-caller-repository"
+
+
+outputs:
+  test:
+    description: "Inputed test variable."
+    value: ${{inputs.test}}
+  test_file:
+    description: "Inputed test_file variable."
+    value: ${{inputs.test_file}}
+  prerelease:
+    description: "Inputed prerelease variable."
+    value: ${{ inputs.prerelease }}
+  prerelease_suffix:
+    description: "Inputed prerelease_suffix variable."
+    value: ${{ inputs.prerelease_suffix }}
+  latest_tag:
+    description: "Inputed latest_tag variable."
+    value: ${{inputs.latest_tag}}
+  last_release:
+    description: "Inputed last_release variable."
+    value: ${{inputs.last_release}}
+  with_v:
+    description: "Inputed with_v variable."
+    value: ${{inputs.with_v}}
+
+  next_tag:
+    description: "Next tag that should be created."
+    value: ${{steps.get_next_tag.outputs.next_tag}}
+  commitish_a:
+    description: "Commit used to look for version bump triggers in messages"
+    value: ${{steps.get_next_tag.outputs.commitish_a}}
+  commitish_b:
+    description: "Commit used to look for version bump triggers in messages"
+    value: ${{steps.get_next_tag.outputs.commitish_b}}
+  majors:
+    description: "number of #major found."
+    value: ${{steps.get_next_tag.outputs.majors}}
+  minors:
+    description: "number of #minor found."
+    value: ${{steps.get_next_tag.outputs.minors}}
+  patches:
+    description: "number of #patch found."
+    value: ${{steps.get_next_tag.outputs.patches}}
+
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Checkout original repo to set folder"
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ github.repository }}
+        ref: ${{ github.head_ref }}
+        path: ${{inputs.caller_repo_subfolder}}
+        fetch-tags: true
+        fetch-depth: 0
+    - name: "Setup python"
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+    - name: Get new Tag
+      id: get_next_tag
+      shell: bash
+      env:
+        RUN_AS_TEST: ${{inputs.test}}
+      run: |
+        pip install -q -r ./requirements.txt
+        src="${{github.action_path}}"
+        repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
+        python ${src}/./next-tag.py \
+          --repository_root="${repo}" \
+          --commitish_a="${{github.base_ref}}" \
+          --commitish_b="${{ github.head_ref }}" \
+          --prerelease="${{inputs.prerelease}}" \
+          --prerelease_suffix="${{inputs.prerelease_suffix}}" \
+          --latest_tag="${{inputs.latest_tag}}" \
+          --last_release="${{inputs.last_release}}" \
+          --with_v="${{inputs.with_v}}" \
+          --default_bump="${{inputs.default_bump}}"

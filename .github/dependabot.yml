@@ -2,7 +2,7 @@ version: 2
 updates:
   - package-ecosystem: 'github-actions'
     pull-request-branch-name:
-      separator: "-"  
+      separator: "-"
     directory: './.github/'
     schedule:
       interval: 'daily'

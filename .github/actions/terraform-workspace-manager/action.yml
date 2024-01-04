@@ -1,6 +1,6 @@
 name: "Terraform workspace manager"
 description: "Tool for terraform workspace manager. "
-  
+
 inputs:
   aws_access_key_id:
     description: "AWS Access Key ID."
@@ -23,7 +23,7 @@ inputs:
   time_to_protect:
     description: "Time in hours to protect workspace for"
     default: "24"
-  
+
 outputs:
   protected_workspaces:
     description: 'Output from protected-workspaces call'
@@ -73,6 +73,3 @@ runs:
             -protected-workspaces=true)
         echo "list=${workspaces}" >> $GITHUB_OUTPUT
         echo "workspace=${{inputs.register_workspace}}" >> $GITHUB_OUTPUT
-
-            
-            

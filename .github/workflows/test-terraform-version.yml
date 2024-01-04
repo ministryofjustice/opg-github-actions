@@ -30,19 +30,19 @@ jobs:
         name: "1. Test exact value"
         uses: './.github/actions/terraform-version'
         with:
-          terraform_directory: "./terraform-version-tests"
+          terraform_directory: "./.github/actions/terraform-version/tests"
           terraform_versions_file: "./one"
       - id: test2
         name: "2. Test range value"
         uses: './.github/actions/terraform-version'
         with:
-          terraform_directory: "./terraform-version-tests"
+          terraform_directory: "./.github/actions/terraform-version/tests"
           terraform_versions_file: "./two"
       - id: test3
         name: "3. Test simple file"
         uses: './.github/actions/terraform-version'
         with:
-          terraform_directory: "./terraform-version-tests"
+          terraform_directory: "./.github/actions/terraform-version/tests"
           terraform_versions_file: "./three"
           simple_file: true
       - id: test_results

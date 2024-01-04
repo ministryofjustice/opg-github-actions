@@ -32,7 +32,7 @@ jobs:
         with:
           # sandbox
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}          
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_account_id: '995199299616'
           aws_iam_role: 'gh-reusable-actions-ci'
           register_workspace: "t${{github.sha}}"
@@ -43,7 +43,7 @@ jobs:
         uses: './.github/actions/terraform-workspace-manager'
         with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}          
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_account_id: '995199299616'
           aws_iam_role: 'gh-reusable-actions-ci'
       - id: test_results
@@ -52,7 +52,7 @@ jobs:
           ws1="t${{github.sha}}"
           pw1="${{steps.test1.outputs.protected_workspaces}}"
           pw2="${{steps.test2.outputs.protected_workspaces}}"
-          
+
           if [[ "${pw1}" != *"${ws1}"* ]]; then
             echo "workspace not found"
             exit 1

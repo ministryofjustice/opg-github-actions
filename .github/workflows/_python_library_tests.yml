@@ -1,0 +1,52 @@
+name: "[Python] Test Library code"
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/python/**'
+  push:
+    branches: [main]
+    paths:
+      - 'app/python/**'
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: read
+  actions: none
+  checks: none
+  deployments: none
+  issues: none
+  packages: none
+  repository-projects: none
+  statuses: none
+
+
+jobs:
+
+  python_tests:
+    name: "Run pytest"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+      - name: "Setup python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      - name: "pip install"
+        shell: bash
+        run: |
+          pip install -q -r ./requirements.txt
+      - name: "Setup and run pytest"
+        shell: bash
+        env:
+          RUN_AS_TEST: "true"
+        run: |
+          cd ./app/python
+          pytest

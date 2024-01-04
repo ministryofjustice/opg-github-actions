@@ -19,10 +19,10 @@ inputs:
 outputs:
   original:
     description: "Original string"
-    value: ${{ steps.make_safe.outputs.original }}
+    value: ${{ inputs.original }}
   suffix:
     description: "Original suffix"
-    value: ${{ steps.make_safe.outputs.suffix }}
+    value: ${{ inputs.suffix }}
   length:
     description: "Originally requested length"
     value: ${{ steps.make_safe.outputs.length }}
@@ -67,7 +67,7 @@ runs:
         # and overwrite the trimmed / safe values
         if [ ! -z "${conditional_match}" ] && [ "${str}" = "${conditional_match}" ]; then
             full_length="${conditional_value}"
-            safe="${conditional_value}"  
+            safe="${conditional_value}"
         fi
 
         echo "original=${str}"
@@ -76,9 +76,6 @@ runs:
         echo "full_length=${full_length}"
         echo "safe=${safe}"
 
-        echo "original=${str}" >> $GITHUB_OUTPUT
-        echo "suffix=${suffix}" >> $GITHUB_OUTPUT
         echo "length=${max_len}" >> $GITHUB_OUTPUT
         echo "full_length=${full_length}" >> $GITHUB_OUTPUT
         echo "safe=${safe}" >> $GITHUB_OUTPUT
-

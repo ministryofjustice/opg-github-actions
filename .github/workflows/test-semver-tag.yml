@@ -1,0 +1,34 @@
+name: "[Test] semver-tag"
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: write
+  security-events: none
+  pull-requests: none
+  actions: none
+  checks: none
+  deployments: none
+  issues: none
+  packages: none
+  repository-projects: none
+  statuses: none
+
+
+jobs:
+  test:
+    runs-on: 'ubuntu-latest'
+    name: "Test semver-tag"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.ref }}
+      - id: test1
+        name: "1. Test pre-release tag construction"
+        uses: './.github/actions/semver-tag'
+        with:
+          test: true
+          prerelease: true

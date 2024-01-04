@@ -4,36 +4,25 @@ on:
   pull_request:
     branches: [main]
     paths-ignore: ['terraform/**', '.github/workflows/_terraform.yml']
-    
 
 jobs:
-  # test terraform-version
-  test_terraform_version:
-    name: "Test terraform-version"
-    uses: './.github/workflows/test-terraform-version.yml'
-  
-  # test terraform-workspace-manager
-  test_terraform_workspace_manager:
-    name: "Test terraform-workspace-manager"
-    uses: './.github/workflows/test-terraform-workspace-manager.yml'
+  # test actions
+  run_tests:
+    name: "[Tests]"
+    uses: './.github/workflows/_tests.yml'
     secrets: inherit
-  
-  # test safe-strings
-  test_safe_strings:
-    name: "Test safe-strings"
-    uses: './.github/workflows/test-safe-strings.yml'
-
 
   # generate branch name
   branch_name:
-    needs: [test_terraform_version, test_safe_strings]
+    needs:
+      - run_tests
     name: "Branch name"
     uses: ministryofjustice/opg-github-workflows/.github/workflows/data-parse-branch-name.yml@v2.0.0
     secrets: inherit
-  
+
   # generate semver tag
   semver_tag:
-    needs: [test_terraform_version, test_safe_strings, branch_name]
+    needs: [branch_name]
     name: "Tag [${{ needs.branch_name.outputs.original }}]"
     uses: ministryofjustice/opg-github-workflows/.github/workflows/data-parse-semver-tag.yml@v2.0.0
     with:
@@ -74,7 +63,8 @@ jobs:
           echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
           echo "| Branch | Original | ${{ needs.branch_name.outputs.original }} |"  >> $GITHUB_STEP_SUMMARY
           echo "| Branch | Safe | ${{ needs.branch_name.outputs.safe }} |"  >> $GITHUB_STEP_SUMMARY
-          echo "| Branch | Full Length | ${{ needs.branch_name.outputs.full_length }} |"  >> $GITHUB_STEP_SUMMARY          echo "| Semver | Tag | ${{ needs.semver_tag.outputs.tag }} |"  >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | Full Length | ${{ needs.branch_name.outputs.full_length }} |"  >> $GITHUB_STEP_SUMMARY
+          echo "| Semver | Tag | ${{ needs.semver_tag.outputs.tag }} |"  >> $GITHUB_STEP_SUMMARY
           echo "| Semver | New Tag | ${{ needs.semver_tag.outputs.new_tag }} |"  >> $GITHUB_STEP_SUMMARY
           echo "| Semver | Pre-release | ${{ needs.semver_tag.outputs.prerelease }} |"  >> $GITHUB_STEP_SUMMARY
           echo "| Release | Draft | true |" >> $GITHUB_STEP_SUMMARY
