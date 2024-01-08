@@ -44,7 +44,6 @@ def arg_parser() -> argparse.ArgumentParser:
 
 
 def run(
-        test:bool,
         tag_list:list,
         branch_name:str,
         release_branches:str,
@@ -97,7 +96,6 @@ def run(
         latest:Version|None = sv.max_version(matching)
 
     return {
-        'test': test,
         'prerelease_argument': prerelease,
         'prerelease_calculated': prerelease_calculated,
         'prerelease_suffix': prerelease_suffix,
@@ -113,7 +111,6 @@ def main():
     all_tags = r.tags("--list")
 
     outputs = run(
-        len(os.getenv("RUN_AS_TEST")) > 0,
         all_tags,
         args.branch_name,
         args.release_branches,

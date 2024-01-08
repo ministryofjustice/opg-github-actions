@@ -1,9 +1,6 @@
 name: "Get the latest semver compatible tag on this repo"
 description: "Use the branch name passed (can be either refs/heads/name-of-thing or just name-of-thing)."
 inputs:
-  test:
-    description: "If set, run test versions of data"
-    default: ""
   prerelease:
     description: "If set, looks for pre-release tag patterns (v1.1.1-${suffix}.${count})"
     default: ""
@@ -22,9 +19,6 @@ inputs:
 
 
 outputs:
-  test:
-    description: "Inputed test."
-    value: ${{inputs.test}}
   prerelease:
     description: "Inputed prerelease variable."
     value: ${{ steps.latest.outputs.prerelease_calculated }}
@@ -62,8 +56,6 @@ runs:
     - name: Get latest Tag
       id: latest
       shell: bash
-      env:
-        RUN_AS_TEST: ${{inputs.test}}
       run: |
         src="${{github.action_path}}"
         repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
