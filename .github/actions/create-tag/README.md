@@ -9,7 +9,7 @@ Within you github workflow job you can place a step such as:
 ```yaml
     - name: "Create tag"
       id: create_tag
-      uses: 'ministryofjustice/opg-github-actions/.github/actions/create-tag@v2.1.3'
+      uses: 'ministryofjustice/opg-github-actions/.github/actions/create-tag@v2.3.1'
       with:
           commitish: "${git_reference}"
           tag_name: "1.0.0-myfeature.2"

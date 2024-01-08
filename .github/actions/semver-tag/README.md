@@ -15,7 +15,7 @@ Within you github workflow job you can place a step such as:
 ```yaml
     - name: "Semver tag"
       id: semver_tag
-      uses: 'ministryofjustice/opg-github-actions/.github/actions/semver-tag@v2.1.3'
+      uses: 'ministryofjustice/opg-github-actions/.github/actions/semver-tag@v2.3.1'
       with:
           prerelease: "true"
           with_v: ""
@@ -28,7 +28,7 @@ Inputs:
 - `prerelease`
 - `release_branch` (default: "main")
 - `with_v` (default: "true"| True)
-- `hide_summary` (default: "" | False)
+- `show_verbose_summary` (default: "" | False)
 - `test` (default: "" | False)
 - `releases_enabled` (default: 'true'|True)
 - `github_token`
@@ -65,8 +65,8 @@ The branch that should be considered a release when being pushed to.  If the act
 #### `with_v` (default: "true"|True)
 Determines if the semver tags are created with a `v` prefix.
 
-#### `hide_summary` (default: ""|False)
-If this is "true" then the collated information will not be outputed to the `${GITHUB_STEP_SUMMARY}`
+#### `show_verbose_summary` (default: ""|False)
+If this is "true" then the larger collated information will be outputed to the `${GITHUB_STEP_SUMMARY}`
 
 #### `test` (default: ""|False)
 When true ("True", "true" or true), the tag will be created, but not pushed to the remote and therefore will not persist.

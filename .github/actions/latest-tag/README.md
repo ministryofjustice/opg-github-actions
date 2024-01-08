@@ -14,7 +14,7 @@ Within you github workflow job you can place a step such as:
 ```yaml
     - name: "Find latest tag"
       id: latest_tag
-      uses: 'ministryofjustice/opg-github-actions/.github/actions/latest-tag@v2.1.3'
+      uses: 'ministryofjustice/opg-github-actions/.github/actions/latest-tag@v2.3.1'
       with:
           branch_name: "my-feature"
           prerelease: "true"

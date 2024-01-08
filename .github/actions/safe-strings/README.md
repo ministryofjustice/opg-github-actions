@@ -11,7 +11,7 @@ Within you github workflow job you can place a step such as this:
 ```yaml
     - name: "Generate safe string"
       id: safe_string
-      uses: 'ministryofjustice/opg-github-actions/.github/actions/branch-name@v2.1.3'
+      uses: 'ministryofjustice/opg-github-actions/.github/actions/branch-name@v2.3.1'
       with:
         original: "none-safe-string"
 ```

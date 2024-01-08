@@ -13,7 +13,7 @@ Within you github workflow job you can place a step such as:
 ```yaml
     - id: terraform_version
       name: "Get terraform version"
-      uses: 'ministryofjustice/opg-github-actions/.github/actions/terraform-version@v2.1.3'
+      uses: 'ministryofjustice/opg-github-actions/.github/actions/terraform-version@v2.3.1'
       with:
         terraform_directory: "./terraform/"
 ```
