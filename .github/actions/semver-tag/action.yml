@@ -13,9 +13,7 @@ inputs:
   with_v:
     description: "New tag will start with a v prefix is this is any non-empty value."
     default: "true"
-  compare:
-    description: "A comparision tag to see if this matches"
-    default: ""
+
 
 outputs:
   test:
@@ -100,20 +98,6 @@ runs:
           test: ${{inputs.test}}
           commitish: ${{steps.branch_name.outputs.branch_name}}
           tag_name: ${{steps.next_tag.outputs.next_tag}}
-    - name: compare
-      shell: bash
-      if: ${{ inputs.compare != '' }}
-      run: |
-        set -eo pipefail
-        echo "### Semver comparision" >> $GITHUB_STEP_SUMMARY
-        echo "| &nbsp; | Expected | Actual |" >> $GITHUB_STEP_SUMMARY
-        echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
-        if [ "${{ inputs.compare }}" -eq "${{ steps.next_tag.outputs.next_tag }}" ]; then
-          passfail="✅"
-        else
-          passfail="❌"
-        fi
-        echo "| ${passfail} | ${{ inputs.compare }} | ${{ steps.next_tag.outputs.next_tag }} |"  >> $GITHUB_STEP_SUMMARY
 
     - name: summary
       shell: bash
@@ -138,4 +122,4 @@ runs:
 
         echo "| Create Tag | latest | ${{ steps.create_tag.outputs.latest }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| Create Tag | test | ${{ steps.create_tag.outputs.test }} |"  >> $GITHUB_STEP_SUMMARY
-        echo "| Create Tag | created | ${{ steps.create_tag.outputs.created }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| **Create Tag** | **created** | **${{ steps.create_tag.outputs.created }}** |"  >> $GITHUB_STEP_SUMMARY
