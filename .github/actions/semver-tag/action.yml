@@ -106,7 +106,7 @@ runs:
         echo "inputs.action_ref=${{ inputs.action_ref }}"
     - name: "Checkout action content"
       uses: actions/checkout@v4
-      if: ${{ inputs.action_repository != "" }}
+      if: ${{ inputs.action_repository != '' }}
       with:
         repository: ${{ inputs.action_repository }}
         ref: ${{ inputs.action_ref }}
