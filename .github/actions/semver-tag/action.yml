@@ -114,7 +114,7 @@ runs:
     # if the branch is release branch and this is not a test
     - id: create_release
       name: Create release
-      if: ${{ ( contains(github.ref, inputs.release_branch) ) && (${{ inputs.test }} == "")  }}
+      if: ${{ ( contains(github.ref, inputs.release_branch) ) && ( inputs.test == "")  }}
       uses: ncipollo/release-action@v1.13.0
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
