@@ -87,10 +87,10 @@ runs:
   steps:
     - name: "Generate safe branch name"
       id: branch_name
-      uses: './.github/actions/branch-name'
+      uses: '${{ github.action_path }}/./.github/actions/branch-name'
     - name: "Find latest tag"
       id: latest_tag
-      uses: './.github/actions/latest-tag'
+      uses: '${{ github.action_path }}/./.github/actions/latest-tag'
       with:
           branch_name: ${{steps.branch_name.outputs.branch_name}}
           release_branches: ${{inputs.release_branch}}
@@ -98,7 +98,7 @@ runs:
           prerelease_suffix: ${{steps.branch_name.outputs.safe}}
     - name: "Find next tag"
       id: next_tag
-      uses: './.github/actions/next-tag'
+      uses: '${{ github.action_path }}/./.github/actions/next-tag'
       with:
           prerelease: ${{steps.latest_tag.outputs.prerelease}}
           prerelease_suffix: ${{steps.latest_tag.outputs.prerelease_suffix}}
@@ -109,7 +109,7 @@ runs:
           commitish_b: ${{steps.branch_name.outputs.destination_commitish}}
     - name: "Create tag"
       id: create_tag
-      uses: './.github/actions/create-tag'
+      uses: '${{ github.action_path }}/./.github/actions/create-tag'
       with:
           test: ${{inputs.test}}
           commitish: ${{steps.branch_name.outputs.branch_name}}
