@@ -30,6 +30,7 @@ Inputs:
 - `with_v` (default: "true"| True)
 - `hide_summary` (default: "" | False)
 - `test` (default: "" | False)
+- `releases_enabled` (default: 'true'|True)
 - `github_token`
 
 Outputs:
@@ -69,6 +70,9 @@ If this is "true" then the collated information will not be outputed to the `${G
 
 #### `test` (default: ""|False)
 When true ("True", "true" or true), the tag will be created, but not pushed to the remote and therefore will not persist.
+
+#### `releases_enabled` (default: "true"|True)
+When this is true and this is on a releaase branch and not a test, then a release will be created.
 
 #### `github_token`
 A github token that has permissions to create a release.
