@@ -122,8 +122,8 @@ class GitHelper:
         logs:list = []
         # checkout between the locations to ensure we have logs
         try:
-            self.repository.git.checkout(commitish_a)
-            self.repository.git.checkout(commitish_b)
+            self.repository.git.checkout(commitish_a, "--")
+            self.repository.git.checkout(commitish_b, "--")
         except Exception:
             print("Failed to checkout")
             raise Exception("Failed to checkout to a commit")

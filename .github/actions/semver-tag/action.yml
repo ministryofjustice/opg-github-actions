@@ -13,17 +13,17 @@ inputs:
   with_v:
     description: "New tag will start with a v prefix is this is any non-empty value."
     default: "true"
-  compare:
-    description: "A comparision tag to see if this matches"
+  hide_summary:
+    description: "Set this to any value to hide the summary output data"
+    default: ""
+  github_token:
+    description: "A token authorised with write permissions to create a release."
     default: ""
 
 outputs:
   test:
     description: "Inputed test variable."
     value: ${{ inputs.test }}
-  hide_summary:
-    description: "Set this to any value to hide the summary output data"
-    value: ""
   release_branch:
     description: "Inputed release_branch variable."
     value: ${{ inputs.release_branch }}
@@ -68,6 +68,17 @@ outputs:
     description: "Output from create_tag - the all value"
     value: ${{ steps.create_tag.outputs.all }}
 
+  release_id:
+    description: "The id of the release if it was created"
+    value: ${{steps.create_release.outputs.id}}
+  release_url:
+    description: "The html_url of the release if it was created"
+    value: ${{steps.create_release.outputs.html_url}}
+
+  created_tag:
+    description: "Output from create_tag - the created value"
+    value: ${{ steps.create_tag.outputs.created }}
+
 runs:
   using: "composite"
   steps:
@@ -100,20 +111,19 @@ runs:
           test: ${{inputs.test}}
           commitish: ${{steps.branch_name.outputs.branch_name}}
           tag_name: ${{steps.next_tag.outputs.next_tag}}
-    - name: compare
-      shell: bash
-      if: ${{ inputs.compare != '' }}
-      run: |
-        set -eo pipefail
-        echo "### Semver comparision" >> $GITHUB_STEP_SUMMARY
-        echo "| &nbsp; | Expected | Actual |" >> $GITHUB_STEP_SUMMARY
-        echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
-        if [ "${{ inputs.compare }}" -eq "${{ steps.next_tag.outputs.next_tag }}" ]; then
-          passfail="✅"
-        else
-          passfail="❌"
-        fi
-        echo "| ${passfail} | ${{ inputs.compare }} | ${{ steps.next_tag.outputs.next_tag }} |"  >> $GITHUB_STEP_SUMMARY
+    # if the branch is release branch and this is not a test
+    - id: create_release
+      name: Create release
+      if: ${{ ( contains(github.ref, inputs.release_branch) ) && ( inputs.test == '')  }}
+      uses: ncipollo/release-action@v1.13.0
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      with:
+        tag: ${{ steps.create_tag.outputs.created }}
+        name: ${{ steps.create_tag.outputs.created }}
+        draft: false
+        prerelease: false
+        generateReleaseNotes: true
 
     - name: summary
       shell: bash
@@ -138,4 +148,6 @@ runs:
 
         echo "| Create Tag | latest | ${{ steps.create_tag.outputs.latest }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| Create Tag | test | ${{ steps.create_tag.outputs.test }} |"  >> $GITHUB_STEP_SUMMARY
-        echo "| Create Tag | created | ${{ steps.create_tag.outputs.created }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| **Create Tag** | **created** | **${{ steps.create_tag.outputs.created }}** |"  >> $GITHUB_STEP_SUMMARY
+
+        echo "| Release | URL | [${{ steps.create_release.outputs.id }}](${{ steps.create_release.outputs.html_url }}) |"  >> $GITHUB_STEP_SUMMARY

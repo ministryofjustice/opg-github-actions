@@ -1,5 +1,5 @@
 name: "Branch Name"
-description: "Use GITHUB_HEAD_REF or GITHUB_REF to get the branch name. Example: ref/heads/main-123-456-789 => main-123-456-789. Also return safe-strings versions."
+description: "Get branch data. Example: ref/heads/main-123-456-789 => main-123-456-789. Also return safe-strings versions."
 
 outputs:
   branch_name:

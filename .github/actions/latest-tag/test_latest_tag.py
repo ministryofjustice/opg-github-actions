@@ -97,7 +97,7 @@ def test_moreactions_found(setup) -> None:
     branch = "more-actions"
     release_branches = "main,master"
     expected = "v1.5.0-moreactions.0"
-    outputs = cmd.run(True, test_tags, branch, release_branches, "true", "moreactions")
+    outputs = cmd.run(test_tags, branch, release_branches, "true", "moreactions")
     t1 = (outputs['latest'] == expected)
     assert True == t1
     o.result(expected, "==", outputs['latest'], t1 == True, fh)
@@ -110,7 +110,7 @@ def test_123rand123_not_found_latest_empty(setup) -> None:
     branch = "more-actions"
     release_branches = "main,master"
     expected = ""
-    outputs = cmd.run(True, test_tags, branch, release_branches, "true", "123rand123")
+    outputs = cmd.run(test_tags, branch, release_branches, "true", "123rand123")
     t1 = (outputs['latest'] == expected)
     assert True == t1
     o.result(expected, "==", outputs['latest'], t1 == True, fh)
@@ -123,7 +123,7 @@ def test_last_release_version_with_empties(setup) -> None:
     branch = "beta"
     release_branches = "main,master"
     expected = "v1.4.0"
-    outputs = cmd.run(True, test_tags, branch, release_branches, "true", "")
+    outputs = cmd.run(test_tags, branch, release_branches, "true", "")
     t1 = (outputs['last_release'] == expected)
     assert True == t1
     o.result(expected, "==", outputs['last_release'], t1 == True, fh)
@@ -136,7 +136,7 @@ def test_branch_matches_release_branch_forces_a_release(setup) -> None:
     branch = "main"
     release_branches = "main,master"
     expected = "v1.4.0"
-    outputs = cmd.run(True, test_tags, branch, release_branches, "true", "123rand123")
+    outputs = cmd.run(test_tags, branch, release_branches, "true", "123rand123")
     t1 = (outputs['last_release'] == expected)
     assert True == t1
     o.result(expected, "==", outputs['last_release'], t1 == True, fh)

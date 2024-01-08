@@ -277,7 +277,6 @@ def test_next_tag_result_matches(
     setup burden
     """
     outputs = cmd.run(
-        test = True,
         last_release = last_release,
         latest_tag = latest_tag,
         prerelease = prerelease,
