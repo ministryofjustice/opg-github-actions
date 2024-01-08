@@ -13,8 +13,8 @@ inputs:
   with_v:
     description: "New tag will start with a v prefix is this is any non-empty value."
     default: "true"
-  hide_summary:
-    description: "Set this to any value to hide the summary output data"
+  show_verbose_summary:
+    description: "Set this to any value to show the more verbose summary output data"
     default: ""
   github_token:
     description: "A token authorised with write permissions to create a release."
@@ -158,7 +158,18 @@ runs:
 
     - name: summary
       shell: bash
-      if: ${{ (always()) && (inputs.hide_summary == '') }}
+      if: ${{ (always()) && (inputs.show_verbose_summary == '') }}
+      run: |
+        set -eo pipefail
+        echo "### Semver tag summary" >> $GITHUB_STEP_SUMMARY
+        echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Created Tag** | **${{ steps.create_tag.outputs.created }}** |"  >> $GITHUB_STEP_SUMMARY
+        echo "| **Release** | [${{ steps.create_release.outputs.id }}](${{ steps.create_release.outputs.html_url }}) |"  >> $GITHUB_STEP_SUMMARY
+
+
+    - name: Verbose summary
+      shell: bash
+      if: ${{ (always()) && (inputs.show_verbose_summary != '') }}
       run: |
         set -eo pipefail
         echo "### Semver tag summary" >> $GITHUB_STEP_SUMMARY

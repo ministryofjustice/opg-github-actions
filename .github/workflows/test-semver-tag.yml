@@ -33,3 +33,4 @@ jobs:
           test: true
           prerelease: ${{ github.ref != 'refs/heads/main' }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          show_verbose_summary: 'true'
