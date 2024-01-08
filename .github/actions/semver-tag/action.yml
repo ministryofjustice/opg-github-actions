@@ -23,6 +23,10 @@ inputs:
     description: "If set, allows the creation of a release when on a release branch (and not testing)"
     default: "true"
 
+  action_repository:
+    description: "test"
+    default: ${{ github.action_repository }}
+
 outputs:
   test:
     description: "Inputed test variable."
@@ -82,14 +86,22 @@ outputs:
     description: "Output from create_tag - the created value"
     value: ${{ steps.create_tag.outputs.created }}
 
+
+
+
+
 runs:
   using: "composite"
   steps:
+    - name: Debug
+      shell: bash
+      run: |
+        echo "github.action_repository=${{ github.action_repository }}"
+        echo "inputs.action_repository=${{ inputs.action_repository }}"
+        pwd
+        ls -la
     - name: "Checkout action content"
       uses: actions/checkout@v4
-      with:
-        repository: ${{ github.action_repository }}
-        ref: ${{ github.action_ref }}
     - name: "Generate safe branch name"
       id: branch_name
       uses: './.github/actions/branch-name'
