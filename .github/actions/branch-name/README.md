@@ -19,7 +19,7 @@ Within you github workflow job you can place a step such as:
 Example of using the data in another step
 
 ```yaml
-- name: "Create tag"
+    - name: "Create tag"
       id: create_tag
       uses: './.github/actions/create-tag'
       with:
