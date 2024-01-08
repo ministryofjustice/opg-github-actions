@@ -14,14 +14,6 @@ Within you github workflow job you can place a step such as:
       uses: 'ministryofjustice/opg-github-actions/.github/actions/branch-name@v2.1.3'
 ```
 
-It does not require any inputs and will return the following data:
-
-- `branch_name`
-- `full_length`
-- `safe`
-- `source_commitish`
-- `destination_commitish`
-
 ### Using the data
 
 Example of using the data in another step
@@ -35,6 +27,17 @@ Example of using the data in another step
           tag_name: ${{steps.next_tag.outputs.next_tag}}
 ```
 
+## Inputs and Outputs
+
+It does not require any inputs and will return the following data:
+
+- `branch_name`
+- `full_length`
+- `safe`
+- `source_commitish`
+- `destination_commitish`
+
+
 #### `branch_name`
 
 In a `pull_request` workflow, this is `github.pull_request.head.ref` value, and will be the name of the branch being worked on - eg `my-feature-1`.
@@ -43,14 +46,14 @@ Both of these then have `refs/heads` removed from their value.
 
 This value will retain any special charaters or seperaters from the branch name, so can also look like `dependabot/package/update`.
 
-### `full_length`
+#### `full_length`
 
 This is the `branch_name` value as only alphanumeric characters, so `branch_name` of `dependabot/update/12` this would be `dependabotupdate12`.
 
-### `safe`
+#### `safe`
 
 This is a truncated form of `full_length`, limited to 12 characters. This is what you would typically use within git tags.
 
-### `source_commitish` and `destination_commitish`
+#### `source_commitish` and `destination_commitish`
 
 Useful for semver and similar processes, these variables contain a `commit-ish` reference for comparison between the points in history. On a `pull_request` workflow, they will contain the branch names being merged (so `my-feature-1` and `main`), and for a `push` workflow they contain the before and after commit references.
