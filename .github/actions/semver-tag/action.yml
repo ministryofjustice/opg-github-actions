@@ -98,6 +98,18 @@ runs:
           test: ${{inputs.test}}
           commitish: ${{steps.branch_name.outputs.branch_name}}
           tag_name: ${{steps.next_tag.outputs.next_tag}}
+    - id: create_release
+      name: Create release
+      if: github.ref == 'refs/heads/main'
+      uses: ncipollo/release-action@v1.13.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag: ${{ steps.create_tag.outputs.created }}
+        name: ${{ needs.semver_tag.outputs.created }}
+        draft: false
+        prerelease: false
+        generateReleaseNotes: true
 
     - name: summary
       shell: bash
@@ -123,3 +135,5 @@ runs:
         echo "| Create Tag | latest | ${{ steps.create_tag.outputs.latest }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| Create Tag | test | ${{ steps.create_tag.outputs.test }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| **Create Tag** | **created** | **${{ steps.create_tag.outputs.created }}** |"  >> $GITHUB_STEP_SUMMARY
+
+        echo "| Release | URL | [${{ steps.create_release.outputs.id }}](${{ steps.create_release.outputs.html_url }}) |"  >> $GITHUB_STEP_SUMMARY
