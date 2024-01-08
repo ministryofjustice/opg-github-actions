@@ -19,6 +19,9 @@ inputs:
   github_token:
     description: "A token authorised with write permissions to create a release."
     default: ""
+  releases_enabled:
+    description: "If set, allows the creation of a release when on a release branch (and not testing)"
+    default: "true"
 
 outputs:
   test:
@@ -111,10 +114,12 @@ runs:
           test: ${{inputs.test}}
           commitish: ${{steps.branch_name.outputs.branch_name}}
           tag_name: ${{steps.next_tag.outputs.next_tag}}
-    # if the branch is release branch and this is not a test
+    # if the branch is release branch, releases are enabled and this is not a test
     - id: create_release
       name: Create release
-      if: ${{ ( contains(github.ref, inputs.release_branch) ) && ( inputs.test == '')  }}
+      if: ${{ ( contains(github.ref, inputs.release_branch) ) &&
+              ( inputs.releases_enabled == 'true' ) &&
+              ( inputs.test == '')  }}
       uses: ncipollo/release-action@v1.13.0
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
