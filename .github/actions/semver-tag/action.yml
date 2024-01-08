@@ -120,7 +120,7 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github_token }}
       with:
         tag: ${{ steps.create_tag.outputs.created }}
-        name: ${{ needs.semver_tag.outputs.created }}
+        name: ${{ steps.create_tag.outputs.created }}
         draft: false
         prerelease: false
         generateReleaseNotes: true
