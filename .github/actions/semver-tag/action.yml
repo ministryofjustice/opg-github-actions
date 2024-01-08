@@ -90,7 +90,7 @@ runs:
       run: echo "action_path=${{ github.action_path }}"
     - name: "Generate safe branch name"
       id: branch_name
-      uses: "${{ github.action_path }}/./.github/actions/branch-name"
+      uses: format('{}/./.github/actions/branch-name', github.action_path)
     - name: "Find latest tag"
       id: latest_tag
       uses: '${{ github.action_path }}/./.github/actions/latest-tag'
