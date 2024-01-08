@@ -13,7 +13,7 @@ Within you github workflow job you can place a step such as:
 ```yaml
     - id: terraform_workspace
       name: "Register workspace"
-      uses: 'ministryofjustice/opg-github-actions/.github/actions/terraform-workspace-manager@v2.1.3'
+      uses: 'ministryofjustice/opg-github-actions/.github/actions/terraform-workspace-manager@v2.3.1'
       with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

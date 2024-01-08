@@ -11,7 +11,7 @@ Within you github workflow job you can place a step such as:
 ```yaml
 - name: "Generate safe branch name"
       id: branch_name
-      uses: 'ministryofjustice/opg-github-actions/.github/actions/branch-name@v2.1.3'
+      uses: 'ministryofjustice/opg-github-actions/.github/actions/branch-name@v2.3.1'
 ```
 
 ### Using the data

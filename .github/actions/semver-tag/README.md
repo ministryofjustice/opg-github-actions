@@ -15,7 +15,7 @@ Within you github workflow job you can place a step such as:
 ```yaml
     - name: "Semver tag"
       id: semver_tag
-      uses: 'ministryofjustice/opg-github-actions/.github/actions/semver-tag@v2.1.3'
+      uses: 'ministryofjustice/opg-github-actions/.github/actions/semver-tag@v2.3.1'
       with:
           prerelease: "true"
           with_v: ""

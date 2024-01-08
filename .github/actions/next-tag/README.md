@@ -16,7 +16,7 @@ Within you github workflow job you can place a step such as this for finding pre
 ```yaml
     - name: "Find next tag"
       id: next_tag
-      uses: 'ministryofjustice/opg-github-actions/.github/actions/next-tag@v2.1.3'
+      uses: 'ministryofjustice/opg-github-actions/.github/actions/next-tag@v2.3.1'
       with:
           prerelease: "true"
           prerelease_suffix: "myfeature"
@@ -28,7 +28,7 @@ or for release versions:
 ```yaml
     - name: "Find next tag"
       id: next_tag
-      uses: 'ministryofjustice/opg-github-actions/.github/actions/next-tag@v2.1.3'
+      uses: 'ministryofjustice/opg-github-actions/.github/actions/next-tag@v2.3.1'
       with:
           prerelease_suffix: "myfeature"
           last_release: "1.0.1"
