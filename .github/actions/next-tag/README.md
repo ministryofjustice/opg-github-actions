@@ -2,7 +2,7 @@
 
 Used to generate the next semver-ish tag suitable for the repository based on the last release, the branch name and the commit history between the points specified.
 
-Looks for `#major|minor|patch` within the subject, body and notes of eahc commit message and will increment the `latest_tag` suitably.
+Looks for `#major|minor|patch` within the subject, body and notes of each commit message and will increment the `latest_tag` suitably.
 
 For prereleases, the prerelease segment is updated and if a major version bump is changed, that will be updated as well. This means your feature branch might start as `1.1.0-myfeature.2`, but if you then do a commit with `#major` in the next tag will be `2.0.0-myfeature.0`.
 
