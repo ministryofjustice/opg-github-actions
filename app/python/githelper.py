@@ -47,6 +47,7 @@ class GitHelper:
         Presumes the tag has already been checked and corrected for use.
         """
         try:
+            print(f"Creating tag [{tag}] locally")
             self.repository.git.tag(tag, commitish)
         except Exception as err:
             print(f"Fatal error: could not create [{tag}] locally", file=sys.stderr)
@@ -54,7 +55,7 @@ class GitHelper:
 
         if push == True:
             print(f"Pushing tag [{tag}] to remote")
-            self.repository.push('origin', tag)
+            self.repository.git.push('origin', tag)
         return tag
 
     def tag_to_create(self, tag:str, all_tags:list) -> str:
