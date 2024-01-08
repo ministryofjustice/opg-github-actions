@@ -85,15 +85,17 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Path
+    - name: Action path
       shell: bash
       run: echo "action_path=${{ github.action_path }}"
     - name: "Generate safe branch name"
       id: branch_name
-      uses: format('{0}/./.github/actions/branch-name', github.action_path)
+      uses: './.github/actions/branch-name'
+      working-directory: github.action_path
     - name: "Find latest tag"
       id: latest_tag
-      uses: format('{0}/./.github/actions/latest-tag', github.action_path)
+      uses: './.github/actions/latest-tag'
+      working-directory: github.action_path
       with:
           branch_name: ${{steps.branch_name.outputs.branch_name}}
           release_branches: ${{inputs.release_branch}}
@@ -101,7 +103,8 @@ runs:
           prerelease_suffix: ${{steps.branch_name.outputs.safe}}
     - name: "Find next tag"
       id: next_tag
-      uses: format('{0}/./.github/actions/next-tag', github.action_path)
+      uses: './.github/actions/next-tag'
+      working-directory: github.action_path
       with:
           prerelease: ${{steps.latest_tag.outputs.prerelease}}
           prerelease_suffix: ${{steps.latest_tag.outputs.prerelease_suffix}}
@@ -112,7 +115,8 @@ runs:
           commitish_b: ${{steps.branch_name.outputs.destination_commitish}}
     - name: "Create tag"
       id: create_tag
-      uses: format('{0}/./.github/actions/create-tag', github.action_path)
+      uses: './.github/actions/create-tag'
+      working-directory: github.action_path
       with:
           test: ${{inputs.test}}
           commitish: ${{steps.branch_name.outputs.branch_name}}
