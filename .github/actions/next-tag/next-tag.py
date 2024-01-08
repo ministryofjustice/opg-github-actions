@@ -54,7 +54,6 @@ def arg_parser() -> argparse.ArgumentParser:
 
 
 def run(
-        test: bool,
         last_release: Version|str|None,
         latest_tag: Version|str|None,
         prerelease: str|bool|None,
@@ -136,7 +135,6 @@ def main():
     }
 
     res = run(
-        test= len(os.getenv("RUN_AS_TEST")) > 0,
         last_release=last_release,
         latest_tag=latest_tag,
         prerelease=args.prerelease,

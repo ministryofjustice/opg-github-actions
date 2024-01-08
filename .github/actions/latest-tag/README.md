@@ -28,14 +28,12 @@ Inputs:
 - `prerelease_suffix`
 - `branch_name` (default: "beta")
 - `release_branches` (default: "main,master")
-- `test` (default: "")
 
 Outputs:
 - `prerelease`
 - `prerelease_suffix`
-- `latest`
 - `last_release`
-- `test`
+- **`latest`**
 
 ### Inputs
 

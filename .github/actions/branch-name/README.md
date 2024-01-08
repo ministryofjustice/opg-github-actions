@@ -33,9 +33,9 @@ It does not require any inputs and will return the following data:
 
 - `branch_name`
 - `full_length`
-- `safe`
 - `source_commitish`
 - `destination_commitish`
+- **`safe`**
 
 
 #### `branch_name`

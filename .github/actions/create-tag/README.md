@@ -28,7 +28,7 @@ Outputs:
 - `requested`
 - `test`
 - `latest`
-- `created`
+- **`created`**
 
 ### Inputs
 

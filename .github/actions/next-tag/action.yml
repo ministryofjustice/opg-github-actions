@@ -1,9 +1,6 @@
 name: "Create semver tag at current github ref using passed branch name as a suffix."
 description: "Use the branch name passed (can be either refs/heads/name-of-thing or just name-of-thing)."
 inputs:
-  test:
-    description: "If set, run test versions of data"
-    default: ""
   prerelease:
     description: "If set, looks for pre-release tag patterns (v1.1.1-${suffix}.${count})"
     default: ""
@@ -33,9 +30,7 @@ inputs:
     required: true
 
 outputs:
-  test:
-    description: "Inputed test variable."
-    value: ${{inputs.test}}
+
   prerelease_suffix:
     description: "Inputed prerelease_suffix variable."
     value: ${{ inputs.prerelease_suffix }}
@@ -95,8 +90,6 @@ runs:
     - name: Get new Tag
       id: get_next_tag
       shell: bash
-      env:
-        RUN_AS_TEST: ${{inputs.test}}
       run: |
         src="${{github.action_path}}"
         repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
