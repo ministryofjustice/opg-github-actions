@@ -16,7 +16,9 @@ inputs:
   hide_summary:
     description: "Set this to any value to hide the summary output data"
     default: ""
-
+  github_token:
+    description: "A token authorised with write permissions to create a release."
+    default: ""
 
 outputs:
   test:
@@ -115,7 +117,7 @@ runs:
       if: ( contains(github.ref, inputs.release_branch) && ${{inputs.test}} == "" )
       uses: ncipollo/release-action@v1.13.0
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
       with:
         tag: ${{ steps.create_tag.outputs.created }}
         name: ${{ needs.semver_tag.outputs.created }}

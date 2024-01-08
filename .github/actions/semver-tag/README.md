@@ -19,6 +19,7 @@ Within you github workflow job you can place a step such as:
       with:
           prerelease: "true"
           with_v: ""
+          github_token: ${{ secrets.token }}
 ```
 
 ## Inputs and Outputs
@@ -29,6 +30,7 @@ Inputs:
 - `with_v` (default: "true"| True)
 - `hide_summary` (default: "" | False)
 - `test` (default: "" | False)
+- `github_token`
 
 Outputs:
 - `prerelease`
@@ -67,6 +69,9 @@ If this is "true" then the collated information will not be outputed to the `${G
 
 #### `test` (default: ""|False)
 When true ("True", "true" or true), the tag will be created, but not pushed to the remote and therefore will not persist.
+
+#### `github_token`
+A github token that has permissions to create a release.
 
 ### Outputs
 
