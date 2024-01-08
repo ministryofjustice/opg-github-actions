@@ -118,14 +118,12 @@ def main():
     lt = sv.SemverHelper(args.latest_tag)
     latest_tag = lt.parse()
 
-    test = (len(os.getenv("RUN_AS_TEST")) > 0)
     r = ghm.GitHelper(args.repository_root)
     commits:list = r.commits(args.commitish_a, args.commitish_b)
 
     print(commits, sep="\n")
 
     config = {
-        'test': test,
         'repository_root': args.repository_root,
         'commitish_a': args.commitish_a,
         'commitish_b': args.commitish_b,
