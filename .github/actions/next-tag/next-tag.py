@@ -48,8 +48,8 @@ def arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--with_v", default="false", help="apply prefix to the new tag")
     parser.add_argument("--default_bump", default="minor", help="If there are no triggers in commits, bump by this")
 
-    parser.add_argument("--pull_request_title", default="", help="Pass along a pull request title from github event")
-    parser.add_argument("--pull_request_body", default="", help="Pass along a pull request body from github event")
+    parser.add_argument("--pull_request_title", default="", help="Pass along a pull request title - normally from the github event")
+    parser.add_argument("--pull_request_body", default="", help="Pass along a pull request body - normally from the github event")
     return parser
 
 
