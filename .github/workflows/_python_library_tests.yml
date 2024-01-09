@@ -49,6 +49,6 @@ jobs:
           RUN_AS_TEST: "true"
         run: |
           cd ./app/python
-          git config --local user.name "pytest"
-          git config --local user.email "dummy@dummymail.com"
+          git config --global user.name "pytest"
+          git config --global user.email "dummy@dummymail.com"
           pytest
