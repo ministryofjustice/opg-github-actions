@@ -22,6 +22,7 @@ inputs:
   releases_enabled:
     description: "If set, allows the creation of a release when on a release branch (and not testing)"
     default: "true"
+  ## Used to capture the intial values before they get overwritten
   action_ref:
     description: "Capture the starting value of github.action_ref. DO NOT SET"
     default: ${{ github.action_ref }}
@@ -100,12 +101,6 @@ runs:
         repository: ${{ inputs.action_repository }}
         ref: ${{ inputs.action_ref }}
         path: ./_ghsemveraction
-    - shell: bash
-      run: |
-        ls -la ./_ghsemveraction/
-        ls -la ./_ghsemveraction/.github/
-        ls -la ./_ghsemveraction/.github/actions/
-        ls -la ./_ghsemveraction/.github/actions/branch-name
     - name: "Generate safe branch name"
       id: branch_name
       uses: ./_ghsemveraction/.github/actions/branch-name
