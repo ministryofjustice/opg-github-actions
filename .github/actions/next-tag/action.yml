@@ -99,8 +99,8 @@ runs:
       id: get_next_tag
       shell: bash
       env:
-        pr_title: toJSON(format('{title:{0}}', github.event.pull_request.title))
-        pr_body: toJSON(format('{body:{0}}', github.event.pull_request.body))
+        pr_title: ${{ toJSON(format('{title:{0}}', github.event.pull_request.title)) }}
+        pr_body: ${{ toJSON(format('{body:{0}}', github.event.pull_request.body)) }}
       run: |
         src="${{github.action_path}}"
         repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
