@@ -98,6 +98,9 @@ runs:
     - name: Get new Tag
       id: get_next_tag
       shell: bash
+      env:
+        github_pr_title: ${{ github.event.pull_request.title }}
+        github_pr_body: ${{ github.event.pull_request.body }}
       run: |
         src="${{github.action_path}}"
         repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"

@@ -121,6 +121,17 @@ def main():
     r = ghm.GitHelper(args.repository_root)
     commits:list = r.commits(args.commitish_a, args.commitish_b)
 
+    # hacky way to add in the pull_request message to the commits
+    # for when someone adds #major etc to just the pr message
+    if 'github_pr_title' in os.environ and 'github_pr_body' in os.environ:
+        print("Injecting pull_request data into commits")
+        commits.append({
+            'hash': '',
+            'notes': '',
+            'subject': os.environ['github_pr_title'],
+            'body': os.environ['github_pr_body']
+        })
+
     print(commits, sep="\n")
 
     config = {
