@@ -78,6 +78,45 @@ def setup_tags(request) -> tuple:
     print("\nPerforming teardown...")
 
 
+@pytest.fixture()
+def setup_repo_with_commits(request) -> tuple:
+    """
+    Create a series of commits on a fresh branch from
+    main that contain odd characters to ensure parising
+    is working correctly
+    """
+    print("\nSetting up resources...")
+    # download repo
+    repo_root = "./githelper-commit-test/"
+    url = "https://github.com/ministryofjustice/opg-github-actions.git"
+    repo = Repo.clone_from(url, repo_root)
+
+    # create new branch from head of `main`
+    repo.git.checkout('main', '--')
+    branch_name = 'pytest-githelper-commits'
+    branch = repo.create_head(branch_name)
+    branch.checkout()
+    # create some empty commits
+    test_commits = [
+        'a normal commit with a #patch',
+        'a test with nothing',
+        'testing > and < work',
+        'test that & and " and \\ pass',
+        '  test     whitespace things and %, @ ? ='
+    ]
+    for t in test_commits:
+        repo.git.commit('-m', t, '--allow-empty')
+
+    yield repo_root, branch_name, test_commits
+
+    print("\nPerforming teardown...")
+    try:
+        shutil.rmtree(repo_root)
+    except OSError as e:
+        print("Error: %s - %s." % (e.filename, e.strerror))
+
+
+
 def test_tags_at_point(setup_repo) -> None:
     """
     Test tag listing is being generated correctly and all test tests
@@ -180,3 +219,17 @@ def test_commits(setup_repo) -> None:
         # should have a commit, subject, notes and body keys
         for f in ['hash', 'subject', 'notes', 'body']:
             assert (f in sample.keys() ) == True
+
+
+def test_commit_message_parsing(setup_repo_with_commits) -> None:
+    """
+    Test that all commits that contain special characters such as
+    ? are returned and parsed correctly
+    """
+    repo_root, branch_name, test_commits = setup_repo_with_commits
+    r = ghm.GitHelper(repo_root)
+    commits = r.commits("main", branch_name)
+    commit_data = r.commit_data("main", branch_name)
+
+    assert (len(commit_data) == len(test_commits)) == True
+    assert (len(commits) == len(test_commits)) == True
