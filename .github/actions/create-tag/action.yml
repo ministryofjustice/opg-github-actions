@@ -55,11 +55,18 @@ runs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-        cache: 'pip'
-    - name: "Setup pip"
+    - name: GitPython
       shell: bash
       run: |
-        pip install -q -r ./requirements.txt
+        pip3 install -q git+https://github.com//gitpython-developers/GitPython@44102f30eaadcd122899f5f801f28b83bd9a5111
+    - name: natsort
+      shell: bash
+      run: |
+        pip3 install -q git+https://github.com//SethMMorton/natsort@d9503c08f8f83ce8a89bfcc45fec136868756243
+    - name: semver
+      shell: bash
+      run: |
+        pip3 install -q git+https://github.com/python-semver/python-semver.git@ec9348aefd8e9f287f451fcf2e837621a40e3ca4
     - name: Create tag
       id: create_tag
       shell: bash

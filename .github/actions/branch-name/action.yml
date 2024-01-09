@@ -1,17 +1,6 @@
 name: "Branch Name"
 description: "Get branch data. Example: ref/heads/main-123-456-789 => main-123-456-789. Also return safe-strings versions."
 
-inputs:
-  action_repository:
-    description: "Capture the starting value of github.action_repository. DO NOT CHANGE."
-    default: ${{ github.action_repository }}
-  action_ref:
-    description: "Capture the starting value of github.action_ref. DO NOT CHANGE."
-    default: ${{ github.action_ref }}
-  action_source:
-    description: "File path for action code. DO NOT CHANGE"
-    default: "./_gh_action_remote_branch_name_source"
-
 outputs:
   branch_name:
     description: "Branch name"
@@ -32,35 +21,22 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Debug
-      shell: bash
-      run: |
-        echo "inputs.action_repository=${{ inputs.action_repository }}"
-        echo "inputs.action_ref=${{ inputs.action_ref }}"
-    - name: "Checkout action content"
-      uses: actions/checkout@v4
-      if: ${{ inputs.action_repository != '' }}
-      with:
-        repository: ${{ inputs.action_repository }}
-        ref: ${{ inputs.action_ref }}
-        path: ${{ inputs.action_source }}
     - name: "Setup python and pip cache"
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-
-    - name: "Install python requirements via pip [as non-action]"
+    - name: GitPython
       shell: bash
-      if: ${{ inputs.action_repository == '' }}
       run: |
-        pip install -q -r ./requirements.txt
-
-    - name: "Install python requirements via pip [as action]"
+        pip3 install -q git+https://github.com//gitpython-developers/GitPython@44102f30eaadcd122899f5f801f28b83bd9a5111
+    - name: natsort
       shell: bash
-      if: ${{ inputs.action_repository != '' }}
       run: |
-        pip install -q -r ${{ inputs.action_source }}/./requirements.txt
-
+        pip3 install -q git+https://github.com//SethMMorton/natsort@d9503c08f8f83ce8a89bfcc45fec136868756243
+    - name: semver
+      shell: bash
+      run: |
+        pip3 install -q git+https://github.com/python-semver/python-semver.git@ec9348aefd8e9f287f451fcf2e837621a40e3ca4
     - name: Generate branch info
       id: safe
       shell: bash
