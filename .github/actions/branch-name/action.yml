@@ -46,25 +46,23 @@ runs:
         repository: ${{ inputs.action_repository }}
         ref: ${{ inputs.action_ref }}
         path: ${{ inputs.action_source }}
-
     - name: "Setup python and pip cache"
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: "Install python requirements via pip [as non-action]"
+      shell: bash
       if: ${{ inputs.action_repository == '' }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-        cache: 'pip'
-    - name: "Setup python and pip cache with action pip"
-      if: ${{ inputs.action_repository != '' }}
-      uses: actions/setup-python@v5
-      working-directory: ${{ inputs.action_source }}
-      with:
-        python-version: '3.10'
-        cache: 'pip'
-    - name: "Install python requirements via pip"
+      run: |
+        pip install -q -r ./requirements.txt
+
+    - name: "Install python requirements via pip [as action]"
       shell: bash
       if: ${{ inputs.action_repository != '' }}
       run: |
         pip install -q -r ${{ inputs.action_source }}/./requirements.txt
+
     - name: Generate branch info
       id: safe
       shell: bash
