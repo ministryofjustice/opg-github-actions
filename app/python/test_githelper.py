@@ -91,6 +91,10 @@ def setup_repo_with_commits(request) -> tuple:
     url = "https://github.com/ministryofjustice/opg-github-actions.git"
     repo = Repo.clone_from(url, repo_root)
 
+    # setup config info
+    repo.config_writer().set_value("user", "name", "pytest")
+    repo.config_writer().set_value("user", "email", "dummy@dummymail.com")
+
     # create new branch from head of `main`
     repo.git.checkout('main', '--')
     branch_name = 'pytest-githelper-commits'
