@@ -97,9 +97,15 @@ runs:
     - name: "Checkout this actions repo into a subfolder at this version"
       uses: actions/checkout@v4
       with:
-        repository: ${{ github.action_repository }}
-        ref: ${{ github.action_ref }}
+        repository: ${{ inputs.action_repository }}
+        ref: ${{ inputs.action_ref }}
         path: ./_ghsemveraction
+    - shell: bash
+      run: |
+        ls -la ./_ghsemveraction/
+        ls -la ./_ghsemveraction/.github/
+        ls -la ./_ghsemveraction/.github/actions/
+        ls -la ./_ghsemveraction/.github/actions/branch-name
     - name: "Generate safe branch name"
       id: branch_name
       uses: ./_ghsemveraction/.github/actions/branch-name
