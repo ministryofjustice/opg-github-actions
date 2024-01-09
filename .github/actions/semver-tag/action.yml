@@ -90,8 +90,6 @@ outputs:
     description: "Output from create_tag - the created value"
     value: ${{ steps.create_tag.outputs.created }}
 
-
-
 runs:
   using: "composite"
   steps:
