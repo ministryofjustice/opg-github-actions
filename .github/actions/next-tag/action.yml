@@ -110,4 +110,6 @@ runs:
           --latest_tag="${{inputs.latest_tag}}" \
           --last_release="${{inputs.last_release}}" \
           --with_v="${{inputs.with_v}}" \
-          --default_bump="${{inputs.default_bump}}"
+          --default_bump="${{inputs.default_bump}}" \
+          --pull_request_title="${{github.event.pull_request.title}}" \
+          --pull_request_body="${{github.event.pull_request.body}}"
