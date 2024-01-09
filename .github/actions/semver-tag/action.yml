@@ -23,12 +23,12 @@ inputs:
     description: "If set, allows the creation of a release when on a release branch (and not testing)"
     default: "true"
 
-  action_repository:
-    description: "Capture the starting value of github.action_repository. Do Not Set."
-    default: ${{ github.action_repository }}
-  action_ref:
-    description: "Capture the starting value of github.action_ref. Do Not Set."
-    default: ${{ github.action_ref }}
+  # action_repository:
+  #   description: "Capture the starting value of github.action_repository. Do Not Set."
+  #   default: ${{ github.action_repository }}
+  # action_ref:
+  #   description: "Capture the starting value of github.action_ref. Do Not Set."
+  #   default: ${{ github.action_ref }}
 
 
 outputs:
@@ -92,24 +92,20 @@ outputs:
 
 
 
-
-
 runs:
   using: "composite"
   steps:
-    - name: Debug
-      shell: bash
-      run: |
-        echo "github.action_ref=${{ github.action_ref }}"
-        echo "github.action_repository=${{ github.action_repository }}"
-        echo "inputs.action_repository=${{ inputs.action_repository }}"
-        echo "inputs.action_ref=${{ inputs.action_ref }}"
-    - name: "Checkout action content"
-      uses: actions/checkout@v4
-      if: ${{ inputs.action_repository != '' }}
-      with:
-        repository: ${{ inputs.action_repository }}
-        ref: ${{ inputs.action_ref }}
+    # - name: Debug
+    #   shell: bash
+    #   run: |
+    #     echo "inputs.action_repository=${{ inputs.action_repository }}"
+    #     echo "inputs.action_ref=${{ inputs.action_ref }}"
+    # - name: "Checkout action content"
+    #   uses: actions/checkout@v4
+    #   if: ${{ inputs.action_repository != '' }}
+    #   with:
+    #     repository: ${{ inputs.action_repository }}
+    #     ref: ${{ inputs.action_ref }}
 
     - name: "Generate safe branch name"
       id: branch_name
