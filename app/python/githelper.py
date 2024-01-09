@@ -89,27 +89,22 @@ class GitHelper:
 
         return tag
 
-    def commits_as_xml(self, commitish_a, commitish_b) -> str:
+
+    def commit_data(self, commitish_a, commitish_b) -> list:
         """
-        Get the commits with an xml formatted output from git
-        and return the resulting string
-        <commits>
-            <commit>
-                <hash>asdsd123</hash>
-                <subject></subject>
-                <notes></notes>
-                <body></body>
-            </commit>
-        </commits>
+        Use the iteration method to find commits between the points
+        and return list of them with a structured dict
         """
-        # get data from the log in an almost json format
-        xmlish = "<commit><hash>%H</hash><subject>%s</subject><notes>%s</notes><body>%s</body></commit>"
-        param = f"--pretty=format:{xmlish}"
-        range = f"{commitish_a}...{commitish_b}"
-        log_data = self.repository.git.log(param, range)
-        # wrap log data in container tag for parsing
-        log_data = f"<commits>\n{log_data.strip()}</commits>"
-        return log_data
+        parsed_commits:list = []
+        for commit in self.repository.iter_commits(f"{commitish_a}...{commitish_b}"):
+            parsed_commits.append({
+                'hash': f"{commit}",
+                'subject': commit.summary,
+                'body': commit.message,
+                'notes': ''
+            })
+        return parsed_commits
+
 
     def commits(self, commitish_a:str, commitish_b:str) -> list:
         """
@@ -128,43 +123,36 @@ class GitHelper:
             print("Failed to checkout")
             raise Exception("Failed to checkout to a commit")
 
-        log_data:str = self.commits_as_xml(commitish_a, commitish_b)
-        logs:dict = xmltodict.parse(log_data)
-        # grab the list
-        logs = logs['commits']['commit']
-        # if there is only one commit xml does not make a list
-        if type(logs) is dict:
-            logs:list = [logs]
-        return logs
-
-    @staticmethod
-    def find_bumps_from_commits(commits:list, default_bump:str) -> tuple:
-        """
-        Scan all fields in the commits passed looking for triggers of each type.
-        Return counter of each.
-        """
-        majors=0
-        minors=0
-        patches=0
-        for c in commits:
-            # check each field in the dict
-            for k in ['subject', 'notes', 'body']:
-                majors = majors + 1 if "#major" in c[k] else majors
-                minors = minors + 1 if "#minor" in c[k] else minors
-                patches = patches + 1 if "#patch" in c[k] else patches
-        # if nothing has been found, use the default
-        if majors == 0 and minors == 0 and patches == 0:
-            if default_bump == "major":
-                majors = 1
-            elif default_bump == "minor":
-                minors = 1
-            elif default_bump == "patch":
-                patches = 1
-
-        return majors, minors, patches
+        log:list = self.commit_data(commitish_a, commitish_b)
+        return log
 
 
 ## NON CLASS FUNCTIONS
+def find_bumps_from_commits(commits:list, default_bump:str) -> tuple:
+    """
+    Scan all fields in the commits passed looking for triggers of each type.
+    Return counter of each.
+    """
+    majors=0
+    minors=0
+    patches=0
+    for c in commits:
+        # check each field in the dict
+        for k in ['subject', 'notes', 'body']:
+            majors = majors + 1 if "#major" in c[k] else majors
+            minors = minors + 1 if "#minor" in c[k] else minors
+            patches = patches + 1 if "#patch" in c[k] else patches
+    # if nothing has been found, use the default
+    if majors == 0 and minors == 0 and patches == 0:
+        if default_bump == "major":
+            majors = 1
+        elif default_bump == "minor":
+            minors = 1
+        elif default_bump == "patch":
+            patches = 1
+
+    return majors, minors, patches
+
 
 def github_branch_data(event_name:str, event_data:dict) -> tuple:
     """
