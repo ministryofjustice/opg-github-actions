@@ -4,7 +4,6 @@ import sys
 from git import Repo
 from natsort import natsorted
 import importlib.util
-import xmltodict
 import re
 
 # CUSTOM PATH LOADING
