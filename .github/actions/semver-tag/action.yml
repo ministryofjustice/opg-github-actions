@@ -154,7 +154,10 @@ runs:
         echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
         echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
         echo "| **Created Tag** | **${{ steps.create_tag.outputs.created }}** |"  >> $GITHUB_STEP_SUMMARY
-        echo "| **Release** | [${{ steps.create_release.outputs.id }}](${{ steps.create_release.outputs.html_url }}) |"  >> $GITHUB_STEP_SUMMARY
+
+        if [ -n "${{ steps.create_release.outputs.id }}" ]; then
+          echo "| **Release** | [${{ steps.create_release.outputs.id }}](${{ steps.create_release.outputs.html_url }}) |"  >> $GITHUB_STEP_SUMMARY
+        fi
 
 
     - name: Verbose summary
