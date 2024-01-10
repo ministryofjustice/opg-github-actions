@@ -45,12 +45,10 @@ runs:
   steps:
     - name: "Checkout original repo to set folder"
       uses: actions/checkout@v4
-      env:
-        TARGET_FOLDER_PATH: ${{inputs.caller_repo_subfolder}}
       with:
         repository: ${{ github.repository }}
         ref: ${{ github.head_ref }}
-        path: ${TARGET_FOLDER_PATH}
+        path: ${{inputs.caller_repo_subfolder}}
         fetch-tags: true
         fetch-depth: 0
     - name: "Setup python"
