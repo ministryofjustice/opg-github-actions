@@ -117,7 +117,6 @@ runs:
         echo -e "COMMITISH_A: ${COMMITISH_A}"
         echo -e "COMMITISH_B: ${COMMITISH_B}"
         echo -e "PRERELEASE: ${PRERELEASE}"
-        echo -e "PRERELEASE: ${PRERELEASE}"
         echo -e "PRERELEASE_SUFFIX: ${PRERELEASE_SUFFIX}"
         echo -e "LATEST_TAG: ${LATEST_TAG}"
         echo -e "LAST_RELEASE: ${LAST_RELEASE}"
