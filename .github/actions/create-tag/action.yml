@@ -95,7 +95,7 @@ runs:
         echo -e "RUN_AS_TEST: ${RUN_AS_TEST}"
 
         cd ${PY_APP_DIR}
-        python ./actions/commands/create-tag.py \
+        python ./actions/commands/create_tag.py \
           --repository_root="${TARGET_REPO}" \
           --commitish="${COMMITISH}" \
           --tag_name="${TAG_NAME}"
