@@ -38,9 +38,11 @@ runs:
     - id: setup
       name: Setup workspace manager
       shell: bash
+      env:
+        TWM_SOURCE: https://github.com/TomTucka/terraform-workspace-manager/releases/download/v0.3.1/terraform-workspace-manager_Linux_x86_64.tar.gz
       run: |
-        wget https://github.com/TomTucka/terraform-workspace-manager/releases/download/v0.3.1/terraform-workspace-manager_Linux_x86_64.tar.gz -O $HOME/terraform-workspace-manager.tar.gz
-        sudo tar -xvf $HOME/terraform-workspace-manager.tar.gz -C /usr/local/bin
+        wget ${TWM_SOURCE} -O ${HOME}/terraform-workspace-manager.tar.gz
+        sudo tar -xvf ${HOME}/terraform-workspace-manager.tar.gz -C /usr/local/bin
         sudo chmod +x /usr/local/bin/terraform-workspace-manager
     - id: aws_creds
       name: Configure AWS Credentials For Terraform
@@ -55,21 +57,29 @@ runs:
       if: ${{ inputs.register_workspace != '' }}
       name: Register workspace name [${{inputs.register_workspace}}]
       shell: bash
+      env:
+        TWM_ACCOUNT_ID: ${{inputs.aws_account_id}}
+        TWM_IAM_ROLE: ${{inputs.aws_iam_role}}
+        TWM_TTL: ${{inputs.time_to_protect}}
+        TWM_REGISTER_WORKSPACE: ${{inputs.register_workspace}}
       run: |
         echo "Registering workspace"
         terraform-workspace-manager \
-            -aws-account-id=${{inputs.aws_account_id}} \
-            -aws-iam-role=${{inputs.aws_iam_role}} \
-            -time-to-protect=${{inputs.time_to_protect}} \
-            -register-workspace=${{inputs.register_workspace}}
+            -aws-account-id=${TWM_ACCOUNT_ID} \
+            -aws-iam-role=${TWM_IAM_ROLE} \
+            -time-to-protect=${TWM_TTL} \
+            -register-workspace=${TWM_REGISTER_WORKSPACE}
     - id: list
       name: List workspaces
       shell: bash
+      env:
+        TWM_ACCOUNT_ID: ${{inputs.aws_account_id}}
+        TWM_IAM_ROLE: ${{inputs.aws_iam_role}}
       run: |
         echo "List protected workspace"
         workspaces=$(terraform-workspace-manager \
-            -aws-account-id=${{inputs.aws_account_id}} \
-            -aws-iam-role=${{inputs.aws_iam_role}} \
+            -aws-account-id=${TWM_ACCOUNT_ID} \
+            -aws-iam-role=${TWM_IAM_ROLE} \
             -protected-workspaces=true)
         echo "list=${workspaces}" >> $GITHUB_OUTPUT
         echo "workspace=${{inputs.register_workspace}}" >> $GITHUB_OUTPUT
