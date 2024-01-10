@@ -1,37 +1,13 @@
+#!/usr/bin/env python3
 import argparse
-import importlib.util
 import os
 import json
-## LOCAL IMPORTS
-# up 4 levels to root or repo
-app_root_dir = os.path.dirname(
-    os.path.dirname(
-        os.path.dirname(
-            os.path.dirname(os.path.realpath(__file__))
-        )
-    )
-)
-# git helper
-gh_mod = importlib.util.spec_from_file_location("strhelper", app_root_dir + '/app/python/githelper.py')
-gh = importlib.util.module_from_spec(gh_mod)
-gh_mod.loader.exec_module(gh)
-# str helper
-st_mod = importlib.util.spec_from_file_location("strhelper", app_root_dir + '/app/python/strhelper.py')
-st = importlib.util.module_from_spec(st_mod)
-st_mod.loader.exec_module(st)
-# output helper
-out_mod = importlib.util.spec_from_file_location("outputhelper", app_root_dir + '/app/python/outputhelper.py')
-oh = importlib.util.module_from_spec(out_mod)
-out_mod.loader.exec_module(oh)
-
-
+from actions.common import githelper as gh, outputhelper as oh, strhelper as st
 
 def arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser("safe-strings")
-
+    parser = argparse.ArgumentParser("branch-name")
     parser.add_argument('--event_name', default="", required=True, help="Github Action event_name")
     parser.add_argument('--event_data_file', default="", required=True, help="File containing json payload.")
-
     return parser
 
 def run(

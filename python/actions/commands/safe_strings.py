@@ -1,25 +1,7 @@
+#!/usr/bin/env python3
 import argparse
-import importlib.util
 import os
-## LOCAL IMPORTS
-# up 4 levels to root or repo
-app_root_dir = os.path.dirname(
-    os.path.dirname(
-        os.path.dirname(
-            os.path.dirname(os.path.realpath(__file__))
-        )
-    )
-)
-# str helper
-st_mod = importlib.util.spec_from_file_location("strhelper", app_root_dir + '/app/python/strhelper.py')
-st = importlib.util.module_from_spec(st_mod)
-st_mod.loader.exec_module(st)
-# output helper
-out_mod = importlib.util.spec_from_file_location("outputhelper", app_root_dir + '/app/python/outputhelper.py')
-oh = importlib.util.module_from_spec(out_mod)
-out_mod.loader.exec_module(oh)
-
-
+from actions.common import strhelper as st, outputhelper as oh
 
 def arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser("safe-strings")
