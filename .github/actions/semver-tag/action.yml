@@ -97,12 +97,9 @@ runs:
   steps:
     - name: "Checkout this actions repo into a subfolder at this version"
       uses: actions/checkout@v4
-      env:
-        ACTION_REPO: ${{ inputs.action_repository }}
-        ACTION_REF: ${{ inputs.action_ref }}
       with:
-        repository: ${ACTION_REPO}
-        ref: ${ACTION_REF}
+        repository: ${{ inputs.action_repository }}
+        ref: ${{ inputs.action_ref }}
         path: ./_ghsemveraction
     - name: "Generate safe branch name"
       id: branch_name
