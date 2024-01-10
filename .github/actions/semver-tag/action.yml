@@ -30,7 +30,6 @@ inputs:
     description: "Capture the starting value of github.action_repository. DO NOT SET"
     default: ${{ github.action_repository }}
 
-
 outputs:
   test:
     description: "Inputed test variable."
