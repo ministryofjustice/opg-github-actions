@@ -34,12 +34,12 @@ jobs:
         run: |
           cd ./python
           pip install -q -r ./requirements.txt
+          pip install -e .
       - name: "Setup and run pytest"
         shell: bash
         env:
           RUN_AS_TEST: "true"
         run: |
           cd python/
-          pip install -e .
           pytest ./tests/commands/test_branch_name.py
           echo "$(cat ./branch_name_results.md)" >> $GITHUB_STEP_SUMMARY

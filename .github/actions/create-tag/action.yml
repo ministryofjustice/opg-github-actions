@@ -13,6 +13,13 @@ inputs:
   caller_repo_subfolder:
     description: "Location to checkout active repository into. (Default: ./create-tag-caller-repository)"
     default: "./create-tag-caller-repository"
+  ## Used to capture the intial values before they get overwritten
+  action_ref:
+    description: "Capture the starting value of github.action_ref. DO NOT SET"
+    default: ${{ github.action_ref }}
+  action_repository:
+    description: "Capture the starting value of github.action_repository. DO NOT SET"
+    default: ${{ github.action_repository }}
 
 
 outputs:
@@ -51,26 +58,29 @@ runs:
         path: ${{inputs.caller_repo_subfolder}}
         fetch-tags: true
         fetch-depth: 0
+    - name: "Checkout this actions repo into a subfolder at this version"
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.action_repository }}
+        ref: ${{ inputs.action_ref }}
+        path: ./_ghcreatetagaction
     - name: "Setup python"
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-    - name: GitPython
+    - name: pip
       shell: bash
+      env:
+        PY_APP_DIR: "./_ghcreatetagaction/python"
       run: |
-        pip3 install -q git+https://github.com//gitpython-developers/GitPython@44102f30eaadcd122899f5f801f28b83bd9a5111
-    - name: natsort
-      shell: bash
-      run: |
-        pip3 install -q git+https://github.com//SethMMorton/natsort@d9503c08f8f83ce8a89bfcc45fec136868756243
-    - name: semver
-      shell: bash
-      run: |
-        pip3 install -q git+https://github.com/python-semver/python-semver.git@ec9348aefd8e9f287f451fcf2e837621a40e3ca4
+        cd ${PY_APP_DIR}
+        pip install -q -r ./requirements.txt
+        pip install -e .
     - name: Create tag
       id: create_tag
       shell: bash
       env:
+        PY_APP_DIR: "./_ghcreatetagaction/python"
         ACTION_SRC: ${{ github.action_path }}
         TARGET_REPO: "${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         COMMITISH: ${{inputs.commitish}}
@@ -78,13 +88,14 @@ runs:
         RUN_AS_TEST: ${{ inputs.test }}
       run: |
         echo -e "# create-tag setup:"
-        echo -e "ACTION_SRC: ${ACTION_SRC}"
+        echo -e "PY_APP_DIR: ${PY_APP_DIR}"
         echo -e "TARGET_REPO: ${TARGET_REPO}"
         echo -e "COMMITISH: ${COMMITISH}"
         echo -e "TAG_NAME: ${TAG_NAME}"
         echo -e "RUN_AS_TEST: ${RUN_AS_TEST}"
 
-        python ${ACTION_SRC}/./create-tag.py \
+        cd ${PY_APP_DIR}
+        python ./actions/commands/create-tag.py \
           --repository_root="${TARGET_REPO}" \
           --commitish="${COMMITISH}" \
           --tag_name="${TAG_NAME}"

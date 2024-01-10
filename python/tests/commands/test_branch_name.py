@@ -9,8 +9,6 @@ o = oh.OutputHelper(False)
 o.header(fh)
 fh.close()
 
-
-
 ### SETUP TEST CONFIG DATA
 testconfig = [
     {
