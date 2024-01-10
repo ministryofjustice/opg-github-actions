@@ -5,7 +5,7 @@ from pyactions.common import outputhelper as oh
 
 
 ### RESULT FILE
-fh = open("./results.md", "a+")
+fh = open("./branch_name_results.md", "a+")
 o = oh.OutputHelper(False)
 o.header(fh)
 fh.close()
@@ -57,7 +57,7 @@ def test_branch_name(
     print(outputs, sep="\n")
 
     t1 = (outputs['branch_name'] == expected)
-    fh = open("./results.md", "a+")
+    fh = open("./branch_name_results.md", "a+")
     o = oh.OutputHelper(False)
     o.result(expected, "==", outputs['branch_name'], t1 == True, fh)
     fh.close()
