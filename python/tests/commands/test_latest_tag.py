@@ -1,30 +1,9 @@
-import os
-import importlib.util
-from git import Repo, Git
+#!/usr/bin/env python3
 import pytest
-import shutil
-
-### local imports
-app_root_dir = os.path.dirname(
-    os.path.dirname(
-        os.path.dirname(
-            os.path.dirname(os.path.realpath(__file__))
-        )
-    )
-)
-dir_name = os.path.dirname(os.path.realpath(__file__))
-
-# load cmd helper
-mod = importlib.util.spec_from_file_location("latest-tag", dir_name + '/latest-tag.py')
-cmd = importlib.util.module_from_spec(mod)
-mod.loader.exec_module(cmd)
-# load output helper
-ohmod = importlib.util.spec_from_file_location("gh", app_root_dir + '/app/python/outputhelper.py')
-oh = importlib.util.module_from_spec(ohmod)
-ohmod.loader.exec_module(oh)
-
+from actions.commands import latest_tag as cmd
+from actions.common import outputhelper as oh
 ### logic
-fh = open("./results.md", "a+")
+fh = open("./latest_tag_results.md", "a+")
 o = oh.OutputHelper(False)
 o.header(fh)
 fh.close()
@@ -32,10 +11,10 @@ fh.close()
 
 @pytest.fixture()
 def setup(request) -> tuple:
-    fh = open("./results.md", "a+")
+    fh = open("./latest_tag_results.md", "a+")
     print("\nSetting up resources...")
     # clone the repo
-    repo_root = "./repo-test/"
+    repo_root = "./latest-tag-repo-test/"
 
     # create all the test tags locally
     test_tags = [

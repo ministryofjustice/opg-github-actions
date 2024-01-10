@@ -1,29 +1,10 @@
 #!/usr/bin/env python3
-import os
-import importlib.util
 import pytest
-
-### local imports
-app_root_dir = os.path.dirname(
-    os.path.dirname(
-        os.path.dirname(
-            os.path.dirname(os.path.realpath(__file__))
-        )
-    )
-)
-dir_name = os.path.dirname(os.path.realpath(__file__))
-
-# load cmd helper
-mod = importlib.util.spec_from_file_location("latest-tag", dir_name + '/safe-strings.py')
-cmd = importlib.util.module_from_spec(mod)
-mod.loader.exec_module(cmd)
-# load output helper
-ohmod = importlib.util.spec_from_file_location("gh", app_root_dir + '/app/python/outputhelper.py')
-oh = importlib.util.module_from_spec(ohmod)
-ohmod.loader.exec_module(oh)
+from actions.commands import safe_strings as cmd
+from actions.common import outputhelper as oh
 
 ### RESULT FILE
-fh = open("./results.md", "a+")
+fh = open("./safe_strings_results.md", "a+")
 o = oh.OutputHelper(False)
 o.header(fh)
 fh.close()
@@ -101,7 +82,7 @@ def test_safe_strings(
     # dump data for debugging
     print(f"Expected {expected} Actual {outputs['safe']}")
     print(outputs, sep="\n")
-    fh = open("./results.md", "a+")
+    fh = open("./safe_strings_results.md", "a+")
     o = oh.OutputHelper(False)
     o.result(expected, "==", outputs['safe'], t1 == True, fh)
     fh.close()

@@ -15,6 +15,13 @@ inputs:
     default: ""
   length:
     description: "If set, trim the string to this length"
+  ## Used to capture the intial values before they get overwritten
+  action_ref:
+    description: "Capture the starting value of github.action_ref. DO NOT SET"
+    default: ${{ github.action_ref }}
+  action_repository:
+    description: "Capture the starting value of github.action_repository. DO NOT SET"
+    default: ${{ github.action_repository }}
 
 outputs:
   original:
@@ -36,27 +43,29 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: "Checkout this actions repo into a subfolder at this version"
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.action_repository }}
+        ref: ${{ inputs.action_ref }}
+        path: ./_ghsafestringsaction
     - name: "Setup python"
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-    - name: GitPython
+    - name: pip
       shell: bash
+      env:
+        PY_APP_DIR: "./_ghsafestringsaction/python"
       run: |
-        pip3 install -q git+https://github.com//gitpython-developers/GitPython@44102f30eaadcd122899f5f801f28b83bd9a5111
-    - name: natsort
-      shell: bash
-      run: |
-        pip3 install -q git+https://github.com//SethMMorton/natsort@d9503c08f8f83ce8a89bfcc45fec136868756243
-    - name: semver
-      shell: bash
-      run: |
-        pip3 install -q git+https://github.com/python-semver/python-semver.git@ec9348aefd8e9f287f451fcf2e837621a40e3ca4
-    - name: Create Safe tags
+        cd ${PY_APP_DIR}
+        pip install -q -r ./requirements.txt
+        pip install -e .
+    - name: Create Safe strings
       id: make_safe
       shell: bash
       env:
-        ACTION_SRC: ${{ github.action_path }}
+        PY_APP_DIR: "./_ghsafestringsaction/python"
         ORIGINAL_STRING: ${{inputs.original}}
         STRING_SUFFIX: ${{inputs.suffix}}
         STRING_LENGTH: ${{inputs.length}}
@@ -65,7 +74,7 @@ runs:
         RUN_AS_TEST: ${{inputs.test}}
       run: |
         echo -e "# safe-strings setup:"
-        echo -e "ACTION_SRC: ${ACTION_SRC}"
+        echo -e "PY_APP_DIR: ${PY_APP_DIR}"
         echo -e "ORIGINAL_STRING: ${ORIGINAL_STRING}"
         echo -e "STRING_SUFFIX: ${STRING_SUFFIX}"
         echo -e "STRING_LENGTH: ${STRING_LENGTH}"
@@ -73,7 +82,8 @@ runs:
         echo -e "CONDITIONAL_VALUE: ${CONDITIONAL_VALUE}"
         echo -e "RUN_AS_TEST: ${RUN_AS_TEST}"
 
-        python ${ACTION_SRC}/./safe-strings.py \
+        cd ${PY_APP_DIR}
+        python ./actions/commands/safe_strings.py \
           --string="${ORIGINAL_STRING}" \
           --suffix="${STRING_SUFFIX}" \
           --length="${STRING_LENGTH}" \

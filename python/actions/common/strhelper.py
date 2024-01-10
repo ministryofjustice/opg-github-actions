@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import string
 
 def str_to_bool(source:str|bool, default:bool=False) -> bool:
     """
