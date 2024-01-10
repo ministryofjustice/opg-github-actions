@@ -1,38 +1,8 @@
-from git import Repo, Git
+#!/usr/bin/env python3
 import os
-import re
-import semver
 import argparse
 from semver.version import Version
-import importlib.util
-
-## LOCAL IMPORTS
-# up 4 levels to root or repo
-app_root_dir = os.path.dirname(
-    os.path.dirname(
-        os.path.dirname(
-            os.path.dirname(os.path.realpath(__file__))
-        )
-    )
-)
-# git helper
-git_mod = importlib.util.spec_from_file_location("githelper", app_root_dir + '/app/python/githelper.py')
-ghm = importlib.util.module_from_spec(git_mod)
-git_mod.loader.exec_module(ghm)
-# output helper
-out_mod = importlib.util.spec_from_file_location("outputhelper", app_root_dir + '/app/python/outputhelper.py')
-oh = importlib.util.module_from_spec(out_mod)
-out_mod.loader.exec_module(oh)
-# semver helper
-sv_mod = importlib.util.spec_from_file_location("semverhelper", app_root_dir + '/app/python/semverhelper.py')
-sv = importlib.util.module_from_spec(sv_mod)
-sv_mod.loader.exec_module(sv)
-# str helper
-st_mod = importlib.util.spec_from_file_location("strhelper", app_root_dir + '/app/python/strhelper.py')
-st = importlib.util.module_from_spec(st_mod)
-st_mod.loader.exec_module(st)
-
-
+from actions.common import githelper as ghm, outputhelper as oh, semverhelper as sv, strhelper as st
 
 def arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser("next-tag")
@@ -50,9 +20,6 @@ def arg_parser() -> argparse.ArgumentParser:
 
     return parser
 
-
-
-
 def run(
         last_release: Version|str|None,
         latest_tag: Version|str|None,
@@ -62,6 +29,8 @@ def run(
         with_v:bool|str,
         commits:list
 ) -> dict:
+    """
+    """
 
      # get the last release version from a string, default to 0.0.0
     if type(last_release) is str or last_release is None:
@@ -71,7 +40,6 @@ def run(
     if type(latest_tag) is str:
         print("converting latest_tag from string")
         latest_tag:Version = sv.SemverHelper(latest_tag).parse()
-
 
     # allow bool True|False as well as string values
     is_prerelease = st.str_to_bool(prerelease)

@@ -16,7 +16,6 @@ permissions:
   repository-projects: none
   statuses: none
 
-
 jobs:
   test_script:
     runs-on: 'ubuntu-latest'
