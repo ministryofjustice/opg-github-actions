@@ -6,7 +6,7 @@ from actions.common import githelper as ghm, outputhelper as oh, semverhelper as
 
 def arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser("latest-tag")
-    parser.add_argument('--repository_root', default="./", help="Path to root of repository")
+    parser.add_argument('--repository_root', default="./",required=True,  help="Path to the root of the repository.")
     parser.add_argument('--prerelease', default="", help="If set, then this is a pre-release. Can be overridden if branch_name matches a release_branches item.")
     parser.add_argument("--prerelease_suffix", default="beta", help="Prerelease naming")
     parser.add_argument("--branch_name", required=True, help="Current branch name. Used to double check if this is a release or not.")

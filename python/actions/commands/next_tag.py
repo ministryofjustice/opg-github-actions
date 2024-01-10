@@ -7,11 +7,11 @@ from actions.common import githelper as ghm, outputhelper as oh, semverhelper as
 def arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser("next-tag")
     parser.add_argument('--repository_root', default="./", help="Path to root of repository")
-    parser.add_argument('--commitish_a', default="", help="Commit-ish used to compare in log to look for triggers")
-    parser.add_argument('--commitish_b', default="", help="Commit-ish used to compare in log to look for triggers")
+    parser.add_argument('--commitish_a', default="", help="Commit-ish used to compare in git history to look for triggers")
+    parser.add_argument('--commitish_b', default="", help="Commit-ish used to compare in git history to look for triggers")
 
     parser.add_argument('--prerelease', default="", help="If set, then this is a pre-release")
-    parser.add_argument("--prerelease_suffix", default="beta", help="Prerelease naming")
+    parser.add_argument("--prerelease_suffix", default="beta", help="Prerelease naming.")
 
     parser.add_argument("--latest_tag", default="", help="Last tag")
     parser.add_argument("--last_release", default="", help="Last release var tag")

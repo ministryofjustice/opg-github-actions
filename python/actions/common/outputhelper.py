@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 
-
 class OutputHelper:
     """
     Handles output to stdout and file

@@ -5,7 +5,7 @@ from actions.common import githelper as ghm, outputhelper as oh
 
 def arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser("create-tags")
-    parser.add_argument('--repository_root', default="./", help="Path to root of repository")
+    parser.add_argument('--repository_root', default="./", required=True, help="Path to root of repository")
     parser.add_argument('--commitish', default="", help="Commit-ish ref to create the tag")
     parser.add_argument("--tag_name", default="", help="Tag to create")
     return parser

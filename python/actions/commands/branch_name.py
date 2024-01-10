@@ -16,6 +16,7 @@ def run(
         length:int = 12
 ) -> dict:
     """
+    Fetch branch data as best possible
     """
     branch_name, source_commitish, destination_commitish = gh.github_branch_data(event_name, event_data)
 
@@ -31,6 +32,9 @@ def run(
 
 
 def main():
+    """
+    Fetch branch related data and output to stdout and github (if available)
+    """
     # get the args
     args = arg_parser().parse_args()
     event_data:dict = {}
