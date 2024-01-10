@@ -56,12 +56,25 @@ runs:
       id: make_safe
       shell: bash
       env:
+        ACTION_SRC: ${{ github.action_path }}
+        ORIGINAL_STRING: ${{inputs.original}}
+        STRING_SUFFIX: ${{inputs.suffix}}
+        STRING_LENGTH: ${{inputs.length}}
+        CONDITIONAL_MATCH: ${{inputs.conditional_match}}
+        CONDITIONAL_VALUE: ${{inputs.conditional_value}}
         RUN_AS_TEST: ${{inputs.test}}
       run: |
-        src="${{github.action_path}}"
-        python ${src}/./safe-strings.py \
-          --string="${{inputs.original}}" \
-          --suffix="${{inputs.suffix}}" \
-          --length="${{inputs.length}}" \
-          --conditional_match="${{inputs.conditional_match}}" \
-          --conditional_value="${{inputs.conditional_value}}"
+        echo -e "ACTION_SRC: ${ACTION_SRC}"
+        echo -e "ORIGINAL_STRING: ${ORIGINAL_STRING}"
+        echo -e "STRING_SUFFIX: ${STRING_SUFFIX}"
+        echo -e "STRING_LENGTH: ${STRING_LENGTH}"
+        echo -e "CONDITIONAL_MATCH: ${CONDITIONAL_MATCH}"
+        echo -e "CONDITIONAL_VALUE: ${CONDITIONAL_VALUE}"
+        echo -e "RUN_AS_TEST: ${RUN_AS_TEST}"
+
+        python ${ACTION_SRC}/./safe-strings.py \
+          --string="${ORIGINAL_STRING}" \
+          --suffix="${STRING_SUFFIX}" \
+          --length="${STRING_LENGTH}" \
+          --conditional_match="${CONDITIONAL_MATCH}" \
+          --conditional_value="${CONDITIONAL_VALUE}"
