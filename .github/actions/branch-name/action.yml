@@ -41,11 +41,9 @@ runs:
       id: safe
       shell: bash
       env:
+        ACTION_SRC: ${{ github.action_path }}
         RUN_AS_TEST: ${{inputs.test}}
-        EVENT_NAME: ${GITHUB_EVENT_NAME}
-        EVENT_PATH: ${GITHUB_EVENT_PATH}
       run: |
-        src="${{github.action_path}}"
-        python ${src}/./branch-name.py \
-          --event_name="${EVENT_NAME}" \
-          --event_data_file="${EVENT_PATH}"
+        python ${ACTION_SRC}/./branch-name.py \
+          --event_name="${GITHUB_EVENT_NAME}" \
+          --event_data_file="${GITHUB_EVENT_PATH}"
