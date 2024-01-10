@@ -16,7 +16,13 @@ inputs:
   caller_repo_subfolder:
     description: "Location to checkout active repository into. (Default: ./latest-tag-caller-repository)"
     default: "./latest-tag-caller-repository"
-
+  ## Used to capture the intial values before they get overwritten
+  action_ref:
+    description: "Capture the starting value of github.action_ref. DO NOT SET"
+    default: ${{ github.action_ref }}
+  action_repository:
+    description: "Capture the starting value of github.action_repository. DO NOT SET"
+    default: ${{ github.action_repository }}
 
 outputs:
   prerelease:
@@ -44,27 +50,25 @@ runs:
         path: ${{inputs.caller_repo_subfolder}}
         fetch-tags: true
         fetch-depth: 0
-    - name: "Setup python"
-      uses: actions/setup-python@v5
+    - name: "Checkout this actions repo into a subfolder at this version"
+      uses: actions/checkout@v4
       with:
-        python-version: '3.10'
-    - name: GitPython
+        repository: ${{ inputs.action_repository }}
+        ref: ${{ inputs.action_ref }}
+        path: ./_ghlatesttagaction
+    - name: pip
       shell: bash
+      env:
+        PY_APP_DIR: "./_ghlatesttagaction/python"
       run: |
-        pip3 install -q git+https://github.com//gitpython-developers/GitPython@44102f30eaadcd122899f5f801f28b83bd9a5111
-    - name: natsort
-      shell: bash
-      run: |
-        pip3 install -q git+https://github.com//SethMMorton/natsort@d9503c08f8f83ce8a89bfcc45fec136868756243
-    - name: semver
-      shell: bash
-      run: |
-        pip3 install -q git+https://github.com/python-semver/python-semver.git@ec9348aefd8e9f287f451fcf2e837621a40e3ca4
+        cd ${PY_APP_DIR}
+        pip install -q -r ./requirements.txt
+        pip install -e .
     - name: Get latest Tag
       id: latest
       shell: bash
       env:
-        ACTION_SRC: ${{ github.action_path }}
+        PY_APP_DIR: "./_ghlatesttagaction/python"
         TARGET_REPO: "${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         BRANCH_NAME: ${{inputs.branch_name}}
         RELEASE_BRANCHES: ${{inputs.release_branches}}
@@ -72,13 +76,14 @@ runs:
         PRERELEASE_SUFFIX: ${{inputs.prerelease_suffix}}
       run: |
         echo -e "# latest-tag setup:"
-        echo -e "ACTION_SRC: ${ACTION_SRC}"
+        echo -e "PY_APP_DIR: ${PY_APP_DIR}"
         echo -e "TARGET_REPO: ${TARGET_REPO}"
         echo -e "BRANCH_NAME: ${BRANCH_NAME}"
         echo -e "RELEASE_BRANCHES: ${RELEASE_BRANCHES}"
         echo -e "PRERELEASE_SUFFIX: ${PRERELEASE_SUFFIX}"
 
-        python ${ACTION_SRC}/./latest-tag.py \
+        cd ${PY_APP_DIR}
+        python ./actions/commands/latest_tag.py \
           --repository_root="${TARGET_REPO}" \
           --branch_name="${BRANCH_NAME}" \
           --release_branches="${RELEASE_BRANCHES}" \
