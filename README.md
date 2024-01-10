@@ -79,3 +79,14 @@ Parse the terraform versions file from the directory passed and return the requi
 A shared terraform workspace tool to track and list workspaces protected from deletion and a time that should be protected for.
 
 [More Details](./.github/actions/terraform-workspace-manager/README.md)
+
+## Tests
+
+All python code is tested using `pytest`:
+
+```bash
+cd ./python
+pip install -q -r ./requirements.txt
+pip install -e .
+pytest ./tests/
+```
