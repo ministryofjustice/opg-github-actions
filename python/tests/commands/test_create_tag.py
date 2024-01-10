@@ -16,7 +16,7 @@ def setup_tags(request) -> tuple:
     fh = open("./create_tag_results.md", "a+")
     print("\nSetting up resources...")
     # clone the repo
-    repo_root = "./repo-test/"
+    repo_root = "./create-tag-repo-test/"
     commitish = "dab1b63"
     url = "https://github.com/ministryofjustice/opg-github-actions.git"
 
