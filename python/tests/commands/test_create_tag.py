@@ -1,39 +1,22 @@
-import os
-import importlib.util
-from git import Repo, Git
+#!/usr/bin/env python3
 import pytest
+from git import Repo
 import shutil
-
-### local imports
-app_root_dir = os.path.dirname(
-    os.path.dirname(
-        os.path.dirname(
-            os.path.dirname(os.path.realpath(__file__))
-        )
-    )
-)
-dir_name = os.path.dirname(os.path.realpath(__file__))
-# load cmd helper
-mod = importlib.util.spec_from_file_location("create-tag", dir_name + '/create-tag.py')
-cmd = importlib.util.module_from_spec(mod)
-mod.loader.exec_module(cmd)
-# load output helper
-ohmod = importlib.util.spec_from_file_location("gh", app_root_dir + '/app/python/outputhelper.py')
-oh = importlib.util.module_from_spec(ohmod)
-ohmod.loader.exec_module(oh)
+from actions.commands import create_tag as cmd
+from actions.common import outputhelper as oh
 
 ### logic
-fh = open("./results.md", "a+")
+fh = open("./create_tag_results.md", "a+")
 o = oh.OutputHelper(False)
 o.header(fh)
 fh.close()
 
 @pytest.fixture()
 def setup_tags(request) -> tuple:
-    fh = open("./results.md", "a+")
+    fh = open("./create_tag_results.md", "a+")
     print("\nSetting up resources...")
     # clone the repo
-    repo_root = "./repo-test/"
+    repo_root = "./create-tag-repo-test/"
     commitish = "dab1b63"
     url = "https://github.com/ministryofjustice/opg-github-actions.git"
 
