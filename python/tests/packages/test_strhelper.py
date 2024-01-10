@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import pytest
-from pyactions.common import strhelper as sth
+from actions.common import strhelper as sth
 
 @pytest.mark.parametrize(
     "expected,source,default",
@@ -12,7 +12,6 @@ from pyactions.common import strhelper as sth
         (False, False, False)
     ]
 )
-
 def test_str_to_bool(expected:bool, source:bool|str, default:bool) -> None:
     """
     Test the str_to_bool conversion

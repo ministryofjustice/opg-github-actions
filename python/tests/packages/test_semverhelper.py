@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import pytest
 from semver.version import Version
-from pyactions.common import semverhelper as svh
+from actions.common import semverhelper as svh
+
 
 @pytest.fixture()
 def setup_with_without_v(request) -> tuple:

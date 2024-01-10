@@ -39,29 +39,26 @@ runs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-    - name: GitPython
+    - name: pip
       shell: bash
+      env:
+        PY_APP_DIR: "./_ghbranchnameaction/python"
       run: |
-        pip3 install -q git+https://github.com//gitpython-developers/GitPython@44102f30eaadcd122899f5f801f28b83bd9a5111
-    - name: natsort
-      shell: bash
-      run: |
-        pip3 install -q git+https://github.com//SethMMorton/natsort@d9503c08f8f83ce8a89bfcc45fec136868756243
-    - name: semver
-      shell: bash
-      run: |
-        pip3 install -q git+https://github.com/python-semver/python-semver.git@ec9348aefd8e9f287f451fcf2e837621a40e3ca4
+        cd ${PY_APP_DIR}
+        pip install -q -r ./requirements.txt
+        pip install -e .
     - name: Generate branch info
       id: safe
       shell: bash
       env:
-        ACTION_SRC: "./_ghbranchnameaction/pyactions/actions"
+        PY_APP_DIR: "./_ghbranchnameaction/python"
         RUN_AS_TEST: ${{inputs.test}}
       run: |
         echo -e "# branch-name setup:"
-        echo -e "ACTION_SRC: ${ACTION_SRC}"
+        echo -e "PY_APP_DIR: ${PY_APP_DIR}"
         echo -e "RUN_AS_TEST: ${RUN_AS_TEST}"
+        cd ${PY_APP_DIR}
 
-        python ${ACTION_SRC}/./branch_name.py \
+        python ./actions/commands/branch_name.py \
           --event_name="${GITHUB_EVENT_NAME}" \
           --event_data_file="${GITHUB_EVENT_PATH}"

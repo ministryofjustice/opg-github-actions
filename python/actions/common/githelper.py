@@ -1,9 +1,23 @@
 #!/usr/bin/env python3
+import os
 import sys
 from git import Repo
 from natsort import natsorted
-from . import semverhelper as svh
-from . import randhelper as rnd
+import importlib.util
+import re
+
+# # CUSTOM PATH LOADING
+# dir_name = os.path.dirname(os.path.realpath(__file__))
+# # load semver helpers
+# semver_mod = importlib.util.spec_from_file_location("semverhelper", dir_name + '/semverhelper.py')
+# svh = importlib.util.module_from_spec(semver_mod)
+# semver_mod.loader.exec_module(svh)
+# # load rand helpers
+# rand_mod = importlib.util.spec_from_file_location("randhelper", dir_name + '/randhelper.py')
+# rnd = importlib.util.module_from_spec(rand_mod)
+# rand_mod.loader.exec_module(rnd)
+
+from . import semverhelper as svh, randhelper as rnd
 
 class GitHelper:
     """

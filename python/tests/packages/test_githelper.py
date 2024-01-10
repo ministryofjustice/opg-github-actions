@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 import pytest
-from semver.version import Version
 from git import Repo
 import shutil
-from pyactions.common import githelper as ghm
-
+from actions.common import githelper as ghm
 
 @pytest.fixture()
 def setup_repo(request) -> tuple:

@@ -2,11 +2,10 @@
 import argparse
 import os
 import json
-from pyactions.common import strhelper as st, githelper as gh, outputhelper as oh
-
+from actions.common import githelper as gh, outputhelper as oh, strhelper as st
 
 def arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser("safe-strings")
+    parser = argparse.ArgumentParser("branch-name")
     parser.add_argument('--event_name', default="", required=True, help="Github Action event_name")
     parser.add_argument('--event_data_file', default="", required=True, help="File containing json payload.")
     return parser

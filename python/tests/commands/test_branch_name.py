@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import pytest
-from pyactions.actions import branch_name as cmd
-from pyactions.common import outputhelper as oh
-
+from actions.common import outputhelper as oh
+from actions.commands import branch_name as cmd
 
 ### RESULT FILE
 fh = open("./branch_name_results.md", "a+")
