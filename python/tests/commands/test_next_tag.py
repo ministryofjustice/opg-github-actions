@@ -7,7 +7,7 @@ from actions.common import outputhelper as oh
 ### RESULT FILE
 fh = open("./next_tag_results.md", "a+")
 o = oh.OutputHelper(False)
-o.header(fh)
+o.header(fh, "Next Tag Test Results")
 fh.close()
 
 

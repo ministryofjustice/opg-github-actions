@@ -22,12 +22,12 @@ class OutputHelper:
                 with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
                     print(f"{k}={v}", file=fh)
 
-    def header(self, fh) -> None:
+    def header(self, fh, segment:str="Test Information") -> None:
         print("## Test")
         print("| A | condition | B | Pass |")
         print("| --- | --- | --- | --- |")
 
-        fh.writelines(["## Test Information\n", "| A | condition | B | Pass |\n", "| --- | --- | --- | --- |\n"])
+        fh.writelines([f"## {segment}\n", "| A | condition | B | Pass |\n", "| --- | --- | --- | --- |\n"])
 
     def result(self, a, condition, b, passed, fh) -> None:
         if passed:

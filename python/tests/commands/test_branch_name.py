@@ -6,7 +6,7 @@ from actions.commands import branch_name as cmd
 ### RESULT FILE
 fh = open("./branch_name_results.md", "a+")
 o = oh.OutputHelper(False)
-o.header(fh)
+o.header(fh, "Branch Name Test Results")
 fh.close()
 
 ### SETUP TEST CONFIG DATA

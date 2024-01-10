@@ -5,7 +5,7 @@ from actions.common import outputhelper as oh
 ### logic
 fh = open("./latest_tag_results.md", "a+")
 o = oh.OutputHelper(False)
-o.header(fh)
+o.header(fh, "Latest Tag Test Results")
 fh.close()
 
 
