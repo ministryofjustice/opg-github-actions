@@ -1,17 +1,7 @@
 #!/usr/bin/env python3
-from semver.version import Version
-import os
-import importlib.util
-from git import Repo, Git
 import pytest
-import shutil
-
-# CUSTOM PATH LOADING
-dir_name = os.path.dirname(os.path.realpath(__file__))
-# load semver helpers
-semver_mod = importlib.util.spec_from_file_location("semverhelper", dir_name + '/semverhelper.py')
-svh = importlib.util.module_from_spec(semver_mod)
-semver_mod.loader.exec_module(svh)
+from semver.version import Version
+from actions.common import semverhelper as svh
 
 
 @pytest.fixture()

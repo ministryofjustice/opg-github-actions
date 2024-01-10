@@ -1,18 +1,8 @@
 #!/usr/bin/env python3
-from semver.version import Version
-import os
-import importlib.util
-from git import Repo, Git
 import pytest
+from git import Repo
 import shutil
-
-# CUSTOM PATH LOADING
-dir_name = os.path.dirname(os.path.realpath(__file__))
-# load semver helpers
-git_mod = importlib.util.spec_from_file_location("githelper", dir_name + '/githelper.py')
-ghm = importlib.util.module_from_spec(git_mod)
-git_mod.loader.exec_module(ghm)
-
+from actions.common import githelper as ghm
 
 @pytest.fixture()
 def setup_repo(request) -> tuple:

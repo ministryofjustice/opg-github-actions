@@ -1,5 +1,5 @@
-name: "Create semver tag at current github ref using passed branch name as a suffix."
-description: "Use the branch name passed (can be either refs/heads/name-of-thing or just name-of-thing)."
+name: "Determine the next semver tag to create"
+description: "Determine the next semver tag to create"
 inputs:
   prerelease:
     description: "If set, looks for pre-release tag patterns (v1.1.1-${suffix}.${count})"
@@ -28,9 +28,15 @@ inputs:
   commitish_b:
     description: "Commit used to look for version bump triggers in messages"
     required: true
+  ## Used to capture the intial values before they get overwritten
+  action_ref:
+    description: "Capture the starting value of github.action_ref. DO NOT SET"
+    default: ${{ github.action_ref }}
+  action_repository:
+    description: "Capture the starting value of github.action_repository. DO NOT SET"
+    default: ${{ github.action_repository }}
 
 outputs:
-
   prerelease_suffix:
     description: "Inputed prerelease_suffix variable."
     value: ${{ inputs.prerelease_suffix }}
@@ -78,27 +84,29 @@ runs:
         path: ${{inputs.caller_repo_subfolder}}
         fetch-tags: true
         fetch-depth: 0
+    - name: "Checkout this actions repo into a subfolder at this version"
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.action_repository }}
+        ref: ${{ inputs.action_ref }}
+        path: ./_ghnexttagaction
     - name: "Setup python"
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-    - name: GitPython
+    - name: pip
       shell: bash
+      env:
+        PY_APP_DIR: "./_ghnexttagaction/python"
       run: |
-        pip3 install -q git+https://github.com//gitpython-developers/GitPython@44102f30eaadcd122899f5f801f28b83bd9a5111
-    - name: natsort
-      shell: bash
-      run: |
-        pip3 install -q git+https://github.com//SethMMorton/natsort@d9503c08f8f83ce8a89bfcc45fec136868756243
-    - name: semver
-      shell: bash
-      run: |
-        pip3 install -q git+https://github.com/python-semver/python-semver.git@ec9348aefd8e9f287f451fcf2e837621a40e3ca4
+        cd ${PY_APP_DIR}
+        pip install -q -r ./requirements.txt
+        pip install -e .
     - name: Get new Tag
       id: get_next_tag
       shell: bash
       env:
-        ACTION_SRC_PATH: ${{ github.action_path }}
+        PY_APP_DIR: "./_ghnexttagaction/python"
         TARGET_REPO: "${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         COMMITISH_A: ${{inputs.commitish_a}}
         COMMITISH_B: ${{inputs.commitish_b}}
@@ -113,7 +121,7 @@ runs:
         github_pr_body: ${{ github.event.pull_request.body }}
       run: |
         echo -e "# next-tag setup:"
-        echo -e "ACTION_SRC_PATH: ${ACTION_SRC_PATH}"
+        echo -e "PY_APP_DIR: ${PY_APP_DIR}"
         echo -e "TARGET_REPO: ${TARGET_REPO}"
         echo -e "COMMITISH_A: ${COMMITISH_A}"
         echo -e "COMMITISH_B: ${COMMITISH_B}"
@@ -124,7 +132,8 @@ runs:
         echo -e "WITH_V: ${WITH_V}"
         echo -e "DEFAULT_BUMP: ${DEFAULT_BUMP}"
 
-        python ${ACTION_SRC_PATH}/./next-tag.py \
+         cd ${PY_APP_DIR}
+        python ./actions/commands/next_tag.py \
           --repository_root="${TARGET_REPO}" \
           --commitish_a="${COMMITISH_A}" \
           --commitish_b="${COMMITISH_B}" \

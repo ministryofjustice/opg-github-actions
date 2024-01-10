@@ -1,34 +1,11 @@
-import sys
+#!/usr/bin/env python3
 import os
-import importlib.util
-from natsort import natsorted
-import semver
 import argparse
-import string
-from semver.version import Version
-
-## LOCAL IMPORTS
-# up 4 levels to root or repo
-app_root_dir = os.path.dirname(
-    os.path.dirname(
-        os.path.dirname(
-            os.path.dirname(os.path.realpath(__file__))
-        )
-    )
-)
-# git helper
-git_mod = importlib.util.spec_from_file_location("githelper", app_root_dir + '/app/python/githelper.py')
-ghm = importlib.util.module_from_spec(git_mod)
-git_mod.loader.exec_module(ghm)
-# github output helper
-gh_mod = importlib.util.spec_from_file_location("outputhelper", app_root_dir + '/app/python/outputhelper.py')
-gh = importlib.util.module_from_spec(gh_mod)
-gh_mod.loader.exec_module(gh)
-
+from actions.common import githelper as ghm, outputhelper as oh
 
 def arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser("create-tags")
-    parser.add_argument('--repository_root', default="./", help="Path to root of repository")
+    parser.add_argument('--repository_root', default="./", required=True, help="Path to root of repository")
     parser.add_argument('--commitish', default="", help="Commit-ish ref to create the tag")
     parser.add_argument("--tag_name", default="", help="Tag to create")
     return parser
@@ -70,7 +47,7 @@ def main():
         len( os.getenv("RUN_AS_TEST") ) > 0
     )
     print("# create-tag outputs:")
-    g = gh.OutputHelper(('GITHUB_OUTPUT' in os.environ))
+    g = oh.OutputHelper(('GITHUB_OUTPUT' in os.environ))
     g.out(outputs)
 
 if __name__ == "__main__":

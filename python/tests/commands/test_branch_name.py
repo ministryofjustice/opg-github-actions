@@ -1,34 +1,13 @@
 #!/usr/bin/env python3
-import os
-import importlib.util
 import pytest
-
-### local imports
-app_root_dir = os.path.dirname(
-    os.path.dirname(
-        os.path.dirname(
-            os.path.dirname(os.path.realpath(__file__))
-        )
-    )
-)
-dir_name = os.path.dirname(os.path.realpath(__file__))
-
-# load cmd helper
-mod = importlib.util.spec_from_file_location("latest-tag", dir_name + '/branch-name.py')
-cmd = importlib.util.module_from_spec(mod)
-mod.loader.exec_module(cmd)
-# load output helper
-ohmod = importlib.util.spec_from_file_location("gh", app_root_dir + '/app/python/outputhelper.py')
-oh = importlib.util.module_from_spec(ohmod)
-ohmod.loader.exec_module(oh)
+from actions.common import outputhelper as oh
+from actions.commands import branch_name as cmd
 
 ### RESULT FILE
-fh = open("./results.md", "a+")
+fh = open("./branch_name_results.md", "a+")
 o = oh.OutputHelper(False)
 o.header(fh)
 fh.close()
-
-
 
 ### SETUP TEST CONFIG DATA
 testconfig = [
@@ -75,7 +54,7 @@ def test_branch_name(
     print(outputs, sep="\n")
 
     t1 = (outputs['branch_name'] == expected)
-    fh = open("./results.md", "a+")
+    fh = open("./branch_name_results.md", "a+")
     o = oh.OutputHelper(False)
     o.result(expected, "==", outputs['branch_name'], t1 == True, fh)
     fh.close()
