@@ -134,7 +134,7 @@ def main():
             'body': os.environ['github_pr_body'], 'hash': '', 'notes': '', 'subject': ''
         })
 
-    print(commits, sep="\n")
+    print(*commits, sep="\n")
 
     config = {
         'repository_root': args.repository_root,
@@ -156,7 +156,7 @@ def main():
     )
 
     outputs = (config | res)
-    print("NEXT TAG DATA")
+    print("# next-tag outputs:")
     o = oh.OutputHelper(('GITHUB_OUTPUT' in os.environ))
     o.out(outputs)
 

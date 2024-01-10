@@ -120,8 +120,8 @@ class GitHelper:
             self.repository.git.checkout(commitish_a, "--")
             self.repository.git.checkout(commitish_b, "--")
         except Exception:
-            print("Failed to checkout")
-            raise Exception("Failed to checkout to a commit")
+            print(f"Failed to checkout [{commitish_a} or {commitish_b}]")
+            raise Exception(f"Failed to checkout to a commit [{commitish_a} or {commitish_b}]")
 
         log:list = self.commit_data(commitish_a, commitish_b)
         return log

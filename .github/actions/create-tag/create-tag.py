@@ -69,7 +69,7 @@ def main():
         args.tag_name,
         len( os.getenv("RUN_AS_TEST") ) > 0
     )
-    print("CREATE TAG DATA")
+    print("# create-tag outputs:")
     g = gh.OutputHelper(('GITHUB_OUTPUT' in os.environ))
     g.out(outputs)
 
