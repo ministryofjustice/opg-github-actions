@@ -26,22 +26,10 @@ jobs:
         id: semver_tag
         uses: ./.github/actions/semver-tag
         with:
-          prerelease: "true"
+          prerelease: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
-      - id: summary
-        name: "Summary"
-        if: always()
-        run: |
-          echo "### PR Information" >> $GITHUB_STEP_SUMMARY
-          echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
-          echo "| branch | ${{ steps.semver_tag.outputs.branch_original }} |"  >> $GITHUB_STEP_SUMMARY
-          echo "| branch_safe | ${{ steps.semver_tag.outputs.branch_safe }} |"  >> $GITHUB_STEP_SUMMARY
-          echo "| prerelease | ${{ steps.semver_tag.outputs.prerelease }} |"  >> $GITHUB_STEP_SUMMARY
-          echo "| lastest_tag | ${{ steps.semver_tag.outputs.latest_tag_latest }} |"  >> $GITHUB_STEP_SUMMARY
-          echo "| last_release | ${{ steps.semver_tag.outputs.latest_tag_last_release }} |"  >> $GITHUB_STEP_SUMMARY
-          echo "| realease | [${{ steps.semver_tag.outputs.release_id }}](${{ steps.semver_tag.outputs.release_url }})  |"  >> $GITHUB_STEP_SUMMARY
-          echo "| **created_tag** | **${{ steps.semver_tag.outputs.created_tag }}** |"  >> $GITHUB_STEP_SUMMARY
+          show_verbose_summary: true
+
 
   end:
     name: 'End of PR workflow'
