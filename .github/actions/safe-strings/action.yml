@@ -56,12 +56,18 @@ runs:
       id: make_safe
       shell: bash
       env:
+        ACTION_SRC: ${{ github.action_path }}
+        ORIGINAL_STRING: ${{inputs.original}}
+        STRING_SUFFIX: ${{inputs.suffix}}
+        STRING_LENGTH: ${{inputs.length}}
+        CONDITIONAL_MATCH: ${{inputs.conditional_match}}
+        CONDITIONAL_VALUE: ${{inputs.conditional_value}}
         RUN_AS_TEST: ${{inputs.test}}
       run: |
         src="${{github.action_path}}"
-        python ${src}/./safe-strings.py \
-          --string="${{inputs.original}}" \
-          --suffix="${{inputs.suffix}}" \
-          --length="${{inputs.length}}" \
-          --conditional_match="${{inputs.conditional_match}}" \
-          --conditional_value="${{inputs.conditional_value}}"
+        python ${ACTION_SRC}/./safe-strings.py \
+          --string="${ORIGINAL_STRING}" \
+          --suffix="${STRING_SUFFIX}" \
+          --length="${STRING_LENGTH}" \
+          --conditional_match="${CONDITIONAL_MATCH}" \
+          --conditional_value="${CONDITIONAL_VALUE}"

@@ -72,10 +72,12 @@ runs:
   steps:
     - name: "Checkout original repo to set folder"
       uses: actions/checkout@v4
+      env:
+        FOLDER_PATH: ${{inputs.caller_repo_subfolder}}
       with:
         repository: ${{ github.repository }}
         ref: ${{ github.ref}}
-        path: ${{inputs.caller_repo_subfolder}}
+        path: ${FOLDER_PATH}
         fetch-tags: true
         fetch-depth: 0
     - name: "Setup python"
@@ -98,18 +100,27 @@ runs:
       id: get_next_tag
       shell: bash
       env:
+        ACTION_SRC_PATH: ${{ github.action_path }}
+        TARGET_REPO: "${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
+        COMMITISH_A: ${{inputs.commitish_a}}
+        COMMITISH_B: ${{inputs.commitish_b}}
+        PRERELEASE: ${{inputs.prerelease}}
+        PRERELEASE_SUFFIX: ${{inputs.prerelease_suffix}}
+        LATEST_TAG: ${{inputs.latest_tag}}
+        LAST_RELEASE: ${{inputs.last_release}}
+        WITH_V: ${{inputs.with_v}}
+        DEFAULT_BUMP: ${{inputs.default_bump}}
+        # used by the python code directly
         github_pr_title: ${{ github.event.pull_request.title }}
         github_pr_body: ${{ github.event.pull_request.body }}
       run: |
-        src="${{github.action_path}}"
-        repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
-        python ${src}/./next-tag.py \
-          --repository_root="${repo}" \
-          --commitish_a="${{inputs.commitish_a}}" \
-          --commitish_b="${{inputs.commitish_b}}" \
-          --prerelease="${{inputs.prerelease}}" \
-          --prerelease_suffix="${{inputs.prerelease_suffix}}" \
-          --latest_tag="${{inputs.latest_tag}}" \
-          --last_release="${{inputs.last_release}}" \
-          --with_v="${{inputs.with_v}}" \
-          --default_bump="${{inputs.default_bump}}"
+        python ${ACTION_SRC_PATH}/./next-tag.py \
+          --repository_root="${TARGET_REPO}" \
+          --commitish_a="${COMMITISH_A}" \
+          --commitish_b="${COMMITISH_B}" \
+          --prerelease="${PRERELEASE}" \
+          --prerelease_suffix="${PRERELEASE_SUFFIX}" \
+          --latest_tag="${LATEST_TAG}" \
+          --last_release="${LAST_RELEASE}" \
+          --with_v="${WITH_V}" \
+          --default_bump="${DEFAULT_BUMP}"

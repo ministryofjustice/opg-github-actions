@@ -42,8 +42,10 @@ runs:
       shell: bash
       env:
         RUN_AS_TEST: ${{inputs.test}}
+        EVENT_NAME: ${GITHUB_EVENT_NAME}
+        EVENT_PATH: ${GITHUB_EVENT_PATH}
       run: |
         src="${{github.action_path}}"
         python ${src}/./branch-name.py \
-          --event_name="${GITHUB_EVENT_NAME}" \
-          --event_data_file="${GITHUB_EVENT_PATH}"
+          --event_name="${EVENT_NAME}" \
+          --event_data_file="${EVENT_PATH}"

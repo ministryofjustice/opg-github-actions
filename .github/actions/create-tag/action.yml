@@ -45,10 +45,12 @@ runs:
   steps:
     - name: "Checkout original repo to set folder"
       uses: actions/checkout@v4
+      env:
+        TARGET_FOLDER_PATH: ${{inputs.caller_repo_subfolder}}
       with:
         repository: ${{ github.repository }}
         ref: ${{ github.head_ref }}
-        path: ${{inputs.caller_repo_subfolder}}
+        path: ${TARGET_FOLDER_PATH}
         fetch-tags: true
         fetch-depth: 0
     - name: "Setup python"
@@ -71,11 +73,13 @@ runs:
       id: create_tag
       shell: bash
       env:
-        RUN_AS_TEST: ${{inputs.test}}
+        RUN_AS_TEST: ${{ inputs.test }}
+        ACTION_SRC: ${{ github.action_path }}
+        TARGET_REPO: "${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
+        COMMITISH: ${{inputs.commitish}}
+        TAG_NAME: ${{inputs.tag_name}}
       run: |
-        src="${{github.action_path}}"
-        repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
-        python ${src}/./create-tag.py \
-          --repository_root="${repo}" \
-          --commitish="${{inputs.commitish}}" \
-          --tag_name="${{inputs.tag_name}}"
+        python ${ACTION_SRC}/./create-tag.py \
+          --repository_root="${TARGET_REPO}" \
+          --commitish="${COMMITISH}" \
+          --tag_name="${TAG_NAME}"

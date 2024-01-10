@@ -37,23 +37,27 @@ runs:
     - id: version
       name: Parse terraform version data from [${{ inputs.terraform_directory }}][${{ inputs.terraform_versions_file }}]
       shell: bash
+      env:
+        TERRAFORM_DIR: ${{ inputs.terraform_directory }}
+        TERRAFORM_VERSIONS_FILE: ${{ inputs.terraform_versions_file }}
+        SIMPLE_FILE: ${{ inputs.simple_file }}
       run: |
         echo "version=" >> $GITHUB_OUTPUT
-        if [ ! -d ${{ inputs.terraform_directory }} ]; then
+        if [ ! -d ${TERRAFORM_DIR} ]; then
           echo "Directory not found"
           exit 1
         fi
-        cd ${{ inputs.terraform_directory }}
-        if [ ! -f ${{ inputs.terraform_versions_file }} ]; then
+        cd ${TERRAFORM_DIR}
+        if [ ! -f ${TERRAFORM_VERSIONS_FILE} ]; then
           echo "File not found"
           exit 1
         fi
 
-        if [ ! -z "${{ inputs.simple_file }}" ]; then
+        if [ ! -z "${SIMPLE_FILE}" ]; then
           echo "Presuming plain text file"
-          terraform_version=$(cat ${{ inputs.terraform_versions_file }} )
+          terraform_version=$(cat ${TERRAFORM_VERSIONS_FILE} )
         else
           echo "Presuming terraform file"
-          terraform_version=$(cat ${{ inputs.terraform_versions_file }} | sed -r -n 's/.*required_version.*"(.*)"$/\1/p' )
+          terraform_version=$(cat ${TERRAFORM_VERSIONS_FILE} | sed -r -n 's/.*required_version.*"(.*)"$/\1/p' )
         fi
         echo "version=${terraform_version}" >> $GITHUB_OUTPUT

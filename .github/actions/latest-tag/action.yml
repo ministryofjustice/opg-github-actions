@@ -38,10 +38,12 @@ runs:
   steps:
     - name: "Checkout original repo to set folder"
       uses: actions/checkout@v4
+      env:
+        TARGET_FOLDER_PATH: ${{inputs.caller_repo_subfolder}}
       with:
         repository: ${{ github.repository }}
         ref: ${{ github.ref }}
-        path: ${{inputs.caller_repo_subfolder}}
+        path: ${TARGET_FOLDER_PATH}
         fetch-tags: true
         fetch-depth: 0
     - name: "Setup python"
@@ -63,12 +65,17 @@ runs:
     - name: Get latest Tag
       id: latest
       shell: bash
+      env:
+        ACTION_SRC: ${{ github.action_path }}
+        TARGET_REPO: "${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
+        BRANCH_NAME: ${{inputs.branch_name}}
+        RELEASE_BRANCHES: ${{inputs.release_branches}}
+        PRERELEASE: ${{inputs.prerelease}}
+        PRERELEASE_SUFFIX: ${{inputs.prerelease_suffix}}
       run: |
-        src="${{github.action_path}}"
-        repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
-        python ${src}/./latest-tag.py \
-          --repository_root="${repo}" \
-          --branch_name="${{inputs.branch_name}}" \
-          --release_branches="${{inputs.release_branches}}" \
-          --prerelease="${{inputs.prerelease}}" \
-          --prerelease_suffix="${{inputs.prerelease_suffix}}"
+        python ${ACTION_SRC}/./latest-tag.py \
+          --repository_root="${TARGET_REPO}" \
+          --branch_name="${BRANCH_NAME}" \
+          --release_branches="${RELEASE_BRANCHES}" \
+          --prerelease="${PRERELEASE}" \
+          --prerelease_suffix="${PRERELEASE_SUFFIX}"
