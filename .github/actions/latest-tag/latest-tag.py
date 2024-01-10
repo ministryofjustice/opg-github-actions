@@ -118,7 +118,7 @@ def main():
         args.prerelease_suffix
     )
 
-    print("LATEST TAG DATA")
+    print("# latest-tag outputs:")
     o = oh.OutputHelper(('GITHUB_OUTPUT' in os.environ))
     o.out(outputs)
 

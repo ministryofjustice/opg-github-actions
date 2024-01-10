@@ -71,11 +71,20 @@ runs:
       id: create_tag
       shell: bash
       env:
-        RUN_AS_TEST: ${{inputs.test}}
+        ACTION_SRC: ${{ github.action_path }}
+        TARGET_REPO: "${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
+        COMMITISH: ${{inputs.commitish}}
+        TAG_NAME: ${{inputs.tag_name}}
+        RUN_AS_TEST: ${{ inputs.test }}
       run: |
-        src="${{github.action_path}}"
-        repo="${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
-        python ${src}/./create-tag.py \
-          --repository_root="${repo}" \
-          --commitish="${{inputs.commitish}}" \
-          --tag_name="${{inputs.tag_name}}"
+        echo -e "# create-tag setup:"
+        echo -e "ACTION_SRC: ${ACTION_SRC}"
+        echo -e "TARGET_REPO: ${TARGET_REPO}"
+        echo -e "COMMITISH: ${COMMITISH}"
+        echo -e "TAG_NAME: ${TAG_NAME}"
+        echo -e "RUN_AS_TEST: ${RUN_AS_TEST}"
+
+        python ${ACTION_SRC}/./create-tag.py \
+          --repository_root="${TARGET_REPO}" \
+          --commitish="${COMMITISH}" \
+          --tag_name="${TAG_NAME}"

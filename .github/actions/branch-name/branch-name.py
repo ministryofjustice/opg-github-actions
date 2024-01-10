@@ -66,7 +66,7 @@ def main():
         event_data=event_data,
     )
 
-    print("BRANCH NAME DATA")
+    print("# branch-name outputs:")
     o = oh.OutputHelper(('GITHUB_OUTPUT' in os.environ))
     o.out(output)
 

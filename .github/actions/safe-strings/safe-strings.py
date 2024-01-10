@@ -85,7 +85,7 @@ def main():
         conditional_value=args.conditional_value
     )
 
-    print("CLEAN STRING DATA")
+    print("# safe-strings outputs:")
     o = oh.OutputHelper(('GITHUB_OUTPUT' in os.environ))
     o.out(output)
 
