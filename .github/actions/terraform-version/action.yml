@@ -42,6 +42,10 @@ runs:
         TERRAFORM_VERSIONS_FILE: ${{ inputs.terraform_versions_file }}
         SIMPLE_FILE: ${{ inputs.simple_file }}
       run: |
+        echo -e "TERRAFORM_DIR: ${TERRAFORM_DIR}"
+        echo -e "TERRAFORM_VERSIONS_FILE: ${TERRAFORM_VERSIONS_FILE}"
+        echo -e "SIMPLE_FILE: ${SIMPLE_FILE}"
+
         echo "version=" >> $GITHUB_OUTPUT
         if [ ! -d ${TERRAFORM_DIR} ]; then
           echo "Directory not found"

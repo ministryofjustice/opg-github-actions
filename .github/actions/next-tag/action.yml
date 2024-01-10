@@ -114,6 +114,18 @@ runs:
         github_pr_title: ${{ github.event.pull_request.title }}
         github_pr_body: ${{ github.event.pull_request.body }}
       run: |
+        echo -e "ACTION_SRC_PATH: ${ACTION_SRC_PATH}"
+        echo -e "TARGET_REPO: ${TARGET_REPO}"
+        echo -e "COMMITISH_A: ${COMMITISH_A}"
+        echo -e "COMMITISH_B: ${COMMITISH_B}"
+        echo -e "PRERELEASE: ${PRERELEASE}"
+        echo -e "PRERELEASE: ${PRERELEASE}"
+        echo -e "PRERELEASE_SUFFIX: ${PRERELEASE_SUFFIX}"
+        echo -e "LATEST_TAG: ${LATEST_TAG}"
+        echo -e "LAST_RELEASE: ${LAST_RELEASE}"
+        echo -e "WITH_V: ${WITH_V}"
+        echo -e "DEFAULT_BUMP: ${DEFAULT_BUMP}"
+
         python ${ACTION_SRC_PATH}/./next-tag.py \
           --repository_root="${TARGET_REPO}" \
           --commitish_a="${COMMITISH_A}" \

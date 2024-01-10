@@ -73,6 +73,12 @@ runs:
         PRERELEASE: ${{inputs.prerelease}}
         PRERELEASE_SUFFIX: ${{inputs.prerelease_suffix}}
       run: |
+        echo -e "ACTION_SRC: ${ACTION_SRC}"
+        echo -e "TARGET_REPO: ${TARGET_REPO}"
+        echo -e "BRANCH_NAME: ${BRANCH_NAME}"
+        echo -e "RELEASE_BRANCHES: ${RELEASE_BRANCHES}"
+        echo -e "PRERELEASE_SUFFIX: ${PRERELEASE_SUFFIX}"
+
         python ${ACTION_SRC}/./latest-tag.py \
           --repository_root="${TARGET_REPO}" \
           --branch_name="${BRANCH_NAME}" \
