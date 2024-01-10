@@ -5,7 +5,7 @@ from actions.commands import next_tag as cmd
 from actions.common import outputhelper as oh
 
 ### RESULT FILE
-fh = open("./next-tag-results.md", "a+")
+fh = open("./next_tag_results.md", "a+")
 o = oh.OutputHelper(False)
 o.header(fh)
 fh.close()
@@ -268,7 +268,7 @@ def test_next_tag_result_matches(
     # dump data for debugging
     print(f"Expected {expected} Actual {outputs['next_tag']}")
     print(outputs, sep="\n")
-    fh = open("./next-tag-results.md", "a+")
+    fh = open("./next_tag_results.md", "a+")
     o = oh.OutputHelper(False)
     o.result(expected, "==", outputs['next_tag'], t1 == True, fh)
     fh.close()
