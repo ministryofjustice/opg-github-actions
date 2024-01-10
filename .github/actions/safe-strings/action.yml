@@ -64,6 +64,7 @@ runs:
         CONDITIONAL_VALUE: ${{inputs.conditional_value}}
         RUN_AS_TEST: ${{inputs.test}}
       run: |
+        echo -e "# safe-strings setup:"
         echo -e "ACTION_SRC: ${ACTION_SRC}"
         echo -e "ORIGINAL_STRING: ${ORIGINAL_STRING}"
         echo -e "STRING_SUFFIX: ${STRING_SUFFIX}"

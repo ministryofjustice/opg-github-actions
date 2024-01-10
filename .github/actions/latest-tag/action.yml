@@ -71,6 +71,7 @@ runs:
         PRERELEASE: ${{inputs.prerelease}}
         PRERELEASE_SUFFIX: ${{inputs.prerelease_suffix}}
       run: |
+        echo -e "# latest-tag setup:"
         echo -e "ACTION_SRC: ${ACTION_SRC}"
         echo -e "TARGET_REPO: ${TARGET_REPO}"
         echo -e "BRANCH_NAME: ${BRANCH_NAME}"

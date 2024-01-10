@@ -44,6 +44,7 @@ runs:
         ACTION_SRC: ${{ github.action_path }}
         RUN_AS_TEST: ${{inputs.test}}
       run: |
+        echo -e "# branch-name setup:"
         echo -e "ACTION_SRC: ${ACTION_SRC}"
         echo -e "RUN_AS_TEST: ${RUN_AS_TEST}"
 

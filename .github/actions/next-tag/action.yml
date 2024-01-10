@@ -112,6 +112,7 @@ runs:
         github_pr_title: ${{ github.event.pull_request.title }}
         github_pr_body: ${{ github.event.pull_request.body }}
       run: |
+        echo -e "# next-tag setup:"
         echo -e "ACTION_SRC_PATH: ${ACTION_SRC_PATH}"
         echo -e "TARGET_REPO: ${TARGET_REPO}"
         echo -e "COMMITISH_A: ${COMMITISH_A}"

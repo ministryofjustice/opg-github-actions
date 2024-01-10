@@ -77,6 +77,7 @@ runs:
         TAG_NAME: ${{inputs.tag_name}}
         RUN_AS_TEST: ${{ inputs.test }}
       run: |
+        echo -e "# create-tag setup:"
         echo -e "ACTION_SRC: ${ACTION_SRC}"
         echo -e "TARGET_REPO: ${TARGET_REPO}"
         echo -e "COMMITISH: ${COMMITISH}"
