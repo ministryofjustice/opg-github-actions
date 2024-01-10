@@ -17,10 +17,6 @@
           "minor",
           "patch"
         ],
-        "excludePackageNames": [
-          "ministryofjustice/opg-github-actions",
-          "ministryofjustice/opg-github-workflows"
-        ],
         "stabilityDays": 5,
         "addLabels": ["minor-and-patch"]
       },
@@ -30,13 +26,12 @@
         "matchUpdateTypes": [
           "major"
         ],
-        "excludePackageNames": [
-          "ministryofjustice/opg-github-actions",
-          "ministryofjustice/opg-github-workflows"
-        ],
         "stabilityDays": 5,
         "addLabels": ["major"]
       }
-
+    ],
+    "ignoreDeps": [
+      "ministryofjustice/opg-github-actions",
+      "ministryofjustice/opg-github-workflows"
     ]
   }
