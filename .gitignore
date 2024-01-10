@@ -16,3 +16,6 @@ venv/
 env/
 **__pycache__**
 **repo-test**
+**.egg-info**
+tmpfiles/**
+python/**results.md
