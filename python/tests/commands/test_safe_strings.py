@@ -6,7 +6,7 @@ from actions.common import outputhelper as oh
 ### RESULT FILE
 fh = open("./safe_strings_results.md", "a+")
 o = oh.OutputHelper(False)
-o.header(fh)
+o.header(fh, "Safe Strings Test Results")
 fh.close()
 
 

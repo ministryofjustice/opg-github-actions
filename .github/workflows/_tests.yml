@@ -1,4 +1,4 @@
-name: "[Data] Test actions"
+name: "[Data] Test python code"
 
 on:
   workflow_dispatch:
@@ -16,32 +16,38 @@ jobs:
     uses: './.github/workflows/test-terraform-workspace-manager.yml'
     secrets: inherit
 
-  # test safe-strings
-  test_safe_strings:
-    name: "safe-strings"
-    uses: './.github/workflows/test-safe-strings.yml'
-
-  # test safe-strings
-  test_branch_name:
-    name: "branch-name"
-    uses: './.github/workflows/test-branch-name.yml'
-
-  # test latest-tag
-  test_latest_tag:
-    name: "latest-tag"
-    uses: './.github/workflows/test-latest-tag.yml'
-
-  # test next-tag
-  test_next_tag:
-    name: "next-tag"
-    uses: './.github/workflows/test-next-tag.yml'
-
-  # test create-tag
-  test_create_tag:
-    name: "create-tag"
-    uses: './.github/workflows/test-create-tag.yml'
-
-  # test semver-tag
-  test_semver:
+  # test terraform-workspace-manager
+  test_semver_tag:
     name: "semver-tag"
     uses: './.github/workflows/test-semver-tag.yml'
+
+  # test the python library
+  test_python_app_code:
+    name: "pytest suite"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+      - name: "Setup python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: "Setup pip"
+        run: |
+          cd ./python
+          pip install -q -r ./requirements.txt
+          pip install -e .
+      - name: "Setup and run pytest"
+        shell: bash
+        env:
+          RUN_AS_TEST: "true"
+        run: |
+          cd ./python
+          git config --global user.name "pytest"
+          git config --global user.email "dummy@dummymail.com"
+          pytest ./tests/
+          echo "$(cat ./branch_name_results.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat ./create_tag_results.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat ./latest_tag_results.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat ./next_tag_results.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat ./safe_strings_results.md)" >> $GITHUB_STEP_SUMMARY
