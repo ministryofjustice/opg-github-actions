@@ -42,7 +42,7 @@ runs:
     - name: pip
       shell: bash
       env:
-        PY_APP_DIR: "./_ghbranchnameaction/python"
+        PY_APP_DIR: "./python"
       run: |
         cd ${PY_APP_DIR}
         pip install -q -r ./requirements.txt
@@ -51,7 +51,7 @@ runs:
       id: safe
       shell: bash
       env:
-        PY_APP_DIR: "./_ghbranchnameaction/python"
+        PY_APP_DIR: "./python"
         RUN_AS_TEST: ${{inputs.test}}
       run: |
         echo -e "# branch-name setup:"
