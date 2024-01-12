@@ -56,8 +56,10 @@ runs:
     - name: pip
       shell: bash
       env:
-        PY_APP_DIR: "./_ghsafestringsaction/python"
+        PY_APP_DIR: "${{github.workspace}}./_ghsafestringsaction/python"
       run: |
+        echo -e "# pip setup:"
+        echo -e "PY_APP_DIR: ${PY_APP_DIR}"
         cd ${PY_APP_DIR}
         pip install -q -r ./requirements.txt
         pip install -e .
@@ -65,7 +67,7 @@ runs:
       id: make_safe
       shell: bash
       env:
-        PY_APP_DIR: "./_ghsafestringsaction/python"
+        PY_APP_DIR: "${{github.workspace}}./_ghsafestringsaction/python"
         ORIGINAL_STRING: ${{inputs.original}}
         STRING_SUFFIX: ${{inputs.suffix}}
         STRING_LENGTH: ${{inputs.length}}
