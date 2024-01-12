@@ -125,7 +125,7 @@ runs:
           with_v: ${{inputs.with_v}}
           commitish_a: ${{steps.branch_name.outputs.source_commitish}}
           commitish_b: ${{steps.branch_name.outputs.destination_commitish}}
-          default_bump: $${{inputs.default_bump}}
+          default_bump: ${{inputs.default_bump}}
     - name: "Create tag"
       id: create_tag
       uses: ./_ghsemveraction/.github/actions/create-tag
