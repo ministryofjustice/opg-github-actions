@@ -42,7 +42,7 @@ runs:
     - name: pip
       shell: bash
       env:
-        PY_APP_DIR: "${{github.workspace}}/./_ghbranchnameaction/python"
+        PY_APP_DIR: "${{github.workspace}}/_ghbranchnameaction/python"
       run: |
         echo -e "# pip setup:"
         echo -e "PY_APP_DIR: ${PY_APP_DIR}"
@@ -53,7 +53,7 @@ runs:
       id: safe
       shell: bash
       env:
-        PY_APP_DIR: "${{github.workspace}}/./_ghbranchnameaction/python"
+        PY_APP_DIR: "${{github.workspace}}/_ghbranchnameaction/python"
         RUN_AS_TEST: ${{inputs.test}}
       run: |
         echo -e "# branch-name setup:"
