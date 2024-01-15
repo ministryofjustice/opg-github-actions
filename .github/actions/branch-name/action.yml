@@ -32,8 +32,8 @@ runs:
     - name: "Checkout this actions repo into a subfolder at this version"
       uses: actions/checkout@v4
       with:
-        repository: ${{ inputs.action_repository }}
-        ref: ${{ inputs.action_ref }}
+        repository: ${{ inputs.action_repository || github.repository }}
+        ref: ${{ inputs.action_ref || github.ref_name }}
         path: ./_ghbranchnameaction
     - name: "Setup python"
       uses: actions/setup-python@v5
