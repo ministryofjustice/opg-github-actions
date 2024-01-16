@@ -106,6 +106,9 @@ runs:
     - name: "Generate safe branch name"
       id: branch_name
       uses: ./_ghsemveraction/.github/actions/branch-name
+      with:
+        action_repository: ${{ inputs.action_repository }}
+        action_ref: ${{ inputs.action_ref }}
     - name: "Find latest tag"
       id: latest_tag
       uses: ./_ghsemveraction/.github/actions/latest-tag
@@ -114,6 +117,8 @@ runs:
           release_branches: ${{inputs.release_branch}}
           prerelease: ${{inputs.prerelease}}
           prerelease_suffix: ${{steps.branch_name.outputs.safe}}
+          action_repository: ${{ inputs.action_repository }}
+          action_ref: ${{ inputs.action_ref }}
     - name: "Find next tag"
       id: next_tag
       uses: ./_ghsemveraction/.github/actions/next-tag
@@ -126,6 +131,8 @@ runs:
           commitish_a: ${{steps.branch_name.outputs.source_commitish}}
           commitish_b: ${{steps.branch_name.outputs.destination_commitish}}
           default_bump: ${{inputs.default_bump}}
+          action_repository: ${{ inputs.action_repository }}
+          action_ref: ${{ inputs.action_ref }}
     - name: "Create tag"
       id: create_tag
       uses: ./_ghsemveraction/.github/actions/create-tag
@@ -133,6 +140,9 @@ runs:
           test: ${{inputs.test}}
           commitish: ${{steps.branch_name.outputs.branch_name}}
           tag_name: ${{steps.next_tag.outputs.next_tag}}
+          action_repository: ${{ inputs.action_repository }}
+          action_ref: ${{ inputs.action_ref }}
+
     # if the branch is release branch, releases are enabled and this is not a test
     - id: create_release
       name: Create release

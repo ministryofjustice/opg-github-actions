@@ -32,8 +32,8 @@ runs:
     - name: "Checkout this actions repo into a subfolder at this version"
       uses: actions/checkout@v4
       with:
-        repository: ministryofjustice/opg-github-actions
-        ref: d01e9f0152fc1e54e724cb476eb5ce03bbb9ade7
+        repository: ${{ inputs.action_repository }}
+        ref: ${{ inputs.action_ref }}
         path: ./_ghbranchnameaction
     - name: "Setup python"
       uses: actions/setup-python@v5
