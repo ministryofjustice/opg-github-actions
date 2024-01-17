@@ -59,8 +59,10 @@ runs:
     - name: pip
       shell: bash
       env:
-        PY_APP_DIR: "./_ghlatesttagaction/python"
+        PY_APP_DIR: "${{github.workspace}}/./_ghlatesttagaction/python"
       run: |
+        echo -e "# pip setup:"
+        echo -e "PY_APP_DIR: ${PY_APP_DIR}"
         cd ${PY_APP_DIR}
         pip install -q -r ./requirements.txt
         pip install -e .
@@ -68,7 +70,7 @@ runs:
       id: latest
       shell: bash
       env:
-        PY_APP_DIR: "./_ghlatesttagaction/python"
+        PY_APP_DIR: "${{github.workspace}}/./_ghlatesttagaction/python"
         TARGET_REPO: "${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         BRANCH_NAME: ${{inputs.branch_name}}
         RELEASE_BRANCHES: ${{inputs.release_branches}}

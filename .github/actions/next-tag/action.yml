@@ -97,8 +97,10 @@ runs:
     - name: pip
       shell: bash
       env:
-        PY_APP_DIR: "./_ghnexttagaction/python"
+        PY_APP_DIR: "${{github.workspace}}/./_ghnexttagaction/python"
       run: |
+        echo -e "# pip setup:"
+        echo -e "PY_APP_DIR: ${PY_APP_DIR}"
         cd ${PY_APP_DIR}
         pip install -q -r ./requirements.txt
         pip install -e .
@@ -106,7 +108,7 @@ runs:
       id: get_next_tag
       shell: bash
       env:
-        PY_APP_DIR: "./_ghnexttagaction/python"
+        PY_APP_DIR: "${{github.workspace}}/./_ghnexttagaction/python"
         TARGET_REPO: "${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
         COMMITISH_A: ${{inputs.commitish_a}}
         COMMITISH_B: ${{inputs.commitish_b}}
