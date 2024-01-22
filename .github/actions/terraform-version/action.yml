@@ -75,14 +75,15 @@ runs:
           echo -e "Commit using:"
           git log -n1 --format="oneline"          
           appPath="${{ github.workspace }}/go"
-        elif [ -n "${{ steps.gha.outputs.ref}}" ]; then          
+        elif [ -n "${{ steps.gha.outputs.ref}}" ]; then   
+          echo -e "Running from remote workflow"       
           appPath="${{ steps.gha.outputs.path }}/go"
         else
-          echo "ERROR: failed to determine location of go code"
+          echo -e "ERROR: failed to determine location of go code"
           echo "${JSON_DEBUG}"             
           exit 1
-        fi
-        echo "appPath=${appPath}"
+        fi        
+        echo -e "appPath=${appPath}"
         echo "appPath=${appPath}" >> $GITHUB_OUTPUT
     - name: "JSON DEBUG [${{ steps.gha.outputs.repo == '' }}]"
       shell: bash
@@ -90,7 +91,7 @@ runs:
         JSON_DEBUG: ${{ toJSON(github) }}
       if: ${{ steps.gha.outputs.repo == '' }}
       run: |
-        echo "github action repo was empty, debugging:"
+        echo -e "github action repo was empty, debugging:"
         echo "${JSON_DEBUG}"
         
     
