@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"opg-github-actions/cmd/branchname"
 	"opg-github-actions/cmd/createtag"
 	"opg-github-actions/cmd/latesttag"
@@ -123,6 +124,7 @@ func main() {
 
 	if err != nil {
 		slog.Error(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	Out(results)
