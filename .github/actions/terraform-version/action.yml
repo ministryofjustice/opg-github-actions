@@ -57,14 +57,26 @@ runs:
         ref: ${{ steps.gha.outputs.ref }}
         path: ${{ steps.gha.outputs.path }}
     
+    # If the repository property matches our own name (so a call from itself)
+    # then we dont checkout anything, set the path to be from the 
+    # base of self and show the last commit hash and message for debug
+    #
+    # If its called remotely, then checkout self into a subfolder of the
+    # workspace and presume can use the env variables from the 'gha' step
     - name: "Set directory path"
       id: set_path
       shell: bash      
       run: | 
-        if [ "${{ steps.gha.outputs.isSelf }}" == "true" ]; then
+        set -e 
+        if [ "${{ steps.gha.outputs.isSelf }}" == "true" ]; then          
+          git log -n1 --format="oneline"
           appPath="${{ github.workspace }}/go"
-        else 
+        elif [ -n "${{ steps.gha.outputs.ref}}" ]; then
           appPath="${{ steps.gha.outputs.path }}/go"
+        else
+          echo "ERROR: failed to determine location of go code"
+          echo ${{ toJSON(github) }}              
+          exit 1
         fi
         echo "appPath=${appPath}"
         echo "appPath=${appPath}" >> $GITHUB_OUTPUT
@@ -75,18 +87,6 @@ runs:
         echo ${{ toJSON(github) }}        
         
     
-
-    # - name: "Checkout the actions repo to a known path"
-    #   uses: actions/checkout@v4
-    #   if: ${{ steps.action_setup.opgaction_exists == 'false' }}
-    #   with:
-    #     repository: ${{ steps.action_setup.opgaction_repo }}
-    #     ref: ${{ steps.action_setup.opgaction_ref }}
-    #     path: 
-    # - name: "Debug checkout"
-    #   shell: bash
-    #   run: |
-    #     ls -la ${{ github.workspace}}/opg-gha
 
     # # get our the calling repo as we need to access files form there
     # - uses: actions/checkout@v4
