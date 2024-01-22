@@ -105,7 +105,7 @@ runs:
         gha_os=$(uname | tr '[:upper:]' '[:lower:]')
         gha_arc=$(uname -m)
         gha_host="${gha_os}_${gha_arc}"
-        cd ${{ steps.setPath.outputs.appPatch }}
+        cd ${{ steps.setPath.outputs.appPath }}
         pwd
         ls -la
         echo "Building (via make) for ${gha_host}"
