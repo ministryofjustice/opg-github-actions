@@ -11,7 +11,7 @@ inputs:
   simple_file:
     description: "If set, change the parsing to presume terraform_versions_file is a plain text file that contains only a semver string."
     default: ""
-   ## Used to capture the intial values before they get overwritten
+  ## Used to capture the intial values before they get overwritten
   action_ref:
     description: "Capture the starting value of github.action_ref. DO NOT SET"
     default: ${{ github.action_ref }}
@@ -46,15 +46,8 @@ runs:
       env: 
         REPO: "${{ github.workspace}}/opg-gha"
       run: |
-        if [ -d "${REPO}" ]; then
-          echo "opgaction_exists=false" >> $GITHUB_OUTPUT
-        else
-          echo "opgaction_exists=true" >> $GITHUB_OUTPUT
-        fi
-        echo "opgaction_repo=${{ inputs.action_repository }}" >> $GITHUB_OUTPUT
-        echo "opgaction_ref=${{ inputs.action_ref }}" >> $GITHUB_OUTPUT
-        echo "opgaction_grepo=${{ github.action_repository }}" >> $GITHUB_OUTPUT
-        echo "opgaction_gref=${{ github.action_ref }}" >> $GITHUB_OUTPUT
+        echo "$GITHUB_CONTEXT"
+        
     # - name: "Checkout the actions repo to a known path"
     #   uses: actions/checkout@v4
     #   if: ${{ steps.action_setup.opgaction_exists == 'false' }}
