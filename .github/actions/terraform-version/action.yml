@@ -66,6 +66,8 @@ runs:
     - name: "Set directory path"
       id: set_path
       shell: bash      
+      env:
+        JSON_DEBUG: ${{ toJSON(github) }}
       run: | 
         set -e 
         if [ "${{ steps.gha.outputs.isSelf }}" == "true" ]; then          
@@ -75,16 +77,18 @@ runs:
           appPath="${{ steps.gha.outputs.path }}/go"
         else
           echo "ERROR: failed to determine location of go code"
-          echo ${{ toJSON(github) }}              
+          echo "${JSON_DEBUG}"             
           exit 1
         fi
         echo "appPath=${appPath}"
         echo "appPath=${appPath}" >> $GITHUB_OUTPUT
     - name: "JSON DEBUG [${{ steps.gha.outputs.repo == '' }}]"
       shell: bash
+      env:
+        JSON_DEBUG: ${{ toJSON(github) }}
       if: ${{ steps.gha.outputs.repo == '' }}
       run: |
-        echo ${{ toJSON(github) }}        
+        echo "${JSON_DEBUG}"
         
     
 
