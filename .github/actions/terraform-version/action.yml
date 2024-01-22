@@ -36,7 +36,7 @@ runs:
       id: action_setup
       shell: bash
       run: |
-        if [ ! -d "${REPO}" ]; then
+        if [ -d "${REPO}" ]; then
           echo "opgaction_exists=false" >> $GITHUB_OUTPUT
         else
           echo "opgaction_exists=true" >> $GITHUB_OUTPUT
