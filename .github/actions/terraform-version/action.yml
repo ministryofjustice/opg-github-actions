@@ -37,6 +37,9 @@ runs:
   using: "composite"
   
   steps:
+    # Create environment variables for the action repo data and workspace
+    # directories and convert those into step outputs for use in other 
+    # steps
     - name: "Environment variables to step variables"
       id: gha
       shell: bash
@@ -49,6 +52,8 @@ runs:
         echo "ref=${GHA_REF}" >> $GITHUB_OUTPUT
         echo "path=${GHA_PATH}" >> $GITHUB_OUTPUT
         echo "isSelf=${{ github.repository == 'ministryofjustice/opg-github-actions' }}" >> $GITHUB_OUTPUT
+    # If we aren't being called from ourselves, then checkout the repository
+    # at the commit we know of into the new path
     - name: "Checkout action [ ${{ steps.gha.outputs.isSelf }} ]"
       uses: actions/checkout@v4
       if: ${{ steps.gha.outputs.isSelf != 'true' }}
@@ -80,13 +85,24 @@ runs:
           appPath="${{ steps.gha.outputs.path }}/go"
         else
           echo -e "ERROR: failed to determine location of go code"
+          echo -e "ERROR: failed to determine location of action code" >> $GITHUB_STEP_SUMMARY
           echo "${JSON_DEBUG}"             
           exit 1
         fi        
         echo -e "appPath=${appPath}"
         echo "appPath=${appPath}" >> $GITHUB_OUTPUT
-        
+
         ls -la ${appPath}
+    - name: "OS & Arch"
+      shell: bash
+      run: |
+        gha_os=$(uname | tr '[:upper:]' '[:lower:]')
+        gha_arc=$(uname -m)
+        gha_host="${OS}_${ARCH}"
+        echo -e "HOST: ${gha_host}"      
+
+
+
     - name: "JSON DEBUG [${{ steps.gha.outputs.repo == '' }}]"
       shell: bash
       env:
