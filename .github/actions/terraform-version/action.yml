@@ -27,42 +27,68 @@ outputs:
 
 runs:
   using: "composite"
+  
   steps:
-    # get our the calling repo as we need to access files form there
-    - uses: actions/checkout@v4
-      with:
-        repository: ${{ github.repository }}
-        ref: ${{ github.ref }}
-    # fail if directory or version file does not exist
-    - id: version
-      name: Parse terraform version data from [${{ inputs.terraform_directory }}][${{ inputs.terraform_versions_file }}]
+    # checkout the opg-github-actions repo if it doesnt exist
+    - name: "Checkout opg-github-actions"
+      id: action_checkout
       shell: bash
       env:
-        TERRAFORM_DIR: ${{ inputs.terraform_directory }}
-        TERRAFORM_VERSIONS_FILE: ${{ inputs.terraform_versions_file }}
-        SIMPLE_FILE: ${{ inputs.simple_file }}
+        REPO: "ministryofjustice/opg-github-actions" 
+        DEST: "${{github.workspace}}/opg-gha"
       run: |
-        echo -e "# terraform-version setup:"
-        echo -e "TERRAFORM_DIR: ${TERRAFORM_DIR}"
-        echo -e "TERRAFORM_VERSIONS_FILE: ${TERRAFORM_VERSIONS_FILE}"
-        echo -e "SIMPLE_FILE: ${SIMPLE_FILE}"
+        if [ ! -d "${REPO}" ]; then
+          gh repo clone ${REPO} ${DEST}
+        fi
+        echo "opgactiondir=${DEST}" >> $GITHUB_OUTPUT
+        ls -la ${{github.workspace}}/opg-gha
+    
+    - name: "Setup go"
+      uses: actions/setup-go@v4
+      with:
+        go-version-file: "${{steps.action_checkout.outputs.opgactiondir }}/go/go.mod"
+    - name: "Get version data"
+      id: version
+      shell: bash
+      run: |
+        cd ${{steps.action_checkout.outputs.opgactiondir}}/
+        ls -la
+        
+    # # get our the calling repo as we need to access files form there
+    # - uses: actions/checkout@v4
+    #   with:
+    #     repository: ${{ github.repository }}
+    #     ref: ${{ github.ref }}
+    # # fail if directory or version file does not exist
+    # - id: version
+    #   name: Parse terraform version data from [${{ inputs.terraform_directory }}][${{ inputs.terraform_versions_file }}]
+    #   shell: bash
+    #   env:
+    #     TERRAFORM_DIR: ${{ inputs.terraform_directory }}
+    #     TERRAFORM_VERSIONS_FILE: ${{ inputs.terraform_versions_file }}
+    #     SIMPLE_FILE: ${{ inputs.simple_file }}
+    #   run: |
+    #     echo -e "# terraform-version setup:"
+    #     echo -e "TERRAFORM_DIR: ${TERRAFORM_DIR}"
+    #     echo -e "TERRAFORM_VERSIONS_FILE: ${TERRAFORM_VERSIONS_FILE}"
+    #     echo -e "SIMPLE_FILE: ${SIMPLE_FILE}"
 
-        echo "version=" >> $GITHUB_OUTPUT
-        if [ ! -d ${TERRAFORM_DIR} ]; then
-          echo "Directory not found"
-          exit 1
-        fi
-        cd ${TERRAFORM_DIR}
-        if [ ! -f ${TERRAFORM_VERSIONS_FILE} ]; then
-          echo "File not found"
-          exit 1
-        fi
+    #     echo "version=" >> $GITHUB_OUTPUT
+    #     if [ ! -d ${TERRAFORM_DIR} ]; then
+    #       echo "Directory not found"
+    #       exit 1
+    #     fi
+    #     cd ${TERRAFORM_DIR}
+    #     if [ ! -f ${TERRAFORM_VERSIONS_FILE} ]; then
+    #       echo "File not found"
+    #       exit 1
+    #     fi
 
-        if [ ! -z "${SIMPLE_FILE}" ]; then
-          echo "Presuming plain text file"
-          terraform_version=$(cat ${TERRAFORM_VERSIONS_FILE} )
-        else
-          echo "Presuming terraform file"
-          terraform_version=$(cat ${TERRAFORM_VERSIONS_FILE} | sed -r -n 's/.*required_version.*"(.*)"$/\1/p' )
-        fi
-        echo "version=${terraform_version}" >> $GITHUB_OUTPUT
+    #     if [ ! -z "${SIMPLE_FILE}" ]; then
+    #       echo "Presuming plain text file"
+    #       terraform_version=$(cat ${TERRAFORM_VERSIONS_FILE} )
+    #     else
+    #       echo "Presuming terraform file"
+    #       terraform_version=$(cat ${TERRAFORM_VERSIONS_FILE} | sed -r -n 's/.*required_version.*"(.*)"$/\1/p' )
+    #     fi
+    #     echo "version=${terraform_version}" >> $GITHUB_OUTPUT
