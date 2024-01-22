@@ -106,6 +106,8 @@ runs:
         gha_arc=$(uname -m)
         gha_host="${gha_os}_${gha_arc}"
         cd ${{ github.setPath.outputs.appPatch }}
+        pwd
+        ls -la
         echo "Building (via make) for ${gha_host}"
         make ${gha_host}
         cd ${{ github.workspace }}
