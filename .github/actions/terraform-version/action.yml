@@ -79,10 +79,10 @@ runs:
           echo -e "Warning: running against self."
           echo -e "Using this commit:"
           git log -n1 --format="oneline"          
-          appPath="${{ github.workspace }}/go"
+          appPath="${{ github.workspace }}"
         elif [ -n "${{ steps.gha.outputs.ref}}" ]; then   
           echo -e "Running from remote workflow"       
-          appPath="${{ steps.gha.outputs.path }}/go"
+          appPath="${{ steps.gha.outputs.path }}"
         else
           echo -e "ERROR: failed to determine location of go code"
           echo -e "ERROR: failed to determine location of action code" >> $GITHUB_STEP_SUMMARY
