@@ -14,8 +14,6 @@ secrets.auto.tfvars
 .env
 venv/
 env/
-**__pycache__**
-**repo-test**
-**.egg-info**
-tmpfiles/**
-python/**results.md
+# build & test result files that makefile creates
+go/builds**
+go/test-results.json
