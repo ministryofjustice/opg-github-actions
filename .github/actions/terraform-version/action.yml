@@ -48,32 +48,26 @@ runs:
         echo "repo=${GHA_REPO}" >> $GITHUB_OUTPUT
         echo "ref=${GHA_REF}" >> $GITHUB_OUTPUT
         echo "path=${GHA_PATH}" >> $GITHUB_OUTPUT
-    # checkout the opg-github-actions repo if it doesnt exist
-    - name: "Checkout repository if required"
-      id: action_repo_checkout
-      shell: bash
-      env:
-        REPO_SELF: "ministryofjustice/opg-github-actions"
-        GH_TOKEN: ${{ github.token }}
+        echo "isSelf=${{ github.repository != 'ministryofjustice/opg-github-actions }}" >> $GITHUB_OUTPUT
+    - name: "Checkout action [ ${{ steps.gha.outputs.isSelf }} ]"
+      uses: actions/checkout@v4
+      if: ${{ steps.gha.outputs.isSelf != 'true' }}
+      with:
+        repository: ${{ steps.gha.outputs.repo }}
+        ref: ${{ steps.gha.outputs.ref }}
+        path: ${{ steps.gha.outputs.path }}
+    
+    - name: "Set directory path"
+      id: set_path
+      shell: bash      
       run: | 
-        set -e   
-
-        # If this is happening on self, then ...
-        if [ "${{ github.repository }}" == "${REPO_SELF}" ]; then
-          git log -n1
-        # else if the repository was passed and directory does not exist, then clone it
-        elif [ -n "${{ steps.gha.outputs.repo }}" ] && [ ! -d "${{ steps.gha.outputs.path }}" ]; then
-          # +refs/pull/*/head:refs/remotes/origin/pr/*
-          gh repo clone ${{ steps.gha.outputs.repo }} ${{ steps.gha.outputs.path }}
-          cd ${{ steps.gha.outputs.path }}
-          git fetch --all --tags
-          git checkout -f "${{ steps.gha.outputs.ref }}" --
-          cd ${{github.workspace}}
-
-          ls -la ${{ steps.gha.outputs.path }}
-
+        if [ "${{ steps.gha.outputs.isSelf }}" == "true" ]; then
+          appPath="${{ github.workspace }}/go"
+        else 
+          appPath="${{ steps.gha.outputs.path }}/go"
         fi
-        
+        echo "appPath=${appPath}"
+        echo "appPath=${appPath}" >> $GITHUB_OUTPUT
     - name: "JSON DEBUG [${{ steps.gha.outputs.repo == '' }}]"
       shell: bash
       if: ${{ steps.gha.outputs.repo == '' }}
