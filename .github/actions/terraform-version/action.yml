@@ -29,32 +29,32 @@ runs:
   using: "composite"
   
   steps:
+    # REPO: "ministryofjustice/opg-github-actions" 
+    # GH_TOKEN: ${{ github.token }}
     # checkout the opg-github-actions repo if it doesnt exist
-    - name: "Checkout opg-github-actions"
-      id: action_checkout
+    - name: "Look for opg-github-actions repo at known path"
+      id: action_setup
       shell: bash
-      env:
-        REPO: "ministryofjustice/opg-github-actions" 
-        DEST: "${{github.workspace}}/opg-gha"
-        GH_TOKEN: ${{ github.token }}
       run: |
         if [ ! -d "${REPO}" ]; then
-          gh repo clone ${REPO} ${DEST}
+          echo "opgaction_exists=false" >> $GITHUB_OUTPUT
+        else
+          echo "opgaction_exists=true" >> $GITHUB_OUTPUT
         fi
-        echo "opgactiondir=${DEST}" >> $GITHUB_OUTPUT
-        ls -la ${{github.workspace}}/opg-gha
-    
-    - name: "Setup go"
-      uses: actions/setup-go@v4
+        echo "opgaction_repo=${{ github.action_repository }}" >> $GITHUB_OUTPUT
+        echo "opgaction_ref=${{ github.action_ref }}" >> $GITHUB_OUTPUT
+    - name: "Checkout the actions repo to a known path"
+      uses: actions/checkout@v4
+      if: ${{ steps.action_setup.opgaction_exists == 'false' }}
       with:
-        go-version-file: "${{steps.action_checkout.outputs.opgactiondir }}/go/go.mod"
-    - name: "Get version data"
-      id: version
+        repository: ${{ steps.action_setup.opgaction_repo }}
+        ref: ${{ steps.action_setup.opgaction_ref }}
+        path: "${{ github.workspace}}/opg-gha"
+    - name: "Debug checkout"
       shell: bash
       run: |
-        cd ${{steps.action_checkout.outputs.opgactiondir}}/
-        ls -la
-        
+        ls -la ${{ github.workspace}}/opg-gha
+
     # # get our the calling repo as we need to access files form there
     # - uses: actions/checkout@v4
     #   with:
