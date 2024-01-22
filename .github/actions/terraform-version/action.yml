@@ -37,24 +37,29 @@ runs:
   using: "composite"
   
   steps:
-    # REPO: "ministryofjustice/opg-github-actions" 
-    # GH_TOKEN: ${{ github.token }}
     # checkout the opg-github-actions repo if it doesnt exist
     - name: "Look for opg-github-actions repo at known path"
-      id: action_setup
+      id: action_repo_checkout
       shell: bash
       env: 
         GHA_REPO: "${{ github.action_repository}}"
         GHA_REF: "${{ github.action_ref}}"
-        REPO_PATH: "${{ github.workspace}}/opg-gha"
-      # /home/runner/work/opg-github-actions/opg-github-actions/./.github/actions/terraform-version
-      run: |
-        echo "input gha ref: ${{inputs.action_ref}}"
-        echo "input gha repo: ${{inputs.action_repository}}"
+        GHA_PATH: "${{ github.workspace}}/opg-gha"
+        GH_TOKEN: ${{ github.token }}    
+      run: | 
+        set -e       
         echo "env gha ref: ${GHA_REF}"
         echo "env gha repo: ${GHA_REPO}"
-        
-        echo "${{ toJSON(github) }}"
+        if [ ! -d "${GHA_PATH}" ]; then
+          gh repo clone ${GHA_REPO} ${GHA_PATH}          
+          cd ${GHA_PATH}          
+          git fetch --all
+          git checkout -f "${GHA_REF}"
+          cd ${{github.workspace}}
+        fi
+        echo "opg_gha_path=${GHA_PATH}" >> $GITHUB_OUTPUT
+        ls -la ${GHA_PATH}
+    
 
     # - name: "Checkout the actions repo to a known path"
     #   uses: actions/checkout@v4
