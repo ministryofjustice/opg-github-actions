@@ -77,7 +77,7 @@ runs:
         set -e 
         if [ "${{ steps.gha.outputs.isSelf }}" == "true" ]; then 
           echo -e "Warning: running against self."
-          echo -e "Commit using:"
+          echo -e "Using this commit:"
           git log -n1 --format="oneline"          
           appPath="${{ github.workspace }}/go"
         elif [ -n "${{ steps.gha.outputs.ref}}" ]; then   
@@ -98,7 +98,7 @@ runs:
       run: |
         gha_os=$(uname | tr '[:upper:]' '[:lower:]')
         gha_arc=$(uname -m)
-        gha_host="${OS}_${ARCH}"
+        gha_host="${gha_os}_${gha_arc}"
         echo -e "HOST: ${gha_host}"      
 
 
