@@ -94,6 +94,8 @@ runs:
     - uses: actions/setup-go@v4
       with:
         go-version: '1.21.6'
+        cache-dependency-path: |
+          ${{ steps.setPath.outputs.appPath }}/go/go.sum
     - shell: bash
       run: go version
     # Get os & arch name for make target
