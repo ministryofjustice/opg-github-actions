@@ -15,7 +15,6 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/k0kubun/pp"
 )
 
 // fixture for handling all the end to end tests
@@ -410,7 +409,7 @@ func TestSemverEndToEnd(t *testing.T) {
 		for k, v := range f.NextTagTest.Expected {
 			if nextTagResult[k] != v {
 				t.Errorf("error: (%s:%d) expected [%s] to be [%s] actual [%v]", nexttag.Name, i, k, v, nextTagResult[k])
-				pp.Println(nextTagResult)
+				fmt.Println(nextTagResult)
 			}
 		}
 
@@ -430,8 +429,8 @@ func TestSemverEndToEnd(t *testing.T) {
 		for k, v := range f.CreateTagTest.Expected {
 			if createTagResult[k] != v {
 				t.Errorf("error: (%s:%d) expected [%s] to be [%s] actual [%v]", createtag.Name, i, k, v, createTagResult[k])
-				pp.Println(nextTagResult)
-				pp.Println(createTagResult)
+				fmt.Println(nextTagResult)
+				fmt.Println(createTagResult)
 			}
 		}
 

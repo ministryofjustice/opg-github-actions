@@ -1,10 +1,9 @@
 package semver
 
 import (
+	"fmt"
 	"opg-github-actions/pkg/testlib"
 	"testing"
-
-	"github.com/k0kubun/pp"
 )
 
 type mFixture struct {
@@ -178,7 +177,7 @@ func TestSemverChangestoMajor(t *testing.T) {
 		s, _ := New(f.Test)
 		s.BumpMajor()
 		if s.String() != f.Expected {
-			pp.Println(s)
+			fmt.Println(s)
 			t.Errorf("error: expected [%s] actual [%s]", f.Expected, s.String())
 		}
 	}
