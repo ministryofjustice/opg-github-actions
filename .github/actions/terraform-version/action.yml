@@ -69,7 +69,7 @@ runs:
     # If its called remotely, then checkout self into a subfolder of the
     # workspace and presume can use the env variables from the 'gha' step
     - name: "Set directory path"
-      id: set_path
+      id: setPath
       shell: bash      
       env:
         JSON_DEBUG: ${{ toJSON(github) }}
@@ -93,13 +93,19 @@ runs:
         echo "appPath=${appPath}" >> $GITHUB_OUTPUT
 
         ls -la ${appPath}
+    # Setup go
+    - uses: actions/setup-go@v4
+      with:
+        go-version-file: '${{ steps.setPath.outputs.appPath }}/go/mod.go'
+    - shell: bash
+      run: go version
     - name: "Build app"
       shell: bash
       run: |
         gha_os=$(uname | tr '[:upper:]' '[:lower:]')
         gha_arc=$(uname -m)
         gha_host="${gha_os}_${gha_arc}"
-        cd ${{ github.set_path.outputs.appPatch }}
+        cd ${{ github.setPath.outputs.appPatch }}
         echo "Building (via make) for ${gha_host}"
         make ${gha_host}
         cd ${{ github.workspace }}
