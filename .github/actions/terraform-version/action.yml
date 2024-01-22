@@ -46,8 +46,8 @@ runs:
       env: 
         REPO: "${{ github.workspace}}/opg-gha"
       run: |
-        echo "$GITHUB_CONTEXT"
-        
+        echo "${{ toJSON(github) }}"
+
     # - name: "Checkout the actions repo to a known path"
     #   uses: actions/checkout@v4
     #   if: ${{ steps.action_setup.opgaction_exists == 'false' }}
