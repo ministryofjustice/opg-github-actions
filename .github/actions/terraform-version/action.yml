@@ -44,8 +44,16 @@ runs:
       id: action_setup
       shell: bash
       env: 
-        REPO: "${{ github.workspace}}/opg-gha"
+        GHA_REPO: "${{ github.action_repository}}"
+        GHA_REF: "${{ github.action_ref}}"
+        REPO_PATH: "${{ github.workspace}}/opg-gha"
+      # /home/runner/work/opg-github-actions/opg-github-actions/./.github/actions/terraform-version
       run: |
+        echo "input gha ref: ${{inputs.action_ref}}"
+        echo "input gha repo: ${{inputs.action_repository}}"
+        echo "env gha ref: ${GHA_REF}"
+        echo "env gha repo: ${GHA_REPO}"
+        
         echo "${{ toJSON(github) }}"
 
     # - name: "Checkout the actions repo to a known path"
