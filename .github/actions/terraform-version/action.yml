@@ -92,7 +92,7 @@ runs:
         echo -e "appPath=${appPath}"
         echo "appPath=${appPath}" >> $GITHUB_OUTPUT
 
-        ls -la ${appPath}
+        ls -la ${appPath}/go
     # Setup go
     - uses: actions/setup-go@v4
       with:
