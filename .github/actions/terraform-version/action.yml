@@ -41,6 +41,7 @@ runs:
         GHA_REF: "${{ github.action_ref }}"
         GHA_PATH: "${{ github.workspace }}/opg-gha"    
       run: |
+        echo -e "Environment variables to step variables"
         echo "repo=${GHA_REPO}" >> $GITHUB_OUTPUT
         echo "ref=${GHA_REF}" >> $GITHUB_OUTPUT
         echo "path=${GHA_PATH}" >> $GITHUB_OUTPUT
@@ -67,6 +68,7 @@ runs:
       env:
         JSON_DEBUG: ${{ toJSON(github) }}
       run: | 
+        echo -e "Set directory path"
         set -e 
         if [ "${{ steps.gha.outputs.isSelf }}" == "true" ]; then 
           echo -e "Warning: running against self."
@@ -84,8 +86,10 @@ runs:
         fi        
         echo -e "appPath=${appPath}"
         echo "appPath=${appPath}" >> $GITHUB_OUTPUT
-
-        ls -la ${appPath}/go/
+        
+        if [ "${{ runner.debug }}" == "1" ]; then
+          ls -la ${appPath}/go/
+        fi
     # Setup go
     - uses: actions/setup-go@v4
       with:
@@ -97,17 +101,21 @@ runs:
       id: info
       shell: bash
       run: |
+        echo -e "Build info"
         gha_os=$(uname | tr '[:upper:]' '[:lower:]')
         gha_arc=$(uname -m)
         make_target="${gha_os}_${gha_arc}"
         binpath="${{ steps.setPath.outputs.appPath }}/go/builds/${make_target}"
         echo "target=${make_target}" >> $GITHUB_OUTPUT
         echo "binpath=${binpath}" >> $GITHUB_OUTPUT
-        if [ ! -a "${binpath}" ]; then
+
+        if [ -a "${binpath}" ]; then
+          echo "Build file exists."
           echo "binexists=true" >> $GITHUB_OUTPUT
         else 
+          echo "Build file does not exist."
           echo "binexists=false" >> $GITHUB_OUTPUT
-        fi
+        fi        
     # This will build the app using the makefile to generate
     #   ./build/$target/main
     # which can then be run
@@ -118,6 +126,7 @@ runs:
       env:
         target: '${{ steps.info.outputs.target }}'
       run: |
+        echo -e "Build app"
         cd ${{ steps.setPath.outputs.appPath }}
         echo "Building (via make) for ${target}"
         make ${target}
@@ -132,8 +141,9 @@ runs:
         versionFile: '${{ inputs.terraform_versions_file }}'
         simple: '${{ inputs.simple_file }}'
       run: |
+        echo -e "Run terraform-version"
         echo -e "${GHABIN}"
-        ${GHABIN} \
+        ${GHABIN} terraform-version \
           --directory="${directory}" \
           --versions-file="${versionsFile}" \
           --simple="${simple}"
