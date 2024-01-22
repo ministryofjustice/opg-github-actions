@@ -85,6 +85,8 @@ runs:
         fi        
         echo -e "appPath=${appPath}"
         echo "appPath=${appPath}" >> $GITHUB_OUTPUT
+        
+        ls -la ${appPath}
     - name: "JSON DEBUG [${{ steps.gha.outputs.repo == '' }}]"
       shell: bash
       env:
