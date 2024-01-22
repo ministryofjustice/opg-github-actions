@@ -36,6 +36,7 @@ runs:
       env:
         REPO: "ministryofjustice/opg-github-actions" 
         DEST: "${{github.workspace}}/opg-gha"
+        GH_TOKEN: ${{ github.token }}
       run: |
         if [ ! -d "${REPO}" ]; then
           gh repo clone ${REPO} ${DEST}
