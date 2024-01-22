@@ -37,28 +37,41 @@ runs:
   using: "composite"
   
   steps:
-    # checkout the opg-github-actions repo if it doesnt exist
-    - name: "Look for opg-github-actions repo at known path"
-      id: action_repo_checkout
+    - name: "Environment variables to step variables"
+      id: gha
       shell: bash
       env: 
         GHA_REPO: "${{ github.action_repository}}"
         GHA_REF: "${{ github.action_ref}}"
-        GHA_PATH: "${{ github.workspace}}/opg-gha"
-        GH_TOKEN: ${{ github.token }}    
+        GHA_PATH: "${{ github.workspace}}/opg-gha"        
+      run: |
+        echo "repo=${GHA_REPO}" >> $GITHUB_OUTPUT
+        echo "ref=${GHA_REF}" >> $GITHUB_OUTPUT
+        echo "path=${GHA_PATH}" >> $GITHUB_OUTPUT
+    - name: "JSON DEBUG [${{ steps.gha.outputs.repo == '' }}]"
+      shell: bash
+      if: ${{ steps.gha.outputs.repo == '' }}
+      run: |
+        echo ${{ toJSON(github) }}
+    # checkout the opg-github-actions repo if it doesnt exist
+    - name: "Look for opg-github-actions repo at known path"
+      id: action_repo_checkout
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
       run: | 
-        set -e       
-        echo "env gha ref: ${GHA_REF}"
-        echo "env gha repo: ${GHA_REPO}"
-        if [ ! -d "${GHA_PATH}" ]; then
-          gh repo clone ${GHA_REPO} ${GHA_PATH}          
-          cd ${GHA_PATH}          
+        set -e               
+        echo "gha ref: ${{ steps.gha.outputs.ref }}"
+        echo "gha repo: ${{ steps.gha.outputs.repo }}"
+        echo "gha path: ${{ steps.gha.outputs.path }}"
+        if [ ! -d "${{ steps.gha.outputs.path }}" ]; then
+          gh repo clone ${{ steps.gha.outputs.repo }} ${{ steps.gha.outputs.path }}
+          cd ${{ steps.gha.outputs.path }}
           git fetch --all
-          git checkout -f "${GHA_REF}"
+          git checkout -f "${{ steps.gha.outputs.ref }}" --
           cd ${{github.workspace}}
         fi
-        echo "opg_gha_path=${GHA_PATH}" >> $GITHUB_OUTPUT
-        ls -la ${GHA_PATH}
+        ls -la ${{ steps.gha.outputs.path }}
     
 
     # - name: "Checkout the actions repo to a known path"
