@@ -93,15 +93,16 @@ runs:
         echo "appPath=${appPath}" >> $GITHUB_OUTPUT
 
         ls -la ${appPath}
-    - name: "OS & Arch"
+    - name: "Build app"
       shell: bash
       run: |
         gha_os=$(uname | tr '[:upper:]' '[:lower:]')
         gha_arc=$(uname -m)
         gha_host="${gha_os}_${gha_arc}"
-        echo -e "HOST: ${gha_host}"      
-
-
+        cd ${{ github.set_path.outputs.appPatch }}
+        echo "Building (via make) for ${gha_host}"
+        make ${gha_host}
+        cd ${{ github.workspace }}
 
     - name: "JSON DEBUG [${{ steps.gha.outputs.repo == '' }}]"
       shell: bash

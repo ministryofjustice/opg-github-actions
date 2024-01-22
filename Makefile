@@ -13,12 +13,16 @@ USER_PROFILE := ~/.zprofile
 
 
 .DEFAULT_GOAL: self
-.PHONY: self all requirements darwin_arm64 darwin_amd64 
-.ONESHELL: self all requirements darwin_arm64 darwin_amd64 
+.PHONY: self all requirements darwin_arm64 darwin_amd64 linux_x86_64
+.ONESHELL: self all requirements darwin_arm64 darwin_amd64 linux_x86_64
 .EXPORT_ALL_VARIABLES:
 
 self: $(HOST_ARCH)
 
+linux_x86_64: requirements
+	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)$@/
+	@cd $(PWD)/go && env GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -o $(BUILD_FOLDER)$@/main main.go
+	@echo Build $@ complete.
 
 darwin_x86_64: requirements
 	@${MAKE} darwin_amd64
