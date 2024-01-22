@@ -13,8 +13,8 @@ USER_PROFILE := ~/.zprofile
 
 
 .DEFAULT_GOAL: self
-.PHONY: self all requirements darwin_arm64 darwin_amd64 linux_x86_64
-.ONESHELL: self all requirements darwin_arm64 darwin_amd64 linux_x86_64
+.PHONY: self requirements darwin_arm64 darwin_amd64 linux_x86_64 tests
+.ONESHELL: self requirements darwin_arm64 darwin_amd64 linux_x86_64 tests
 .EXPORT_ALL_VARIABLES:
 
 self: $(HOST_ARCH)

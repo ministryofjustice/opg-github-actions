@@ -28,7 +28,6 @@ outputs:
 
 runs:
   using: "composite"
-  
   steps:
     # Create environment variables for the action repo data and workspace
     # directories and convert those into step outputs for use in other 
@@ -40,7 +39,7 @@ runs:
         GHA_REPO: "${{ github.action_repository }}"
         GHA_REF: "${{ github.action_ref }}"
         GHA_PATH: "${{ github.workspace }}/opg-gha"    
-      run: |
+      run: |        
         echo -e "Environment variables to step variables"
         echo "repo=${GHA_REPO}" >> $GITHUB_OUTPUT
         echo "ref=${GHA_REF}" >> $GITHUB_OUTPUT
@@ -74,6 +73,7 @@ runs:
           echo -e "Warning: running against self."
           echo -e "Using this commit:"
           git log -n1 --format="oneline"          
+
           appPath="${{ github.workspace }}"
         elif [ -n "${{ steps.gha.outputs.ref}}" ]; then   
           echo -e "Running from remote workflow"       
