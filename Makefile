@@ -21,7 +21,7 @@ self: $(HOST_ARCH)
 
 linux_x86_64: requirements
 	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)$@/
-	@cd $(PWD)/go && env GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -o $(BUILD_FOLDER)$@/main main.go
+	@cd $(PWD)/go && go build -o $(BUILD_FOLDER)$@/main main.go
 	@echo Build $@ complete.
 
 darwin_x86_64: requirements

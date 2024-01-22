@@ -92,11 +92,11 @@ runs:
         echo -e "appPath=${appPath}"
         echo "appPath=${appPath}" >> $GITHUB_OUTPUT
 
-        ls -la ${appPath}/go
+        ls -la ${appPath}/go/
     # Setup go
     - uses: actions/setup-go@v4
       with:
-        go-version-file: '${{ steps.setPath.outputs.appPath }}/go/mod.go'
+        go-version: '1.21.6'
     - shell: bash
       run: go version
     - name: "Build app"
