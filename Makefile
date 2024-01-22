@@ -5,7 +5,7 @@ OS := $(shell uname | tr '[:upper:]' '[:lower:]')
 ARCH := $(shell uname -m)
 HOST_ARCH := ${OS}_${ARCH}
 
-BUILD_FOLDER = ./builds/
+BUILD_FOLDER = ./builds
 OS_AND_ARCHS_TO_BUILD := darwin_arm64 darwin_amd64
 
 PWD := $(shell pwd)
@@ -19,22 +19,24 @@ USER_PROFILE := ~/.zprofile
 
 self: $(HOST_ARCH)
 
-linux_x86_64: requirements
-	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)$@/
-	@cd $(PWD)/go && go build -o $(BUILD_FOLDER)$@/main main.go
+# for the github action builder - so dont run requirements
+linux_x86_64:
+	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)/
+	@cd $(PWD)/go && env GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -o $(BUILD_FOLDER)/$@ main.go
 	@echo Build $@ complete.
 
+# LOCAL DEV VERSIONS
 darwin_x86_64: requirements
 	@${MAKE} darwin_amd64
 
 darwin_arm64: requirements
-	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)$@/
-	@cd $(PWD)/go && env GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -o $(BUILD_FOLDER)$@/main main.go
+	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)/
+	@cd $(PWD)/go && env GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -o $(BUILD_FOLDER)/$@ main.go
 	@echo Build $@ complete.
 
 darwin_amd64: requirements
-	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)$@/
-	@cd $(PWD)/go && env GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -o $(BUILD_FOLDER)$@/main main.go
+	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)/
+	@cd $(PWD)/go && env GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -o $(BUILD_FOLDER)/$@ main.go
 	@echo Build $@ complete.
 
 

@@ -11,13 +11,6 @@ inputs:
   simple_file:
     description: "If set, change the parsing to presume terraform_versions_file is a plain text file that contains only a semver string."
     default: ""
-  ## Used to capture the intial values before they get overwritten
-  action_ref:
-    description: "Capture the starting value of github.action_ref. DO NOT SET"
-    default: ${{ github.action_ref }}
-  action_repository:
-    description: "Capture the starting value of github.action_repository. DO NOT SET"
-    default: ${{ github.action_repository }}
 
 outputs:
   terraform_directory:
@@ -99,19 +92,40 @@ runs:
         go-version: '1.21.6'
     - shell: bash
       run: go version
-    - name: "Build app"
+    # Get os & arch name for make target
+    - name: "Build info"
+      id: info
       shell: bash
       run: |
         gha_os=$(uname | tr '[:upper:]' '[:lower:]')
         gha_arc=$(uname -m)
-        gha_host="${gha_os}_${gha_arc}"
+        make_target="${gha_os}_${gha_arc}"
+        binpath="${{ steps.setPath.outputs.appPath }}/go/builds/${make_target}"
+        echo "target=${make_target}" >> $GITHUB_OUTPUT
+        echo "binpath=${binpath}" >> $GITHUB_OUTPUT
+    # This will build the app using the makefile to generate
+    #   ./build/$target/main
+    # which can then be run
+    - name: "Build app"
+      id: build      
+      shell: bash
+      env:
+        target: '${{ steps.info.outputs.target }}'
+      run: |
         cd ${{ steps.setPath.outputs.appPath }}
-        pwd
-        ls -la
-        echo "Building (via make) for ${gha_host}"
-        make ${gha_host}
+        echo "Building (via make) for ${target}"
+        make ${target}
         cd ${{ github.workspace }}
-
+    # RUN THE COMMAND
+    - name: "terraform-version"
+      id: "version"
+      shell: bash
+      env:
+        GHABIN: '${{ steps.info.outputs.binpath }}'
+      run: |
+        echo -e "${GHABIN}"
+    
+    # DUMP DEBUG    
     - name: "JSON DEBUG [${{ steps.gha.outputs.repo == '' }}]"
       shell: bash
       env:
