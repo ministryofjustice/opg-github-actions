@@ -70,10 +70,12 @@ runs:
         JSON_DEBUG: ${{ toJSON(github) }}
       run: | 
         set -e 
-        if [ "${{ steps.gha.outputs.isSelf }}" == "true" ]; then          
-          git log -n1 --format="oneline"
+        if [ "${{ steps.gha.outputs.isSelf }}" == "true" ]; then 
+          echo -e "Warning: running against self."
+          echo -e "Commit using:"
+          git log -n1 --format="oneline"          
           appPath="${{ github.workspace }}/go"
-        elif [ -n "${{ steps.gha.outputs.ref}}" ]; then
+        elif [ -n "${{ steps.gha.outputs.ref}}" ]; then          
           appPath="${{ steps.gha.outputs.path }}/go"
         else
           echo "ERROR: failed to determine location of go code"
@@ -88,6 +90,7 @@ runs:
         JSON_DEBUG: ${{ toJSON(github) }}
       if: ${{ steps.gha.outputs.repo == '' }}
       run: |
+        echo "github action repo was empty, debugging:"
         echo "${JSON_DEBUG}"
         
     
