@@ -48,11 +48,6 @@ runs:
         echo "repo=${GHA_REPO}" >> $GITHUB_OUTPUT
         echo "ref=${GHA_REF}" >> $GITHUB_OUTPUT
         echo "path=${GHA_PATH}" >> $GITHUB_OUTPUT
-    - name: "JSON DEBUG [${{ steps.gha.outputs.repo == '' }}]"
-      shell: bash
-      if: ${{ steps.gha.outputs.repo == '' }}
-      run: |
-        echo ${{ toJSON(github) }}
     # checkout the opg-github-actions repo if it doesnt exist
     - name: "Checkout repository if required"
       id: action_repo_checkout
@@ -79,6 +74,11 @@ runs:
 
         fi
         
+    - name: "JSON DEBUG [${{ steps.gha.outputs.repo == '' }}]"
+      shell: bash
+      if: ${{ steps.gha.outputs.repo == '' }}
+      run: |
+        echo ${{ toJSON(github) }}        
         
     
 
