@@ -41,14 +41,14 @@ runs:
       id: gha
       shell: bash
       env: 
-        GHA_REPO: "${{ github.action_repository}}"
-        GHA_REF: "${{ github.action_ref}}"
-        GHA_PATH: "${{ github.workspace}}/opg-gha"        
+        GHA_REPO: "${{ github.action_repository }}"
+        GHA_REF: "${{ github.action_ref }}"
+        GHA_PATH: "${{ github.workspace }}/opg-gha"    
       run: |
         echo "repo=${GHA_REPO}" >> $GITHUB_OUTPUT
         echo "ref=${GHA_REF}" >> $GITHUB_OUTPUT
         echo "path=${GHA_PATH}" >> $GITHUB_OUTPUT
-        echo "isSelf=${{ github.repository != 'ministryofjustice/opg-github-actions }}" >> $GITHUB_OUTPUT
+        echo "isSelf=${{ github.repository != 'ministryofjustice/opg-github-actions' }}" >> $GITHUB_OUTPUT
     - name: "Checkout action [ ${{ steps.gha.outputs.isSelf }} ]"
       uses: actions/checkout@v4
       if: ${{ steps.gha.outputs.isSelf != 'true' }}
