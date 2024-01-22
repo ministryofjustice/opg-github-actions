@@ -103,12 +103,18 @@ runs:
         binpath="${{ steps.setPath.outputs.appPath }}/go/builds/${make_target}"
         echo "target=${make_target}" >> $GITHUB_OUTPUT
         echo "binpath=${binpath}" >> $GITHUB_OUTPUT
+        if [ ! -a "${binpath}" ]; then
+          echo "binexists=true" >> $GITHUB_OUTPUT
+        else 
+          echo "binexists=false" >> $GITHUB_OUTPUT
+        fi
     # This will build the app using the makefile to generate
     #   ./build/$target/main
     # which can then be run
-    - name: "Build app"
+    - name: "Build app [ ${{ steps.info.outputs.binexists == 'false' }} ]"
       id: build      
       shell: bash
+      if: ${{ steps.info.outputs.binexists == 'false' }}
       env:
         target: '${{ steps.info.outputs.target }}'
       run: |
@@ -122,11 +128,18 @@ runs:
       shell: bash
       env:
         GHABIN: '${{ steps.info.outputs.binpath }}'
+        directory: '${{ inputs.terraform_directory }}'
+        versionFile: '${{ inputs.terraform_versions_file }}'
+        simple: '${{ inputs.simple_file }}'
       run: |
         echo -e "${GHABIN}"
-    
-    # DUMP DEBUG    
-    - name: "JSON DEBUG [${{ steps.gha.outputs.repo == '' }}]"
+        ${GHABIN} \
+          --directory="${directory}" \
+          --versions-file="${versionsFile}" \
+          --simple="${simple}"
+
+    # DUMP DEBUG DATA  
+    - name: "JSON DEBUG [${{ steps.gha.outputs.repo == '' && runner.debug == '1' }}]"
       shell: bash
       env:
         JSON_DEBUG: ${{ toJSON(github) }}
@@ -135,43 +148,3 @@ runs:
         echo -e "github action repo was empty, debugging:"
         echo "${JSON_DEBUG}"
         
-    
-
-    # # get our the calling repo as we need to access files form there
-    # - uses: actions/checkout@v4
-    #   with:
-    #     repository: ${{ github.repository }}
-    #     ref: ${{ github.ref }}
-    # # fail if directory or version file does not exist
-    # - id: version
-    #   name: Parse terraform version data from [${{ inputs.terraform_directory }}][${{ inputs.terraform_versions_file }}]
-    #   shell: bash
-    #   env:
-    #     TERRAFORM_DIR: ${{ inputs.terraform_directory }}
-    #     TERRAFORM_VERSIONS_FILE: ${{ inputs.terraform_versions_file }}
-    #     SIMPLE_FILE: ${{ inputs.simple_file }}
-    #   run: |
-    #     echo -e "# terraform-version setup:"
-    #     echo -e "TERRAFORM_DIR: ${TERRAFORM_DIR}"
-    #     echo -e "TERRAFORM_VERSIONS_FILE: ${TERRAFORM_VERSIONS_FILE}"
-    #     echo -e "SIMPLE_FILE: ${SIMPLE_FILE}"
-
-    #     echo "version=" >> $GITHUB_OUTPUT
-    #     if [ ! -d ${TERRAFORM_DIR} ]; then
-    #       echo "Directory not found"
-    #       exit 1
-    #     fi
-    #     cd ${TERRAFORM_DIR}
-    #     if [ ! -f ${TERRAFORM_VERSIONS_FILE} ]; then
-    #       echo "File not found"
-    #       exit 1
-    #     fi
-
-    #     if [ ! -z "${SIMPLE_FILE}" ]; then
-    #       echo "Presuming plain text file"
-    #       terraform_version=$(cat ${TERRAFORM_VERSIONS_FILE} )
-    #     else
-    #       echo "Presuming terraform file"
-    #       terraform_version=$(cat ${TERRAFORM_VERSIONS_FILE} | sed -r -n 's/.*required_version.*"(.*)"$/\1/p' )
-    #     fi
-    #     echo "version=${terraform_version}" >> $GITHUB_OUTPUT
