@@ -45,8 +45,10 @@ func (c *Commits) StrToReference(str string) (ref *plumbing.Reference, err error
 			branches = append(branches, ref.Name().Short())
 			return nil
 		})
-		slog.Error(strings.Join(branches, ","))
-		slog.Error(e.Error())
+		slog.Error("branches:" + strings.Join(branches, ","))
+		if e != nil {
+			slog.Error(e.Error())
+		}
 		// _, e := c.repository.Worktree()
 		// slog.Error("worktree:" + e.Error())
 		// _, e = c.repository.Head()
