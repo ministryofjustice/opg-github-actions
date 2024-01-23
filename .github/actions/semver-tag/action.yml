@@ -215,8 +215,7 @@ runs:
         withV: '${{ inputs.with_v }}'
         defaultBump: '${{ inputs.default_bump }}'
       run: |
-        ${binPath} next-tag \     
-          --log-level="info" \
+        ${binPath} next-tag \
           --repository="${repo}" \
           --base="${baseRef}" \
           --head="${headRef}" \
