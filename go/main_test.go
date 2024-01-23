@@ -266,7 +266,7 @@ var (
 				Expected: map[string]string{"last_release": "v1.10.0", "last_prerelease": "", "all_releases": "v1.9.0, v1.10.0", "all_prereleases": "v0.0.1-beta.0, v2.0.0-beta.0"},
 			},
 			NextTagTest: nextTagFixture{
-				Expected: map[string]string{"next_tag": "v1.11.0"},
+				Expected: map[string]string{"next_tag": "v1.11.0", "last_release": "v1.10.0", "last_prerelease": ""},
 			},
 			CreateTagTest: createTagFixture{
 				Expected: map[string]string{"created_tag": "v1.11.0", "regenerated": "false"},

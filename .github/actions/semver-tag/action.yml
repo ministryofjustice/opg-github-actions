@@ -197,7 +197,7 @@ runs:
           --prerelease="${prerelease}" \
           --prerelease-suffix="${prereleaseSuffix}" \
           --release-branches="${releaseBranch}"
-   # next tag
+    # next tag
     - name: "next-tag"
       id: nexttag
       shell: bash
@@ -226,7 +226,7 @@ runs:
           --last-prerelease="${lastPrerelease}" \
           --with-v="${withV}" \
           --default-bump="${defaultBump}"
-   # create tag
+    # create tag
     - name: "create-tag"
       id: createtag
       shell: bash
