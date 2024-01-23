@@ -39,7 +39,7 @@ func logSetup() {
 		level          string               = *logLevel
 		as             string               = *logAs
 		to             string               = *logTo
-		handlerOptions *slog.HandlerOptions = &slog.HandlerOptions{AddSource: true, Level: slog.LevelError}
+		handlerOptions *slog.HandlerOptions = &slog.HandlerOptions{AddSource: true, Level: slog.LevelInfo}
 		validAsChoice  bool                 = slices.Contains(logAsChoices, as)
 		validToChoice  bool                 = slices.Contains(logToChoices, to)
 		out            io.Writer            = os.Stdout
@@ -79,6 +79,8 @@ func Out(results map[string]string) {
 		outFile = os.Getenv(githubout)
 		f, _ = os.OpenFile(outFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		defer f.Close()
+	} else {
+		slog.Info("github workspace not found...")
 	}
 
 	for k, v := range results {
