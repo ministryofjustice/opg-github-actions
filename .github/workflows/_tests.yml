@@ -35,14 +35,14 @@ jobs:
           cd ./go
           go install github.com/jstemmer/go-junit-report/v2@latest
           echo "here1"
-          go test -v -json -bench -count=5 ./... > testresult.json          
+          go test -v -json -bench -count=5 ./...
           echo "here2"
           ls -la
-          go-junit-report \
-            -in="./testresult.json"
-            -parser=gojson \
-            -set-exit-code \
-            -package-name="opg-github-actions" > report.xml
+          # go-junit-report \
+          #   -in="./testresult.json"
+          #   -parser=gojson \
+          #   -set-exit-code \
+          #   -package-name="opg-github-actions" > report.xml
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: always()
