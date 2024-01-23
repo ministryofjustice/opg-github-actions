@@ -44,8 +44,9 @@ func (c *Commits) StrToReference(str string) (ref *plumbing.Reference, err error
 		branchIter, e := c.repository.Branches()
 		pp.Println(branchIter)
 		branches := []string{}
-		branchIter.ForEach(func(ref *plumbing.Reference) error {
-			branches = append(branches, ref.Name().Short())
+		branchIter.ForEach(func(p *plumbing.Reference) error {
+			println(p.Name().Short())
+			branches = append(branches, p.Name().Short())
 			return nil
 		})
 		slog.Error(fmt.Sprintf("branches: [%s]", strings.Join(branches, " ")))
