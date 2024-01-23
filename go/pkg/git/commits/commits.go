@@ -3,6 +3,7 @@ package commits
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"opg-github-actions/pkg/git/repo"
 	"os"
 
@@ -32,6 +33,8 @@ func (c *Commits) StrToReference(str string) (ref *plumbing.Reference, err error
 	rev := plumbing.Revision(str)
 	hash, err := c.repository.ResolveRevision(rev)
 	if err != nil {
+		slog.Error("str: " + str)
+		slog.Error("rev: " + rev.String())
 		return
 	}
 	ref = plumbing.NewReferenceFromStrings(str, hash.String())
