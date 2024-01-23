@@ -2,6 +2,7 @@ package testlib
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/go-git/go-git/v5"
@@ -9,6 +10,8 @@ import (
 )
 
 func TestRepositorySkeleton() (dir string, r *git.Repository, defaultBranch *plumbing.Reference) {
+	var e error
+
 	dir, _ = os.MkdirTemp("./", "test_repository_")
 	// create the repository locally
 	r, _ = git.PlainInit(dir, false)
@@ -18,18 +21,27 @@ func TestRepositorySkeleton() (dir string, r *git.Repository, defaultBranch *plu
 	n := TestRandInRange(10, 150)
 	for i := 0; i < n; i++ {
 		msg := fmt.Sprintf("commit %d", i)
-		w.Commit(msg, &git.CommitOptions{
+		_, e = w.Commit(msg, &git.CommitOptions{
 			AllowEmptyCommits: true,
 		})
+		if e != nil {
+			log.Fatal(e)
+		}
 	}
-	defaultBranch, _ = r.Head()
+	defaultBranch, e = r.Head()
+	if e != nil {
+		log.Fatal(e)
+	}
 
 	// checkout to default branch
-	w.Checkout(&git.CheckoutOptions{
+	e = w.Checkout(&git.CheckoutOptions{
 		Create: false,
 		Force:  true,
 		Branch: defaultBranch.Name(),
 	})
+	if e != nil {
+		log.Fatal(e)
+	}
 
 	return
 }
