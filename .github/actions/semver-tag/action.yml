@@ -109,7 +109,7 @@ runs:
 
         if [ "${isSelf}" == "true" ]; then
           echo -e "Warning: running against self."          
-          path="${{ github.workspace }}/opggha"          
+          path="${{ github.workspace }}"          
           echo "path=${path}" >> $GITHUB_OUTPUT
         elif [ -n "${ACTION_REF}" ]; then   
           echo -e "Info: running from remote"          
