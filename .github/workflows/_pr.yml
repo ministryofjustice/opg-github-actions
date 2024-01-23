@@ -24,7 +24,6 @@ jobs:
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
-
       - name: "Build"
         id: build
         shell: bash
@@ -35,7 +34,11 @@ jobs:
           gha_os=$(uname | tr '[:upper:]' '[:lower:]')
           gha_arc=$(uname -m)
           target="${gha_os}_${gha_arc}"
+          
           cd ${appPath}
+          pwd 
+          ls -la
+          
           echo -e "Building (via make) for ${target}"
           make ${target}
           cd ${{ github.workspace }}
