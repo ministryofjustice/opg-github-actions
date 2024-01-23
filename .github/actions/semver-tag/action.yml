@@ -85,7 +85,7 @@ runs:
       env:
         ACTION_REPO: "${{ github.action_repository }}"
         ACTION:REF: "${{ github.action_ref }}"
-        JSON_DEBUG: ${{ toJSON(github) }}
+        # JSON_DEBUG: ${{ toJSON(github) }}
       run: |
         echo -e "Setup variables."
         set -e
@@ -109,11 +109,11 @@ runs:
 
         if [ "${isSelf}" == "true" ]; then
           echo -e "Warning: running against self."          
-          path=${{ github.workspace }}/opggha"          
+          path="${{ github.workspace }}/opggha"          
           echo "path=${path}" >> $GITHUB_OUTPUT
         elif [ -n "${ACTION_REF}" ]; then   
           echo -e "Info: running from remote"          
-          path=${{ github.workspace }}/opggha"
+          path="${{ github.workspace }}/opggha"
           echo "path=${path}" >> $GITHUB_OUTPUT
         else
           echo -e "ERROR: failed to determine action code location"
