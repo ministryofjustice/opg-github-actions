@@ -19,9 +19,9 @@ inputs:
   github_token:
     description: "A token authorised with write permissions to create a release."
     default: ""
-  # releases_enabled:
-  #   description: "If set, allows the creation of a release when on a release branch (and not testing)"
-  #   default: "true"
+  releases_enabled:
+    description: "If set, allows the creation of a release when on a release branch (and not testing)"
+    default: "true"
   # show_verbose_summary:
   #   description: "Set this to any value to show the more verbose summary output data"
   #   default: ""
@@ -34,9 +34,7 @@ outputs:
   release_branch:
     description: "Inputed release_branch variable."
     value: ${{ inputs.release_branch }}
-  prerelease:
-    description: "Inputed prerelease variable."
-    value: ${{ inputs.prerelease }}
+  
 
   branch_original:
     description: "Output from branch_name safety check - the branch_name return value"
@@ -48,6 +46,9 @@ outputs:
     description: "Output from branch_name safety check  - the safe return value"
     value: ${{ steps.branchname.outputs.safe }}
 
+  prerelease:
+    description: "Inputed prerelease variable."
+    value: ${{ steps.latesttag.outputs.prerelease }}
   latest_tag_latest:
     description: "Output from latest_tag - the latest return value"
     value: ${{ steps.latesttag.outputs.latest_prerelease }}
@@ -245,8 +246,17 @@ runs:
           --tag-name="${tagName}" \
           --regen="true" \
           --push="false" 
-
-
+    # Create a release object
+    - name: "Create a release"
+      id: create_release      
+      if: ${{ inputs.releases_enabled == 'true' }}
+      uses: ncipollo/release-action@v1.13.0
+      with:
+        tag: ${{ steps.createtag.outputs.created_tag }}
+        name: ${{ steps.createtag.outputs.created_tag }}
+        draft: ${{ steps.latesttag.outputs.prerelease == 'true' }}
+        prerelease: ${{ steps.latesttag.outputs.prerelease == 'true' }}
+        generateReleaseNotes: true
           
 
         

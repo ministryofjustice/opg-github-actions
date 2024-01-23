@@ -23,14 +23,42 @@ jobs:
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
+
+      - name: "Build"
+        id: build
+        shell: bash
+        if: ${{ steps.setup.outputs.isSelf == 'true' }}
+        env:
+          appPath: '${{ github.workspace }}/go'
+        run: |
+          echo -e "Building"
+          gha_os=$(uname | tr '[:upper:]' '[:lower:]')
+          gha_arc=$(uname -m)
+          target="${gha_os}_${gha_arc}"
+          cd ${appPath}
+          echo -e "Building (via make) for ${target}"
+          make ${target}
+          cd ${{ github.workspace }}
       - name: "Semver tag and release"
         id: semver_tag
         uses: ./.github/actions/semver-tag
         with:
           test: true
           prerelease: true
+          releases_enabled: false # disable the release as we make here and include build assests
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          
+      - name: "Create a release"
+        id: create_release      
+        if: ${{ inputs.releases_enabled == 'true' }}
+        uses: ncipollo/release-action@v1.13.0
+        with:
+          tag: ${{ steps.semver_tag.outputs.created_tag }}
+          name: ${{ steps.semver_tag.outputs.created_tag }}
+          draft: true
+          prerelease: true
+          generateReleaseNotes: true
+          artifacts: '${{ github.workspace }}/go/builds/*.tar'
+            
 
   end:
     name: 'End of PR workflow'
