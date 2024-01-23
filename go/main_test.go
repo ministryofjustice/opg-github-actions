@@ -15,6 +15,7 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/k0kubun/pp"
 )
 
 // fixture for handling all the end to end tests
@@ -181,6 +182,41 @@ var (
 			},
 			CreateTagTest: createTagFixture{
 				Expected: map[string]string{"created_tag": "2.0.0-beta.0", "regenerated": "false"},
+			},
+		},
+		// Testing a prerelease
+		{
+			Prerelease: true,
+			EventSetup: eventSetup{
+				Event: "pull_request",
+				Data:  testlib.TestEventPullRequest("master", "beta", "beta merge", "beta merge body #patch"),
+			},
+			// simple repo, 1 branch, 1 prerelease tag, 3 commits with 1 major
+			RepoSetup: repoSetup{
+				Btc: []branchCommitTags{
+					{
+						Branch: "beta",
+						TagCom: []tagCommit{
+							{Msg: "release", Tag: "v2.7.3"},
+							{Msg: "commit test"},
+							{Msg: "commit #minor"},
+						},
+					},
+				},
+			},
+			// branch name test setup
+			BranchTest: branchFixture{
+				Event:    "pull_request",
+				Expected: map[string]string{"full_length": "beta", "safe": "beta", "branch_name": "beta"},
+			},
+			LatestTagTest: latestTagFixture{
+				Expected: map[string]string{"last_release": "v2.7.3", "last_prerelease": ""},
+			},
+			NextTagTest: nextTagFixture{
+				Expected: map[string]string{"next_tag": "v2.8.0-beta.0"},
+			},
+			CreateTagTest: createTagFixture{
+				Expected: map[string]string{"created_tag": "v2.8.0-beta.0", "regenerated": "false"},
 			},
 		},
 		// Testing a release
@@ -409,7 +445,7 @@ func TestSemverEndToEnd(t *testing.T) {
 		for k, v := range f.NextTagTest.Expected {
 			if nextTagResult[k] != v {
 				t.Errorf("error: (%s:%d) expected [%s] to be [%s] actual [%v]", nexttag.Name, i, k, v, nextTagResult[k])
-				fmt.Println(nextTagResult)
+				pp.Println(nextTagResult)
 			}
 		}
 

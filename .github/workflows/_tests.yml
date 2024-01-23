@@ -1,4 +1,4 @@
-name: "[Data] Test python code"
+name: "[Data] Test application code"
 
 on:
   workflow_dispatch:

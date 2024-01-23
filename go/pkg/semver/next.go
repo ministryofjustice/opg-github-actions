@@ -41,6 +41,7 @@ func Next(
 			// based on the release tag
 			// => v1.5.0-beta.0
 			tag.BumpMinor()
+			tag.SetPatch(0)
 			tag.MustBumpPrerelease(prereleaseSuffix)
 		} else {
 			// Last release of v1.4.0 + has a minor flag
