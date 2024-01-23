@@ -21,16 +21,8 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version-file: './go/go.mod'        
-          cache-dependency-path: './go/go.sum'
-      - name: "Go paths"
-        id: gobin
-        run: |
-          go version          
-          gb=$(go env GOPATH)/bin          
-          echo "gobin=${gb}"
-      - name: "Running tests"       
-        env:
-          GOBIN: ${{steps.gobin.outputs.gobin}}
+          cache-dependency-path: './go/go.sum'      
+      - name: "Running tests"              
         run: |          
           cd ./go
           go install github.com/jstemmer/go-junit-report/v2@latest
