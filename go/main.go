@@ -105,7 +105,7 @@ func main() {
 	}
 
 	slog.Debug("flag parsed command:" + cmd)
-	slog.Info(
+	slog.Error(
 		fmt.Sprintf("arguments: \n\t%s \n---",
 			strings.Join(flag.Args(), "\n\t"),
 		))
