@@ -34,8 +34,10 @@ jobs:
         run: |          
           cd ./go
           go install github.com/jstemmer/go-junit-report/v2@latest
-          echo "here"
-          go test -v -json -bench -count=5 ./... >> testresult.json          
+          echo "here1"
+          go test -v -json -bench -count=5 ./... > testresult.json          
+          echo "here2"
+          ls -la
           go-junit-report \
             -in="./testresult.json"
             -parser=gojson \
