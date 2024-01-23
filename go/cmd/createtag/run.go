@@ -60,7 +60,7 @@ func process(
 	// if true, push to the remote
 	if push && !isTest {
 		slog.Info(fmt.Sprintf("pushing created tag [%s] to origin.", tagName))
-		//err = tagSet.Push()
+		err = tagSet.Push()
 	}
 	output = map[string]string{
 		"test":          fmt.Sprintf("%t", isTest),

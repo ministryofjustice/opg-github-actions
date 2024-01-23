@@ -437,3 +437,26 @@ func TestSemverEndToEnd(t *testing.T) {
 	}
 
 }
+
+// func TestRemoteRepo(t *testing.T) {
+// 	// clone self as a remote repo to test branch data works
+// 	dir, _ := os.MkdirTemp("./", "test_remote_repository_")
+// 	repo.CloneRepo(dir, "https://github.com/ministryofjustice/opg-github-actions.git")
+// 	defer os.RemoveAll(dir)
+
+// 	nextTagResult, e := nexttag.Run([]string{
+// 		fmt.Sprintf(`--repository=%s`, dir),
+// 		fmt.Sprintf(`--base=%s`, "main"),
+// 		fmt.Sprintf(`--head=%s`, "go-version"),
+// 		fmt.Sprintf(`--prerelease=%s`, "true"),
+// 		fmt.Sprintf(`--prerelease-suffix=%s`, "goversion"),
+// 		fmt.Sprintf(`--last-release=%s`, "v2.7.3"),
+// 		fmt.Sprintf(`--last-prerelease=%s`, ""),
+// 		fmt.Sprintf(`--with-v=%s`, "true"),
+// 		fmt.Sprintf(`--default-bump=%s`, "patch"),
+// 	})
+
+// 	pp.Println(nextTagResult)
+// 	pp.Println(e)
+
+// }
