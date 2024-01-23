@@ -13,6 +13,7 @@ import (
 	"opg-github-actions/cmd/terraformversion"
 	"os"
 	"slices"
+	"strings"
 
 	"log/slog"
 )
@@ -104,6 +105,11 @@ func main() {
 	}
 
 	slog.Debug("flag parsed command:" + cmd)
+	slog.Info(
+		fmt.Sprintf("arguments: \n\t%s \n---",
+			strings.Join(flag.Args(), "\n\t"),
+		))
+
 	switch cmd {
 	case branchname.Name:
 		results, err = branchname.Run(flag.Args()[1:])

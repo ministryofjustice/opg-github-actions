@@ -154,7 +154,6 @@ runs:
         echo "Building (via make) for ${target}"
         make ${target}
         cd ${{ github.workspace }}
-        ls -la ./go/builds/
     #### FETCH THE TARGET REPO INTO A SUB FOLDER
     - name: "Checkout original repo to set folder"
       uses: actions/checkout@v4
@@ -216,7 +215,8 @@ runs:
         withV: '${{ inputs.with_v }}'
         defaultBump: '${{ inputs.default_bump }}'
       run: |
-        ${binPath} next-tag \          
+        ${binPath} next-tag \     
+          --log-level="info" \
           --repository="${repo}" \
           --base="${baseRef}" \
           --head="${headRef}" \
