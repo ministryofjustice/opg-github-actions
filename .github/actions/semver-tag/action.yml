@@ -88,7 +88,6 @@ runs:
         # JSON_DEBUG: ${{ toJSON(github) }}
       run: |
         echo -e "Setup variables."
-        set -e
         # self / repo info
         isSelf="${{ github.repository == 'ministryofjustice/opg-github-actions' }}"
         echo "isSelf=${isSelf}" >> $GITHUB_OUTPUT
@@ -102,7 +101,10 @@ runs:
         echo "target=${make_target}" >> $GITHUB_OUTPUT
 
         # where to put the target repo
-        echo "targetDir=${{ github.workspace }}/_targetRepo" >> $GITHUB_OUTPUT
+        target="${{ github.workspace }}/_targetRepo"
+        echo -e "targetDir=${target}"
+        echo "targetDir=${target}" >> $GITHUB_OUTPUT
+
         if [ "${{ runner.debug }}" == "1" ]; then          
           echo "${JSON_DEBUG}"
         fi
@@ -140,11 +142,11 @@ runs:
         cache-dependency-path: '${{ steps.setup.outputs.path }}/go/go.sum'
     # run the build 
     - name: "Build"
-      id: info
+      id: build
       shell: bash
       if: ${{ steps.setup.outputs.isSelf == 'true' }}
       env:
-        target: '${{ steps.info.outputs.target }}'
+        target: '${{ steps.setup.outputs.target }}'
         appPath: '${{ steps.setup.outputs.path }}'
       run: |
         echo -e "Building"
@@ -152,6 +154,7 @@ runs:
         echo "Building (via make) for ${target}"
         make ${target}
         cd ${{ github.workspace }}
+        ls -la ./go/builds/
     #### FETCH THE TARGET REPO INTO A SUB FOLDER
     - name: "Checkout original repo to set folder"
       uses: actions/checkout@v4
