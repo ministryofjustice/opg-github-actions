@@ -26,7 +26,6 @@ jobs:
           ref: ${{ github.ref }}
       ## setup and build locally
       - name: Setup go
-        if: ${{ steps.setup.outputs.isSelf == 'true' }}
         uses: actions/setup-go@v4
         with:
           go-version-file: './go/go.mod'
