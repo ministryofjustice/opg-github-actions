@@ -163,21 +163,8 @@ runs:
         path: ${{ steps.setup.outputs.targetDir }}
         fetch-tags: true
         fetch-depth: 0
-    #### COMMANDS
-    # checkout all branches in the target
-    # - this is due to go-git only returning branches that match a refs/head pattern
-    #   so doesnt see remote ones
-    - name: "Checkout target branches"
-      shell: bash
-      env:
-        repoDir: '${{ steps.setup.outputs.targetDir }}'
-      run: |
-        cd ${repoDir}
-        git branch --all | grep remotes | grep -v HEAD
-        for branch in `git branch --all | grep remotes | grep -v HEAD `; do
-          b=${branch##*/}
-          git checkout -f ${b}
-        done
+    
+    #### COMMANDS ####
     # Get branch name info
     - name: "branch-name"
       id: branchname
