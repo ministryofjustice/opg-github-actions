@@ -44,7 +44,7 @@ jobs:
         id: semver_tag
         uses: ./.github/actions/semver-tag
         with:
-          test: true
+          test: false
           prerelease: true
           releases_enabled: false # disable the release as we make here and include build assests
           github_token: ${{ secrets.GITHUB_TOKEN }}
