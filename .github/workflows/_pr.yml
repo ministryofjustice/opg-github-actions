@@ -12,24 +12,26 @@ jobs:
     uses: './.github/workflows/_tests.yml'
     secrets: inherit
 
-  # pr_workflow:
-  #   name: "PR Workflow"
-  #   runs-on: ubuntu-latest
-  #   needs: [run_tests]
-  #   steps:
-  #     - name: "Checkout self"
-  #       uses: actions/checkout@v4
-  #       with:
-  #         repository: ${{ github.repository }}
-  #         ref: ${{ github.ref }}
-  #     - name: "Semver tag and release"
-  #       id: semver_tag
-  #       uses: ./.github/actions/semver-tag
-  #       with:
-  #         prerelease: true
-  #         github_token: ${{ secrets.GITHUB_TOKEN }}
-  #         show_verbose_summary: true
 
+
+  pr_workflow:
+    name: "PR Workflow"
+    runs-on: ubuntu-latest
+    needs: [run_tests]
+    steps:
+      - name: "Checkout self"
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.ref }}
+      - name: "Semver tag and release"
+        id: semver_tag
+        uses: ./.github/actions/semver-tag
+        with:
+          test: true
+          prerelease: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          
 
   end:
     name: 'End of PR workflow'

@@ -16,16 +16,17 @@ inputs:
   with_v:
     description: "New tag will start with a v prefix is this is any non-empty value."
     default: "true"
-  show_verbose_summary:
-    description: "Set this to any value to show the more verbose summary output data"
-    default: ""
   github_token:
     description: "A token authorised with write permissions to create a release."
     default: ""
-  releases_enabled:
-    description: "If set, allows the creation of a release when on a release branch (and not testing)"
-    default: "true"
+  # releases_enabled:
+  #   description: "If set, allows the creation of a release when on a release branch (and not testing)"
+  #   default: "true"
+  # show_verbose_summary:
+  #   description: "Set this to any value to show the more verbose summary output data"
+  #   default: ""
   
+
 outputs:
   test:
     description: "Inputed test variable."
