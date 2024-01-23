@@ -33,6 +33,10 @@ func (c *Commits) StrToReference(str string) (ref *plumbing.Reference, err error
 	rev := plumbing.Revision(str)
 	hash, err := c.repository.ResolveRevision(rev)
 	if err != nil {
+		_, e := c.repository.Worktree()
+		slog.Error("worktree:" + e.Error())
+		_, e = c.repository.Head()
+		slog.Error("head:" + e.Error())
 		slog.Error("str: " + str)
 		slog.Error("rev: " + rev.String())
 		return
