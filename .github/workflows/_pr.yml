@@ -34,14 +34,8 @@ jobs:
           gha_os=$(uname | tr '[:upper:]' '[:lower:]')
           gha_arc=$(uname -m)
           target="${gha_os}_${gha_arc}"
-          
-          cd ${appPath}
-          pwd 
-          ls -la
-          
           echo -e "Building (via make) for ${target}"
-          make ${target}
-          cd ${{ github.workspace }}
+          make ${target}          
       - name: "Semver tag and release"
         id: semver_tag
         uses: ./.github/actions/semver-tag
