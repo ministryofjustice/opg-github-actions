@@ -30,7 +30,7 @@ jobs:
         with:
           go-version-file: './go/go.mod'
           cache-dependency-path: './go/go.sum'
-      - name: "Build"
+      - name: "Build binary for runner"
         id: build
         shell: bash
         env:
@@ -40,7 +40,7 @@ jobs:
           gha_os=$(uname | tr '[:upper:]' '[:lower:]')
           gha_arc=$(uname -m)
           target="${gha_os}_${gha_arc}"
-          echo -e "Building (via make) for ${target}"
+          echo -e "Building (with make) for ${target}"
           make ${target}        
       ## semver tagging  
       - name: "Semver tag and release"
