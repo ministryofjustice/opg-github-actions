@@ -265,12 +265,12 @@ runs:
         echo "### Semver tag summary" >> $GITHUB_STEP_SUMMARY
         echo "| Stage | Variable | Value |" >> $GITHUB_STEP_SUMMARY
         echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
-        echo "| Branch | original | ${{ steps.branchname.outputs.branchname }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Branch | branch_name | ${{ steps.branchname.outputs.branch_name }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| Branch | safe | ${{ steps.branchname.outputs.safe }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| Branch | full_length | ${{ steps.branchname.outputs.full_length }} |"  >> $GITHUB_STEP_SUMMARY
-        echo "| Latest Tag | latesttag | ${{ steps.latesttag.outputs.last_prerelease }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Latest Tag | last_prerelease | ${{ steps.latesttag.outputs.last_prerelease }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| Latest Tag | last_release | ${{ steps.latesttag.outputs.last_release }} |"  >> $GITHUB_STEP_SUMMARY
-        echo "| Next Tag | next_tag | ${{ steps.nexttag.outputs.nexttag }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Next Tag | next_tag | ${{ steps.nexttag.outputs.next_tag }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| Create Tag | test | ${{ steps.createtag.outputs.test }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| Create Tag | requested_tag | ${{ steps.createtag.outputs.requested_tag }} |"  >> $GITHUB_STEP_SUMMARY
         echo "| **Create Tag** | **created** | **${{ steps.createtag.outputs.created_tag }}** |"  >> $GITHUB_STEP_SUMMARY
