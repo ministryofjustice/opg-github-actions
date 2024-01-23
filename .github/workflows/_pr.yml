@@ -24,6 +24,13 @@ jobs:
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
+      ## setup and build locally
+      - name: Setup go
+        if: ${{ steps.setup.outputs.isSelf == 'true' }}
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: './go/go.mod'
+          cache-dependency-path: './go/go.sum'
       - name: "Build"
         id: build
         shell: bash
@@ -35,7 +42,8 @@ jobs:
           gha_arc=$(uname -m)
           target="${gha_os}_${gha_arc}"
           echo -e "Building (via make) for ${target}"
-          make ${target}          
+          make ${target}        
+      ## semver tagging  
       - name: "Semver tag and release"
         id: semver_tag
         uses: ./.github/actions/semver-tag
@@ -44,6 +52,7 @@ jobs:
           prerelease: true
           releases_enabled: false # disable the release as we make here and include build assests
           github_token: ${{ secrets.GITHUB_TOKEN }}
+      ## release with artifacts
       - name: "Create a release [${{ steps.semver_tag.outputs.created_tag }}]"
         id: create_release      
         uses: ncipollo/release-action@v1.13.0
