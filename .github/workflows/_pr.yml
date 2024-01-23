@@ -15,6 +15,7 @@ jobs:
 
 
   pr_workflow:
+    needs: [run_tests]
     name: "PR Workflow"
     runs-on: ubuntu-latest
     steps:
@@ -49,7 +50,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: "Create a release"
         id: create_release      
-        if: ${{ inputs.releases_enabled == 'true' }}
         uses: ncipollo/release-action@v1.13.0
         with:
           tag: ${{ steps.semver_tag.outputs.created_tag }}
