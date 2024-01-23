@@ -48,7 +48,7 @@ jobs:
           prerelease: true
           releases_enabled: false # disable the release as we make here and include build assests
           github_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: "Create a release"
+      - name: "Create a release [${{ steps.semver_tag.outputs.created_tag }}]"
         id: create_release      
         uses: ncipollo/release-action@v1.13.0
         with:

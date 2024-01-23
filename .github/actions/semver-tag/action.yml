@@ -245,7 +245,7 @@ runs:
           --commitish="${commitish}" \
           --tag-name="${tagName}" \
           --regen="true" \
-          --push="false" 
+          --push="true" 
     # Create a release object
     - name: "Create a release"
       id: create_release      

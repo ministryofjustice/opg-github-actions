@@ -56,7 +56,11 @@ func process(
 		createdSuccess = true
 	}
 
-	isTest := (len(os.Getenv("RUN_AS_TEST")) > 0)
+	runAsTest := os.Getenv("RUN_AS_TEST")
+	if len(runAsTest) == 0 {
+		runAsTest = "false"
+	}
+	isTest, _ := safestrings.ToBool(runAsTest)
 	// if true, push to the remote
 	if push && !isTest {
 		slog.Info(fmt.Sprintf("pushing created tag [%s] to origin.", tagName))
