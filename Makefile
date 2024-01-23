@@ -24,22 +24,26 @@ all: $(HOST_ARCH)
 linux_x86_64:
 	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)/
 	@cd $(PWD)/go && env GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -o $(BUILD_FOLDER)/$@ main.go
+	@tar -cvf $(BUILD_FOLDER)/$@.tar $(BUILD_FOLDER)/$@
 	@echo Build $@ complete.
 
 # LOCAL DEV VERSIONS
 darwin_x86_64: requirements
 	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)/
 	@cd $(PWD)/go && env GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -o $(BUILD_FOLDER)/$@ main.go
+	@cd $(PWD)/go && tar -cvf $(BUILD_FOLDER)/$@.tar $(BUILD_FOLDER)/$@
 	@echo Build $@ complete.
 
 darwin_arm64: requirements
 	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)/
 	@cd $(PWD)/go && env GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -o $(BUILD_FOLDER)/$@ main.go
+	@cd $(PWD)/go && tar -cvf $(BUILD_FOLDER)/$@.tar $(BUILD_FOLDER)/$@
 	@echo Build $@ complete.
 
 darwin_amd64: requirements
 	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)/
 	@cd $(PWD)/go && env GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -o $(BUILD_FOLDER)/$@ main.go
+	@cd $(PWD)/go && tar -cvf $(BUILD_FOLDER)/$@.tar $(BUILD_FOLDER)/$@
 	@echo Build $@ complete.
 
 

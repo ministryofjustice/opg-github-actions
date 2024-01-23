@@ -1,6 +1,7 @@
 package tags
 
 import (
+	"log/slog"
 	"os"
 
 	"github.com/go-git/go-git/v5"
@@ -16,8 +17,8 @@ func (t *Tags) CreateAt(tagName string, ref *plumbing.Hash) (*plumbing.Reference
 
 // Push send a push of tags from local to remote.
 // Uses the environment variable 'GITHUB_TOKEN' for authentication
-func (t *Tags) Push() error {
-	return t.repository.Push(
+func (t *Tags) Push() (err error) {
+	err = t.repository.Push(
 		&git.PushOptions{
 			RemoteName: "origin",
 			RefSpecs:   []config.RefSpec{config.RefSpec("refs/tags/*:refs/tags/*")},
@@ -27,4 +28,9 @@ func (t *Tags) Push() error {
 			},
 		},
 	)
+	if err != nil {
+		slog.Error("error with push:")
+		slog.Error(err.Error())
+	}
+	return
 }

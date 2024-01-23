@@ -232,6 +232,7 @@ runs:
       id: createtag
       shell: bash
       env:        
+        GITHUB_TOKEN: ${{ inputs.github_token }}
         RUN_AS_TEST: ${{ inputs.test }}
         appPath: '${{ steps.setup.outputs.path }}'
         binPath: '${{ steps.setup.outputs.path }}/go/builds/${{ steps.setup.outputs.target }}'
@@ -257,7 +258,3 @@ runs:
         draft: ${{ steps.latesttag.outputs.prerelease == 'true' }}
         prerelease: ${{ steps.latesttag.outputs.prerelease == 'true' }}
         generateReleaseNotes: true
-          
-
-        
-          
