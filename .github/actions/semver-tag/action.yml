@@ -190,6 +190,10 @@ runs:
         prereleaseSuffix: '${{ steps.branchname.outputs.safe }}'
         releaseBranch: '${{ inputs.release_branch }}'
       run: |
+        cd ${repo}
+        git log -n5 --format="oneline"
+        git fetch --all
+        cd -
         ${binPath} latest-tag \
           --repository="${repo}" \
           --branch="${branch}" \
