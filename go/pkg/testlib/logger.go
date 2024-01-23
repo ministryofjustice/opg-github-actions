@@ -17,8 +17,9 @@ var (
 func Testlogger(opts *slog.HandlerOptions) {
 	var handler *slog.TextHandler
 	if opts == nil {
-		opts = VerboseOptions
+		opts = DefaultOptions
+
 	}
-	handler = slog.NewTextHandler(stdout, opts)
+	handler = slog.NewTextHandler(ignore, opts)
 	slog.SetDefault(slog.New(handler))
 }
