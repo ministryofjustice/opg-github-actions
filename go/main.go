@@ -75,6 +75,7 @@ func Out(results map[string]string) {
 	var f *os.File
 	// github output via os.environ['GITHUB_OUTPUT']
 	if os.Getenv(workspace) != "" {
+		slog.Info("github workspace found, writting to GITHUB_OUTPUT")
 		outFile = os.Getenv(githubout)
 		f, _ = os.OpenFile(outFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		defer f.Close()
@@ -84,6 +85,7 @@ func Out(results map[string]string) {
 		str := fmt.Sprintf("%s=%s\n", k, v)
 		fmt.Printf(str)
 		if outFile != "" && f != nil {
+			slog.Debug("writting to GITHUB_OUTPUT")
 			f.WriteString(str)
 		}
 	}
