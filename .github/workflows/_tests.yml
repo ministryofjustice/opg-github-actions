@@ -35,10 +35,9 @@ jobs:
           cd ./go
           go install github.com/jstemmer/go-junit-report/v2@latest
           echo "here1"
-          go test -v -json -bench -count=5 ./... >> testresult.json 2>&1       
+          go test -v -bench -count=5 ./... >> testresult.json 2>&1       
           go-junit-report \
             -in="./testresult.json"
-            -parser=gojson \
             -set-exit-code \
             -package-name="opg-github-actions" > report.xml
       - name: Test Report
