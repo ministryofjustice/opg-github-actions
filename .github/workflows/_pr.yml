@@ -28,7 +28,6 @@ jobs:
       - name: "Build"
         id: build
         shell: bash
-        if: ${{ steps.setup.outputs.isSelf == 'true' }}
         env:
           appPath: '${{ github.workspace }}/go'
         run: |
