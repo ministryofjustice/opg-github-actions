@@ -76,23 +76,27 @@ func Run(args []string) (output map[string]string, err error) {
 	commitSet, err := commits.New(*repoDir)
 	if err != nil {
 		slog.Error("commitSet failed.")
+		slog.Error(err.Error())
 		return
 	}
 
 	base, err := commitSet.StrToReference(*baseRef)
 	if err != nil {
 		slog.Error(fmt.Sprintf("base reference failed [%s]", *baseRef))
+		slog.Error(err.Error())
 		return
 	}
 	head, err := commitSet.StrToReference(*headRef)
 	if err != nil {
 		slog.Error(fmt.Sprintf("head reference failed [%s]", *headRef))
+		slog.Error(err.Error())
 		return
 	}
 
 	diff, err := commitSet.DiffBetween(base.Hash(), head.Hash())
 	if err != nil {
 		slog.Error("commit diff failed")
+		slog.Error(err.Error())
 		return
 	}
 

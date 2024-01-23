@@ -105,10 +105,7 @@ func main() {
 	}
 
 	slog.Debug("flag parsed command:" + cmd)
-	slog.Error(
-		fmt.Sprintf("arguments: \n\t%s \n---",
-			strings.Join(flag.Args(), "\n\t"),
-		))
+	slog.Debug(fmt.Sprintf("arguments: [%s]", strings.Join(flag.Args(), " ")))
 
 	switch cmd {
 	case branchname.Name:
