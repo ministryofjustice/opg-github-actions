@@ -173,6 +173,7 @@ runs:
         repoDir: '${{ steps.setup.outputs.targetDir }}'
       run: |
         cd ${repoDir}
+        git branch --all | grep remotes | grep -v HEAD
         for branch in `git branch --all | grep remotes | grep -v HEAD `; do
           b=${branch##*/}
           git checkout -f ${b}
