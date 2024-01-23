@@ -6,13 +6,15 @@ func Next(
 	counters IncrementCounters,
 ) (next *Semver, err error) {
 
-	var tag Semver
+	var tag *Semver
 	lastPrereleaseValid := Valid(lastPrerelease.String())
 
 	if prerelease && lastPrereleaseValid {
-		tag = *lastPrerelease
+		tag, _ = New(lastPrerelease.String())
+		// tag = *lastPrerelease
 	} else {
-		tag = *lastRelease
+		tag, _ = New(lastRelease.String())
+		// tag = *lastRelease
 	}
 
 	if counters.Major > 0 {
@@ -69,7 +71,7 @@ func Next(
 			tag.BumpPatch()
 		}
 	}
-	next = &tag
+	next = tag
 
 	return
 }

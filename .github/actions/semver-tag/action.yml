@@ -215,12 +215,7 @@ runs:
         lastPrerelease: '${{ steps.latesttag.outputs.last_prerelease }}'
         withV: '${{ inputs.with_v }}'
         defaultBump: '${{ inputs.default_bump }}'
-      run: |
-        cd ${repo}
-        git log -n5 --format="oneline"
-        git fetch --all
-        cd -
-        
+      run: |        
         ${binPath} next-tag \
           --repository="${repo}" \
           --base="${baseRef}" \
@@ -244,7 +239,7 @@ runs:
         tagName: '${{ steps.nexttag.outputs.next_tag }}'
         prereleaseSuffix: '${{ steps.latesttag.outputs.prerelease_suffix }}'                
       run: |
-        ${binPath} create-tag \          
+        ${binPath} create-tag \
           --repository="${repo}" \
           --commitish="${commitish}" \
           --tag-name="${tagName}" \
