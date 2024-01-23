@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"opg-github-actions/pkg/git/repo"
 	"os"
+	"strings"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -27,23 +28,6 @@ func New(directory string) (t *Commits, err error) {
 		return
 	}
 
-	w, err := r.Worktree()
-	if err != nil {
-		slog.Error(err.Error())
-		return
-	}
-	defaultBranch, err := r.Head()
-	if err != nil {
-		slog.Error(err.Error())
-		return
-	}
-	slog.Error("branch:" + defaultBranch.Name().String())
-	err = w.Checkout(&git.CheckoutOptions{
-		Create: false,
-		Force:  true,
-		Branch: defaultBranch.Name(),
-	})
-
 	t = &Commits{
 		Directory:  directory,
 		repository: r,
@@ -55,6 +39,10 @@ func (c *Commits) StrToReference(str string) (ref *plumbing.Reference, err error
 	rev := plumbing.Revision(str)
 	hash, err := c.repository.ResolveRevision(rev)
 	if err != nil {
+
+		b, e := c.repository.Branches()
+		slog.Error(strings.Join(b, ","))
+		slog.Error(e)
 		// _, e := c.repository.Worktree()
 		// slog.Error("worktree:" + e.Error())
 		// _, e = c.repository.Head()

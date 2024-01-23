@@ -189,11 +189,7 @@ runs:
         prerelease: '${{ inputs.prerelease }}'
         prereleaseSuffix: '${{ steps.branchname.outputs.safe }}'
         releaseBranch: '${{ inputs.release_branch }}'
-      run: |
-        cd ${repo}
-        git log -n5 --format="oneline"
-        git fetch --all
-        cd -
+      run: |        
         ${binPath} latest-tag \
           --repository="${repo}" \
           --branch="${branch}" \
@@ -219,6 +215,11 @@ runs:
         withV: '${{ inputs.with_v }}'
         defaultBump: '${{ inputs.default_bump }}'
       run: |
+        cd ${repo}
+        git log -n5 --format="oneline"
+        git fetch --all
+        cd -
+        
         ${binPath} next-tag \
           --repository="${repo}" \
           --base="${baseRef}" \
