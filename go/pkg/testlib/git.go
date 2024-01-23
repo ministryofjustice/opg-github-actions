@@ -2,8 +2,9 @@ package testlib
 
 import (
 	"fmt"
-	"log"
 	"os"
+
+	"log/slog"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -25,14 +26,12 @@ func TestRepositorySkeleton() (dir string, r *git.Repository, defaultBranch *plu
 			AllowEmptyCommits: true,
 		})
 		if e != nil {
-			log.Fatal(e)
+			slog.Error(e.Error())
 		}
 	}
 	defaultBranch, e = r.Head()
 	if e != nil {
-		fmt.Errorf(e.Error())
-		println(e.Error())
-		log.Fatal(e)
+		slog.Error(e.Error())
 	}
 
 	// checkout to default branch
@@ -42,7 +41,7 @@ func TestRepositorySkeleton() (dir string, r *git.Repository, defaultBranch *plu
 		Branch: defaultBranch.Name(),
 	})
 	if e != nil {
-		log.Fatal(e)
+		slog.Error(e.Error())
 	}
 
 	return
