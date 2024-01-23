@@ -161,7 +161,7 @@ runs:
       with:
         repository: ${{ github.repository }}
         ref: ${{ github.ref }}
-        path: ${{ steps.setup.ouputs.targetDir }}
+        path: ${{ steps.setup.outputs.targetDir }}
         fetch-tags: true
         fetch-depth: 0
     #### COMMANDS
