@@ -32,6 +32,8 @@ func New(directory string) (t *Commits, err error) {
 		Directory:  directory,
 		repository: r,
 	}
+	// fetch branches
+	_, err = r.Branches()
 	return
 }
 
@@ -46,7 +48,7 @@ func (c *Commits) StrToReference(str string) (ref *plumbing.Reference, err error
 			branches = append(branches, ref.Name().Short())
 			return nil
 		})
-		slog.Error("branches:" + strings.Join(branches, ","))
+		slog.Error(fmt.Sprintf("branches: [%s]", strings.Join(branches, " ")))
 		if e != nil {
 			slog.Error(e.Error())
 		}
