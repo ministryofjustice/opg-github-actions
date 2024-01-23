@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 func TestRepositorySkeleton() (dir string, r *git.Repository, defaultBranch *plumbing.Reference) {
@@ -24,6 +25,7 @@ func TestRepositorySkeleton() (dir string, r *git.Repository, defaultBranch *plu
 		msg := fmt.Sprintf("commit %d", i)
 		_, e = w.Commit(msg, &git.CommitOptions{
 			AllowEmptyCommits: true,
+			Author:            &object.Signature{Name: "go test", Email: "test@example.com"},
 		})
 		if e != nil {
 			slog.Error(e.Error())
@@ -63,6 +65,7 @@ func TestRepositoryCommit(r *git.Repository, commitMsg string) (plumbing.Hash, e
 
 	return w.Commit(commitMsg, &git.CommitOptions{
 		AllowEmptyCommits: true,
+		Author:            &object.Signature{Name: "go test", Email: "test@example.com"},
 	})
 }
 
