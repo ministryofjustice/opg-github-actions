@@ -25,6 +25,14 @@ jobs:
             ./go/go.sum 
       - run: go version
       - run: |
-          echo -e "Running tests"
+          echo -e "Running tests"          
           cd ./go
-          go test -v ./...
+          go install github.com/jstemmer/go-junit-report@latest
+          go test -v -json -bench -count=5 ./... 2>&1 | go-junit-report -parser gojson -set-exit-code -package-name="opg-github-actions" > report.xml
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Test Results          
+          path: ./go/report.xml 
+          reporter: jest-junit
