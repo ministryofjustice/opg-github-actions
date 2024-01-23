@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/k0kubun/pp"
 )
 
 type Commits struct {
@@ -27,7 +28,6 @@ func New(directory string) (t *Commits, err error) {
 		slog.Error(err.Error())
 		return
 	}
-
 	t = &Commits{
 		Directory:  directory,
 		repository: r,
@@ -40,6 +40,7 @@ func (c *Commits) StrToReference(str string) (ref *plumbing.Reference, err error
 	hash, err := c.repository.ResolveRevision(rev)
 	if err != nil {
 		branchIter, e := c.repository.Branches()
+		pp.Println(branchIter)
 		branches := []string{}
 		branchIter.ForEach(func(ref *plumbing.Reference) error {
 			branches = append(branches, ref.Name().Short())
