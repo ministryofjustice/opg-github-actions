@@ -30,6 +30,8 @@ func TestRepositorySkeleton() (dir string, r *git.Repository, defaultBranch *plu
 	}
 	defaultBranch, e = r.Head()
 	if e != nil {
+		fmt.Errorf(e.Error())
+		println(e.Error())
 		log.Fatal(e)
 	}
 
