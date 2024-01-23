@@ -12,12 +12,13 @@ PWD := $(shell pwd)
 USER_PROFILE := ~/.zprofile
 
 
-.DEFAULT_GOAL: self
-.PHONY: self requirements darwin_arm64 darwin_amd64 linux_x86_64 tests
-.ONESHELL: self requirements darwin_arm64 darwin_amd64 linux_x86_64 tests
+.DEFAULT_GOAL: all
+.PHONY: all requirements darwin_arm64 darwin_amd64 linux_x86_64 tests build
+.ONESHELL: all requirements darwin_arm64 darwin_amd64 linux_x86_64 tests build
 .EXPORT_ALL_VARIABLES:
 
-self: $(HOST_ARCH)
+# when running self, requires you run a target based on your arch
+all: $(HOST_ARCH)
 
 # for the github action builder - so dont run requirements
 linux_x86_64:
@@ -27,7 +28,9 @@ linux_x86_64:
 
 # LOCAL DEV VERSIONS
 darwin_x86_64: requirements
-	@${MAKE} darwin_amd64
+	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)/
+	@cd $(PWD)/go && env GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -o $(BUILD_FOLDER)/$@ main.go
+	@echo Build $@ complete.
 
 darwin_arm64: requirements
 	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)/
