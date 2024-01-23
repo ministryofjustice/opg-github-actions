@@ -22,9 +22,9 @@ inputs:
   releases_enabled:
     description: "If set, allows the creation of a release when on a release branch (and not testing)"
     default: "true"
-  # show_verbose_summary:
-  #   description: "Set this to any value to show the more verbose summary output data"
-  #   default: ""
+  show_verbose_summary:
+    description: "Set this to any value to show the more verbose summary output data"
+    default: "true"
   
 
 outputs:
@@ -62,7 +62,7 @@ outputs:
   
   create_tag_created:
     description: "Output from create_tag - flag if it worked"
-    value: ${{ steps.create_tag.outputs.success }}
+    value: ${{ steps.createtag.outputs.success }}
   
   release_id:
     description: "The id of the release if it was created"
@@ -73,7 +73,7 @@ outputs:
 
   created_tag:
     description: "Output from create_tag - the created value"
-    value: ${{ steps.create_tag.outputs.created_tag }}
+    value: ${{ steps.createtag.outputs.created_tag }}
 
 runs:
   using: "composite"
@@ -258,3 +258,22 @@ runs:
         draft: ${{ steps.latesttag.outputs.prerelease == 'true' }}
         prerelease: ${{ steps.latesttag.outputs.prerelease == 'true' }}
         generateReleaseNotes: true
+    - name: "summary"
+      if: ${{ (always()) && (inputs.show_verbose_summary != '') }}
+      shell: bash
+      run: |
+        echo "### Semver tag summary" >> $GITHUB_STEP_SUMMARY
+        echo "| Stage | Variable | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Branch | original | ${{ steps.branchname.outputs.branchname }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Branch | safe | ${{ steps.branchname.outputs.safe }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Branch | full_length | ${{ steps.branchname.outputs.full_length }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Latest Tag | latesttag | ${{ steps.latesttag.outputs.last_prerelease }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Latest Tag | last_release | ${{ steps.latesttag.outputs.last_release }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Next Tag | next_tag | ${{ steps.nexttag.outputs.nexttag }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Create Tag | test | ${{ steps.createtag.outputs.test }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Create Tag | requested_tag | ${{ steps.createtag.outputs.requested_tag }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| **Create Tag** | **created** | **${{ steps.createtag.outputs.created_tag }}** |"  >> $GITHUB_STEP_SUMMARY
+        if [ -n "${{ steps.create_release.outputs.id }}" ]; then
+          echo "| **Release** | **URL** | **[${{ steps.create_release.outputs.id }}](${{ steps.create_release.outputs.html_url }})** |"  >> $GITHUB_STEP_SUMMARY
+        fi        
