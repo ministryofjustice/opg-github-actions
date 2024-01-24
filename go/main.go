@@ -122,7 +122,7 @@ func main() {
 	}
 
 	slog.Info("sub-command:" + cmd)
-	slog.Debug(fmt.Sprintf("arguments: [%s]", strings.Join(flag.Args(), ", ")))
+	slog.Info(fmt.Sprintf("arguments: [%s]", strings.Join(flag.Args(), ", ")))
 
 	if cmd == "" {
 		err = fmt.Errorf("No sub-command set")
