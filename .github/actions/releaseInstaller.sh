@@ -23,7 +23,8 @@ fi
 mkdir -p ${ARTIFACT_PATH}
 # Try to download the release artifact directly, presuming 
 # action_ref is a release tag
-echo -n "Trying direct release download using [${ACTION_REF}]..."
+echo -n "Trying direct release download using [${ACTION_REF}] [${ACTION_REPO}]..."
+gh release list --exclude-drafts=false --exclude-pre-releases=false -R "${ACTION_REPO}" 
 DIRECT=$(gh release download "${ACTION_REF}" -R "${ACTION_REPO}" --clobber && echo "${ok}")
 
 # If direct worked, then move the downloaded artifact
