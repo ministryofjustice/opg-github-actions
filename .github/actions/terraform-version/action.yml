@@ -106,6 +106,8 @@ runs:
         VersionsFile: ${{ inputs.terraform_versions_file }}
         SimpleFile: ${{ inputs.simple_file }}
       run:
+        echo -e "Running terraform-version"
+        ls -la ${Directory}
          ${APP_BIN} terraform-version \
           --log-level="info" \
           --directory="${Directory}" \
