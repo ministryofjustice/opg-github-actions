@@ -6,7 +6,6 @@ ARCH := $(shell uname -m)
 HOST_ARCH := ${OS}_${ARCH}
 
 BUILD_FOLDER = ./builds
-OS_AND_ARCHS_TO_BUILD := darwin_arm64 darwin_amd64
 
 PWD := $(shell pwd)
 USER_PROFILE := ~/.zprofile
@@ -21,7 +20,7 @@ USER_PROFILE := ~/.zprofile
 all: $(HOST_ARCH)
 
 release: $(HOST_ARCH)
-	@cd $(BUILD_FOLDER) && tar -czvf *.tar.gz *
+	@cd $(PWD)/go/$(BUILD_FOLDER) && tar -czvf release.tar.gz *
 # for the github action builder - so dont run requirements
 linux_x86_64:
 	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)/
