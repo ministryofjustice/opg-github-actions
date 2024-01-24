@@ -109,7 +109,7 @@ runs:
         echo -e "Running terraform-version"
         ls -la ${Directory}
          ${APP_BIN} terraform-version \
-          --log-level="info" \
+          --log-level="debug" \
           --directory="${Directory}" \
           --versions-file="${VersionsFile}" \
           --simple="${SimpleFile}"
