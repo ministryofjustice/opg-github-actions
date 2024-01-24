@@ -41,9 +41,9 @@ runs:
         GH_WORKSPACE: "${{ github.workspace }}"
         actionsRootDir: "${{ github.action_path }}/../"
       run: |
+        echo -e "Get release binary for [${GH_ACTION_REF}]"
         cd ${actionsRootDir}
-        # ./release-download.sh 2> $GITHUB_STEP_SUMMARY
-        ./release-download.sh
+        ./release-download.sh 2> $GITHUB_STEP_SUMMARY
     ## LOCAL BUILD
     # setup and build locally if the release data is not setup
     - name: "Setup go"
@@ -60,6 +60,7 @@ runs:
         buildSource: '${{ steps.fetch.outputs.SELF_BUILD }}'
         target: '${{ steps.fetch.outputs.TARGET_BUILD }}'
       run: |
+        echo -e "Build from source"
         cd ${buildSource}
         echo -e "Building (with make) for ${target}"        
         make release

@@ -50,9 +50,11 @@ if [ "${listed}" == "${ok}" ]; then
         echo -e "Set release: [${RELEASE}]"
     else
         echo " ❌"
-        echo -e "Failed to find binary for this runner, will trigger the self build..."
+        echo -e "Failed to find binary for this runner, will trigger the self build... "
         listed=""
     fi
+else
+    echo " ❌"
 fi
 # If we failed to download the artifact using the action_ref directly
 # then its likely someone has used a prerelease or a git hash ref 
@@ -60,7 +62,6 @@ fi
 # In that case, we need to download the repo to a new location so
 # that it can be built
 if [ "${listed}" != "${ok}" ]; then
-    echo " ❌"
     # build from local 
     echo -e "Cloning action repostitory [${actionRepo}] to [${localBuildPath}] ..."
     gh repo clone ${actionRepo} ${localBuildPath} 
@@ -68,6 +69,10 @@ if [ "${listed}" != "${ok}" ]; then
     cd ${localBuildPath}
     # checkout to the git ref
     checkout=$(git checkout -q -f ${actionRef} -- 2> /dev/null && echo "${ok}")
+    # output  the commit
+    echo -e "-- commit --"
+    git log -n1 --format="oneline"
+    echo -e "----"
 
     if [ "${checkout}" == "${ok}" ]; then
         echo -e "Checked out local repo to [${actionRef}] [${localBuildPath}]"
@@ -89,26 +94,3 @@ export TARGET_BUILD=${TARGET_BUILD}
 echo "SELF_BUILD=${SELF_BUILD}" >> $GITHUB_OUTPUT
 echo "RELEASE=${RELEASE}" >> $GITHUB_OUTPUT
 echo "TARGET_BUILD=${TARGET_BUILD}" >> $GITHUB_OUTPUT
-
-# make sure we have an artifact that matches this runner
-
-# cd ${artifactPath}
-# ls -la
-# pwd
-# if [ ! -r "${tarball}" ]; then
-#     err="ERROR: could not find a readable tar ball at [${artifactPath}/${tarball}]"
-#     echo -e "${err}" >&2
-#     exit 1
-# fi
-
-# echo -e "Expanding tar ball [${tarball}]"
-# tar -xzvf ${tarball}
-
-# if [ ! -x "${hostBuild}" ]; then
-#     err="ERROR: unable to find executable at [${artifactPath}/${hostBuild}]"
-#     echo -e "${err}" >&2
-#     exit 1
-# fi
-
-# echo -e "release=${artifactPath}/${hostBuild}"
-# echo "release=${artifactPath}/${hostBuild}" >> $GITHUB_OUTPUT
