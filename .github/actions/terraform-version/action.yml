@@ -9,8 +9,8 @@ inputs:
     description: "Name of file that contains the required_version config is stored. (Default `./versions.tf`)"
     default: "./versions.tf"
   simple_file:
-    description: "If set, change the parsing to presume terraform_versions_file is a plain text file that contains only a semver string."
-    default: ""
+    description: "If 'true', change the parsing to presume terraform_versions_file is a plain text file that contains only a semver string."
+    default: "false"
 
 outputs:
   version:
@@ -41,7 +41,7 @@ runs:
         GH_WORKSPACE: "${{ github.workspace }}"
         actionsRootDir: "${{ github.action_path }}/../"
       run: |
-        echo -e "Get release binary for [${GH_ACTION_REF}]"
+        echo -e "Get release binary"
         cd ${actionsRootDir}
         ./release-download.sh 2> $GITHUB_STEP_SUMMARY
     ## LOCAL BUILD
