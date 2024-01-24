@@ -22,7 +22,7 @@ TARGET_BUILD="${hostBuild}"
 echo -n "Trying direct release download using [${actionRef}] [${actionRepo}]..."
 releases=$(gh release list --exclude-drafts=false --exclude-pre-releases=false -R "${actionRepo}")
 listed=$( echo "${releases}" | grep "^${actionRef}" && echo "${ok}")
-
+echo "${releases}" | grep "^${actionRef}" && echo "${ok}"
 set -e
 set -o pipefail
 
