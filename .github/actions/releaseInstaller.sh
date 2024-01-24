@@ -24,8 +24,9 @@ mkdir -p ${ARTIFACT_PATH}
 # Try to download the release artifact directly, presuming 
 # action_ref is a release tag
 echo -n "Trying direct release download using [${ACTION_REF}] [${ACTION_REPO}]..."
-gh release list --exclude-drafts=false --exclude-pre-releases=false -R "${ACTION_REPO}" 
-DIRECT=$(gh release download "${ACTION_REF}" -R "${ACTION_REPO}" --clobber && echo "${ok}")
+releases=$(gh release list --exclude-drafts=false --exclude-pre-releases=false -R "${ACTION_REPO}")
+# swallow the error as we want to move to hash lookup
+DIRECT=$(gh release download "${ACTION_REF}" -R "${ACTION_REPO}" --clobber 2>/dev/null && echo "${ok}")
 
 # If direct worked, then move the downloaded artifact
 if [ "${DIRECT}" == "${ok}" ]; then
@@ -37,6 +38,8 @@ fi
 # In that case, try to find a semver tag that points to that hash
 if [ "${DIRECT}" != "${ok}" ]; then
     echo " ❌"
+    echo -e "Releases found:"
+    echo -e "${releases}"
     echo -e "Will try to convert [${ACTION_REF}] to a known release tag."
     echo -e "Cloning action repostitory [${ACTION_REPO}] locally..."
     REF=""
