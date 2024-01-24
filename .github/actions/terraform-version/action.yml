@@ -105,8 +105,9 @@ runs:
         Directory: "${{ github.workspace}}/../target/${{ inputs.terraform_directory }}"
         VersionsFile: ${{ inputs.terraform_versions_file }}
         SimpleFile: ${{ inputs.simple_file }}
+        LOG_LEVEL: "debug"
       run:
         echo -e "Running terraform-version"
-        
-        ${APP_BIN} terraform-version --log-level="debug" --directory="${Directory}" --versions-file="${VersionsFile}" --simple="${SimpleFile}"
+
+        ${APP_BIN} terraform-version --directory="${Directory}" --versions-file="${VersionsFile}" --simple="${SimpleFile}"
           

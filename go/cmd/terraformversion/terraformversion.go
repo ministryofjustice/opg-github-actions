@@ -13,7 +13,7 @@ Usage:
 
 The flags are:
 
-	--directory			(required, defauly: ./)
+	--directory			(required, default: ./)
 	--versions-file		(required, default: ./versions.tf)
 	--simple
 */
@@ -24,7 +24,7 @@ import "flag"
 var (
 	Name         = "terraform-version"                     // Command name
 	FlagSet      = flag.NewFlagSet(Name, flag.ExitOnError) // Argument group
-	directory    = FlagSet.String("directory", "./", "Directory to look for versions.tf")
+	directory    = FlagSet.String("directory", "", "Directory to look for versions.tf")
 	versionsFile = FlagSet.String("versions-file", "versions.tf", "Name of the versions.tf file")
 	isSimple     = FlagSet.String("simple", "", "When set, presumes a simple file with just a version number string")
 )

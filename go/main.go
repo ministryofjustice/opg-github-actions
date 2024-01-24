@@ -28,28 +28,39 @@ var (
 	}
 	logAsChoices = []string{"text", "json"}
 	logToChoices = []string{"stdout", "file"}
-	logLevel     = flag.String("log-level", "error", "Logging level to use, must be one of (debug, info, warn, error). Default: error")
-	logAs        = flag.String("log-as", "text", "Log as this format type, must be either (text, json). Default: text")
-	logTo        = flag.String("log-to", "stdout", "Log to either (stdout, file). Default: stdout")
 	logFile      *os.File
 )
 
 func logSetup() {
 	var (
-		level          string     = *logLevel
-		as             string     = *logAs
-		to             string     = *logTo
-		validAsChoice  bool       = slices.Contains(logAsChoices, as)
-		validToChoice  bool       = slices.Contains(logToChoices, to)
+		level          string = os.Getenv("LOG_LEVEL") // "error"
+		as             string = os.Getenv("LOG_AS")    // "text"
+		to             string = os.Getenv("LOG_TO")    // "stdout"
+		validAsChoice  bool
+		validToChoice  bool
 		out            io.Writer  = os.Stdout
 		logLevel       slog.Level = slog.LevelError
 		handlerOptions *slog.HandlerOptions
 		log            *slog.Logger
 	)
+
 	// setup log level
 	if l, ok := logLevels[level]; ok {
 		logLevel = l
+	} else {
+		logLevel = logLevels["error"]
 	}
+	// setup log as
+	validAsChoice = slices.Contains(logAsChoices, as)
+	if !validAsChoice {
+		as = "text"
+	}
+	// setup to
+	validToChoice = slices.Contains(logToChoices, to)
+	if !validToChoice {
+		to = "stdout"
+	}
+
 	handlerOptions = &slog.HandlerOptions{AddSource: true, Level: logLevel}
 	// if chosen to change output to file, open the file and adjust out
 	if validToChoice && to == "file" {
