@@ -65,9 +65,13 @@ runs:
       shell: bash
       env:
         buildSource: '${{ steps.fetch.outputs.SELF_BUILD }}'
+        target: '${{ steps.fetch.outputs.TARGET_BUILD }}'
       run: |
-        echo -e ${buildSource}
-
+        cd ${buildSource}
+        echo -e "Building (with make) for ${target}"
+        ls -la
+        make release
+        ls -la ./builds/
 
       
 

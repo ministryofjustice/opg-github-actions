@@ -68,8 +68,6 @@ if [ "${listed}" != "${ok}" ]; then
     gh repo clone ${actionRepo} ${localBuildPath} 
     
     cd ${localBuildPath}
-    pwd
-    ls -la
     # checkout to the git ref
     checkout=$(git checkout -q -f ${actionRef} -- 2> /dev/null && echo "${ok}")
 
