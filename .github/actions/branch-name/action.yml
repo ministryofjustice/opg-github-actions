@@ -102,4 +102,4 @@ runs:
         APP_BIN: "${{ steps.binary.outputs.binary }}"
       run: |
         echo -e "Run branch-name"        
-        ${APP_BIN} branch-name --event_name="${GITHUB_EVENT_NAME}" --event_data_file="${GITHUB_EVENT_PATH}"
+        ${APP_BIN} branch-name --event-name="${GITHUB_EVENT_NAME}" --event-data-file="${GITHUB_EVENT_PATH}"
