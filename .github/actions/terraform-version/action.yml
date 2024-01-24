@@ -37,12 +37,12 @@ runs:
         GH_TOKEN: ${{ github.token }}
         GH_ACTION_REPOSITORY: "${{ github.action_repository }}"
         GH_ACTION_REF: "${{ github.action_ref }}"
-        ACTION_WORKSPACE: "${{ github.workspace}}/../opg-gha"
+        GH_WORKSPACE: "${{ github.workspace}}"
         actionDir: ${{ github.action_path }}
       run: |
         cd ${actionDir}/../
         ls -la
-        ./installer.sh 2> $GITHUB_STEP_SUMMARY
+        ./releaseInstaller.sh 2> $GITHUB_STEP_SUMMARY
         
 
       

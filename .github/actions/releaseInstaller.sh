@@ -4,7 +4,7 @@ set -o pipefail
 
 ACTION_REPO="${GH_ACTION_REPOSITORY}"
 ACTION_REF="${GH_ACTION_REF}"
-BASE_PATH="${ACTION_WORKSPACE}"
+BASE_PATH="${GH_WORKSPACE}/../opg-gha"
 ARTIFACT_PATH="${BASE_PATH}/releases"
 TARBALL="release.tar.gz"
 

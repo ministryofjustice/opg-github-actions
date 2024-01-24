@@ -85,7 +85,7 @@ runs:
       shell: bash
       env:
         ACTION_REPO: "${{ github.action_repository }}"
-        ACTION:REF: "${{ github.action_ref }}"
+        ACTION_REF: "${{ github.action_ref }}"
         # JSON_DEBUG: ${{ toJSON(github) }}
       run: |
         echo -e "Setup variables."
