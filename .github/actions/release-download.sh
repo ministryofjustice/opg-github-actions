@@ -16,6 +16,7 @@ ok=">ok<"
 # These vars will be passed along to determine next action
 RELEASE=""
 SELF_BUILD=""
+TARGET_BUILD="${hostBuild}"
 ####
 
 # Look for the reference in the existing releases
@@ -87,9 +88,11 @@ fi
 
 export RELEASE=${RELEASE}
 export SELF_BUILD=${SELF_BUILD}
+export TARGET_BUILD=${TARGET_BUILD}
 
 echo "SELF_BUILD=${SELF_BUILD}" >> $GITHUB_OUTPUT
 echo "RELEASE=${RELEASE}" >> $GITHUB_OUTPUT
+echo "TARGET_BUILD=${TARGET_BUILD}" >> $GITHUB_OUTPUT
 
 # make sure we have an artifact that matches this runner
 
