@@ -18,7 +18,6 @@ if [ -z "${ACTION_REF}" ] || [ -z "${ACTION_REPO}" ]; then
     exit 1
 fi
 
-mkdir -p ${ARTIFACT_PATH}
 # Try to download the release artifact directly, presuming 
 # action_ref is a release tag
 echo -n "Trying direct release download using [${ACTION_REF}] [${ACTION_REPO}]..."
@@ -31,8 +30,10 @@ set -o pipefail
 
 # If direct worked, then move the downloaded artifact
 if [ "${DIRECT}" == "${ok}" ]; then
-    gh release download "${ACTION_REF}" -R "${ACTION_REPO}" --clobber
     echo " ✅"
+    mkdir -p ${ARTIFACT_PATH}
+    gh release download "${ACTION_REF}" -R "${ACTION_REPO}" --clobber
+    
     mv *.tar.gz ${ARTIFACT_PATH}
 fi
 # If we failed to download the artifact using the action_ref directly
@@ -47,6 +48,7 @@ if [ "${DIRECT}" != "${ok}" ]; then
     REF=""
 
     gh repo clone ${ACTION_REPO} ${BASE_PATH} -- --mirror
+    mkdir -p ${ARTIFACT_PATH}
     cd ${ARTIFACT_PATH}
 
     # look for semver tags at this ref
