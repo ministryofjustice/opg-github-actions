@@ -49,28 +49,25 @@ if [ "${DIRECT}" != "${ok}" ]; then
     echo -e "Cloning action repostitory [${ACTION_REPO}] ..."
     REF=""
 
-    gh repo clone ${ACTION_REPO} ${BASE_PATH} -- --mirror
-    echo "base"
+    gh repo clone ${ACTION_REPO} ${BASE_PATH} -- --mirror    
     cd ${BASE_PATH}
     
-    echo "tags"
-    git tag --points-at="${ACTION_REF}"
     # look for semver tags at this ref
     tags=$(git tag --points-at="${ACTION_REF}")
-    echo -e "tags:"
-    echo -e "${tags}"
 
-    semverish=$(echo ${tags} | grep -E '^v[0-9]{1,}.[0-9]{1,}.[0-9]{1,}' )
-    semverishCount=$(echo ${semverish} | wc -l | tr -d ' ')
+    semverish=$(echo "${tags}" | grep -E "^v[0-9]{1,}.[0-9]{1,}.[0-9]{1,}" )
+    semverishCount=$(echo "${semverish}" | wc -l | tr -d " " )
+    echo -e "Found matching semver tags [${semverishCount}]"
 
     if [ "${semverishCount}" -ge "1" ]; then
-        tag=$(echo ${semverish} | tail -n1 )
+        tag=$(echo "${semverish}" | tail -n1 )
         echo -e "Using [${tag}] as release tag."
         REF=$(gh release download ${tag} --clobber && echo "${ok}")
         
         mkdir -p ${ARTIFACT_PATH}
         mv *.tar.gz ${ARTIFACT_PATH}
     fi
+    echo -e "Finshied looking for semver tags..."
 
     if [ "${REF}" != "${ok}" ]; then
         err="ERROR: could not find release artifact for [${ACTION_REF}]"
