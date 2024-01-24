@@ -21,7 +21,7 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version-file: './go/go.mod'        
-          cache-dependency-path: './go/go.sum'      
+          cache: false
       - name: "Running tests"              
         run: |          
           cd ./go
