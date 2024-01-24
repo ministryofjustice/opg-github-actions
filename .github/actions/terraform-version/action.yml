@@ -76,6 +76,7 @@ runs:
         direct: ${{ steps.fetch.outputs.RELEASE }}
         built: ${{ steps.buildFromSource.outputs.RELEASE }}
       run: |
+        echo -e "Determine binary to use..."
         binary=""
         if [ "${direct}" != "" ]; then
           binary="${direct}"
