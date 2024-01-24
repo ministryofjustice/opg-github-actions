@@ -29,6 +29,16 @@ outputs:
 runs:
   using: "composite"
   steps:
+    # Check running as a remote call
+    - name: "Ensure running as remote"
+      if: ${{ github.action_ref == '' }}
+      shell: bash
+      run: |
+        err="ERROR: this composite action must be run via full path (eg ministryofjustice/opg-github-actions/.github/actions/terraform-version@v2.3.1)"
+        echo -e "${err}"
+        echo -e "${err}" >&2
+        echo -e "${err}" >> $GITHUB_STEP_SUMMARY
+        exit 1
     # Use bash shell script to fetch and work out releases    
     - name: "Get release binary for this runner"
       shell: bash
@@ -36,14 +46,27 @@ runs:
       env:
         GH_ACTION_REPOSITORY: "${{ github.action_repository }}"
         GH_ACTION_REF: "${{ github.action_ref }}"
-        GH_WORKSPACE: "${{ github.workspace}}"
-        actionDir: ${{ github.action_path }}
+        GH_WORKSPACE: "${{ github.workspace }}"
+        actionsRootDir: "${{ github.action_path }}/../"
       run: |
-        cd ${actionDir}/../
-        ls -la
-        # ./releaseInstaller.sh 2> $GITHUB_STEP_SUMMARY
-        ./releaseInstaller.sh
-        
+        cd ${actionsRootDir}
+        # ./release-download.sh 2> $GITHUB_STEP_SUMMARY
+        ./release-download.sh
+    # setup and build locally if the release data is not setup
+    - name: Setup go
+      uses: actions/setup-go@v4
+      if: ${{ steps.fetch.outputs.RELEASE == '' }}
+      with:
+        go-version-file: '${{ steps.fetch.outputs.SELF_BUILD }}/./go/go.mod'
+        cache: false
+    - name: Build directly from source
+      if: ${{ steps.fetch.outputs.RELEASE == '' }}
+      shell: bash
+      env:
+        buildSource: '${{ steps.fetch.outputs.SELF_BUILD }}'
+      run: |
+        echo -e ${buildSource}
+
 
       
 
