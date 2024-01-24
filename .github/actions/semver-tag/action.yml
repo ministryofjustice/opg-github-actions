@@ -140,7 +140,7 @@ runs:
       uses: actions/setup-go@v4
       with:
         go-version-file: '${{ steps.setup.outputs.path }}/go/go.mod'
-        cache-dependency-path: '${{ steps.setup.outputs.path }}/go/go.sum'
+        cache: false
     # run the build 
     - name: "Build"
       id: build
