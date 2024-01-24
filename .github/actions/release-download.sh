@@ -22,15 +22,13 @@ TARGET_BUILD="${hostBuild}"
 echo -n "Trying direct release download using [${actionRef}] [${actionRepo}]..."
 releases=$(gh release list --exclude-drafts=false --exclude-pre-releases=false -R "${actionRepo}")
 listed=$( echo "${releases}" | grep "^${actionRef}" && echo "${ok}")
-echo -e "${releases}" | grep "^${actionRef}" && echo "${ok}"
-echo -e "listed:"
-echo -e "${listed}"
+found=$(echo "${listed}" | tail -n1)
+
 set -e
 set -o pipefail
-
 # If ref is in the release list, then we can download
 # and then move the artifact
-if [ "${listed}" == "${ok}" ]; then
+if [ "${found}" == "${ok}" ]; then
     echo " ✅"
     cd ${basePath}
     mkdir -p ${artifactPath}
@@ -65,7 +63,7 @@ fi
 # to pass to us 
 # In that case, we need to download the repo to a new location so
 # that it can be built
-if [ "${listed}" != "${ok}" ]; then
+if [ "${found}" != "${ok}" ]; then
     # build from local 
     echo -e "Cloning action repostitory [${actionRepo}] to [${localBuildPath}] ..."
     gh repo clone ${actionRepo} ${localBuildPath} -- -q
