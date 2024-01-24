@@ -39,7 +39,7 @@ func logSetup() {
 		level          string               = *logLevel
 		as             string               = *logAs
 		to             string               = *logTo
-		handlerOptions *slog.HandlerOptions = &slog.HandlerOptions{AddSource: true, Level: slog.LevelError}
+		handlerOptions *slog.HandlerOptions = &slog.HandlerOptions{AddSource: true, Level: slog.LevelDebug}
 		validAsChoice  bool                 = slices.Contains(logAsChoices, as)
 		validToChoice  bool                 = slices.Contains(logToChoices, to)
 		out            io.Writer            = os.Stdout
@@ -109,7 +109,7 @@ func main() {
 	}
 
 	slog.Info("flag parsed command:" + cmd)
-	slog.Info(fmt.Sprintf("arguments: [%s]", strings.Join(flag.Args(), " ")))
+	slog.Error(fmt.Sprintf("arguments: [%s]", strings.Join(flag.Args(), " ")))
 
 	switch cmd {
 	case branchname.Name:
