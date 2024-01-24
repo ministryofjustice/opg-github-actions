@@ -29,9 +29,10 @@ set -o pipefail
 # If ref is in the release list, then we can download
 # and then move the artifact
 if [ "${found}" == "${ok}" ]; then
-    echo " ✅"
-    cd ${basePath}
+    echo " ✅"    
+    mkdir -p ${basePath}
     mkdir -p ${artifactPath}
+    cd ${basePath}
     echo -e "Downloading existing release [${actionRef}]..."
     # download the release tar ball
     gh release download "${actionRef}" -R "${actionRepo}" --clobber
