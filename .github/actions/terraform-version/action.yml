@@ -29,136 +29,19 @@ outputs:
 runs:
   using: "composite"
   steps:
-    # Create environment variables for the action repo data and workspace
-    # directories and convert those into step outputs for use in other 
-    # steps
-    - name: "Environment variables to step variables"
-      id: gha
+    # Use bash shell script to fetch and work out releases    
+    - name: "Get release binary for this runner"
       shell: bash
-      env: 
-        GHA_REPO: "${{ github.action_repository }}"
-        GHA_REF: "${{ github.action_ref }}"
-        GHA_PATH: "${{ github.workspace }}/opg-gha"    
-      run: |        
-        echo -e "Environment variables to step variables"
-        echo "repo=${GHA_REPO}" >> $GITHUB_OUTPUT
-        echo "ref=${GHA_REF}" >> $GITHUB_OUTPUT
-        echo "path=${GHA_PATH}" >> $GITHUB_OUTPUT
-        echo "isSelf=${{ github.repository == 'ministryofjustice/opg-github-actions' }}" >> $GITHUB_OUTPUT
-    # If we aren't being called from ourselves, then checkout the repository
-    # at the commit we know of into the new path
-    - name: "Checkout action [ ${{ steps.gha.outputs.isSelf }} ]"
-      uses: actions/checkout@v4
-      if: ${{ steps.gha.outputs.isSelf != 'true' }}
-      with:
-        repository: ${{ steps.gha.outputs.repo }}
-        ref: ${{ steps.gha.outputs.ref }}
-        path: ${{ steps.gha.outputs.path }}
-    
-    # If the repository property matches our own name (so a call from itself)
-    # then we dont checkout anything, set the path to be from the 
-    # base of self and show the last commit hash and message for debug
-    #
-    # If its called remotely, then checkout self into a subfolder of the
-    # workspace and presume can use the env variables from the 'gha' step
-    - name: "Set directory path"
-      id: setPath
-      shell: bash      
+      id: fetch
       env:
-        JSON_DEBUG: ${{ toJSON(github) }}
-      run: | 
-        echo -e "Set directory path"
-        set -e 
-        if [ "${{ steps.gha.outputs.isSelf }}" == "true" ]; then 
-          echo -e "Warning: running against self."
-          echo -e "Using this commit:"
-          git log -n1 --format="oneline"          
+        GH_ACTION_REPOSITORY: "${{ github.action_repository }}"
+        GH_ACTION_REF:REF: "${{ github.action_ref }}"
+        ACTION_WORKSPACE: "${{ github.workspace}}/opg-gha"
+        actionDir: ${{ github.action_path }}
+      run: |
+        cd ${actionDir}
+        ls -la
+        ls -la ../
 
-          appPath="${{ github.workspace }}"
-        elif [ -n "${{ steps.gha.outputs.ref}}" ]; then   
-          echo -e "Running from remote workflow"       
-          appPath="${{ steps.gha.outputs.path }}"
-        else
-          echo -e "ERROR: failed to determine location of go code"
-          echo -e "ERROR: failed to determine location of action code" >> $GITHUB_STEP_SUMMARY
-          echo "${JSON_DEBUG}"             
-          exit 1
-        fi        
-        echo -e "appPath=${appPath}"
-        echo "appPath=${appPath}" >> $GITHUB_OUTPUT
-        
-        if [ "${{ runner.debug }}" == "1" ]; then
-          ls -la ${appPath}/go/
-        fi
-    # Setup go
-    - uses: actions/setup-go@v4
-      with:
-        go-version-file: '${{ steps.setPath.outputs.appPath }}/go/go.mod'
-        #go-version: '1.21.6'
-        cache-dependency-path: |
-          ${{ steps.setPath.outputs.appPath }}/go/go.sum
-    - shell: bash
-      run: go version
-    # Get os & arch name for make target
-    - name: "Build info"
-      id: info
-      shell: bash
-      run: |
-        echo -e "Build info"
-        gha_os=$(uname | tr '[:upper:]' '[:lower:]')
-        gha_arc=$(uname -m)
-        make_target="${gha_os}_${gha_arc}"
-        binpath="${{ steps.setPath.outputs.appPath }}/go/builds/${make_target}"
-        echo "target=${make_target}" >> $GITHUB_OUTPUT
-        echo "binpath=${binpath}" >> $GITHUB_OUTPUT
+      
 
-        if [ -a "${binpath}" ]; then
-          echo "Build file exists."
-          echo "binexists=true" >> $GITHUB_OUTPUT
-        else 
-          echo "Build file does not exist."
-          echo "binexists=false" >> $GITHUB_OUTPUT
-        fi        
-    # This will build the app using the makefile to generate
-    #   ./build/$target/main
-    # which can then be run
-    - name: "Build app [ ${{ steps.info.outputs.binexists == 'false' }} ]"
-      id: build      
-      shell: bash
-      if: ${{ steps.info.outputs.binexists == 'false' }}
-      env:
-        target: '${{ steps.info.outputs.target }}'
-      run: |
-        echo -e "Build app"
-        cd ${{ steps.setPath.outputs.appPath }}
-        echo "Building (via make) for ${target}"
-        make ${target}
-        cd ${{ github.workspace }}
-    # RUN THE COMMAND
-    - name: "terraform-version"
-      id: "version"
-      shell: bash
-      env:
-        GHABIN: '${{ steps.info.outputs.binpath }}'
-        directory: '${{ inputs.terraform_directory }}'
-        versionFile: '${{ inputs.terraform_versions_file }}'
-        simple: '${{ inputs.simple_file }}'
-      run: |
-        echo -e "Run terraform-version"
-        echo -e "${GHABIN}"
-        ${GHABIN} terraform-version \
-          --directory="${directory}" \
-          --versions-file="${versionsFile}" \
-          --simple="${simple}"
-
-    # DUMP DEBUG DATA  
-    - name: "JSON DEBUG [${{ steps.gha.outputs.repo == '' && runner.debug == '1' }}]"
-      shell: bash
-      env:
-        JSON_DEBUG: ${{ toJSON(github) }}
-      if: ${{ steps.gha.outputs.repo == '' }}
-      run: |
-        echo -e "github action repo was empty, debugging:"
-        echo "${{ runner.debug }}"
-        echo "${JSON_DEBUG}"
-        
