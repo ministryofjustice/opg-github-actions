@@ -107,10 +107,6 @@ runs:
         SimpleFile: ${{ inputs.simple_file }}
       run:
         echo -e "Running terraform-version"
-
-        ${APP_BIN} terraform-version \
-          --log-level="debug" \
-          --directory="${Directory}" \
-          --versions-file="${VersionsFile}" \
-          --simple="${SimpleFile}"
+        
+        ${APP_BIN} terraform-version --log-level="debug" --directory="${Directory}" --versions-file="${VersionsFile}" --simple="${SimpleFile}"
           
