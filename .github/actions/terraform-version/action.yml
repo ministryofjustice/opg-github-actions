@@ -71,7 +71,8 @@ runs:
         echo -e "Building (with make) for ${target}"
         ls -la
         make release
-        ls -la ./builds/
+        ls -la 
+        ls -la ./go/builds
 
       
 
