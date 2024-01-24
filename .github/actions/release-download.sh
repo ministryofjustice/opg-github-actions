@@ -69,13 +69,11 @@ if [ "${listed}" != "${ok}" ]; then
     cd ${localBuildPath}
     # checkout to the git ref
     checkout=$(git checkout -q -f ${actionRef} -- 2> /dev/null && echo "${ok}")
-    # output  the commit
-    echo -e "-- commit --"
-    git log -n1 --format="oneline"
-    echo -e "----"
-
     if [ "${checkout}" == "${ok}" ]; then
         echo -e "Checked out local repo to [${actionRef}] [${localBuildPath}]"
+        echo -e "-- commit --"
+        git log -n1 --format="oneline"
+        echo -e "------------"
         SELF_BUILD="${localBuildPath}"
     else
         err="ERROR: failed to checkout [${actionRef}]"

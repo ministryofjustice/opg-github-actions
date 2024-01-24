@@ -108,8 +108,8 @@ func main() {
 		defer logFile.Close()
 	}
 
-	slog.Debug("flag parsed command:" + cmd)
-	slog.Debug(fmt.Sprintf("arguments: [%s]", strings.Join(flag.Args(), " ")))
+	slog.Info("flag parsed command:" + cmd)
+	slog.Info(fmt.Sprintf("arguments: [%s]", strings.Join(flag.Args(), " ")))
 
 	switch cmd {
 	case branchname.Name:

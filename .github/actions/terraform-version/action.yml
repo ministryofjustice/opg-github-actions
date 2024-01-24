@@ -102,11 +102,12 @@ runs:
       shell: bash
       env:
         APP_BIN: "${{ steps.binary.outputs.binary }}"
-        Directory: "${{ github.workspace}}/target/${{ inputs.terraform_directory }}"
+        Directory: "${{ github.workspace}}/../target/${{ inputs.terraform_directory }}"
         VersionsFile: ${{ inputs.terraform_versions_file }}
         SimpleFile: ${{ inputs.simple_file }}
       run:
          ${APP_BIN} terraform-version \
+          --log-level="info" \
           --directory="${Directory}" \
           --versions-file="${VersionsFile}" \
           --simple="${SimpleFile}"
