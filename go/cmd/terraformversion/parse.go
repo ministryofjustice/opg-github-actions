@@ -3,6 +3,7 @@ package terraformversion
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"opg-github-actions/pkg/commonstrings"
 	"os"
 	"path/filepath"
@@ -18,6 +19,7 @@ func parseArgs() error {
 	}
 
 	path := filepath.Join(*directory, "/", *versionsFile)
+	slog.Debug(fmt.Sprintf("args: checking path: [%s]", path))
 	if *versionsFile == "" {
 		return fmt.Errorf(commonstrings.ErrorArgumentMissing, "versions-file")
 	} else if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
