@@ -89,7 +89,7 @@ runs:
         fi
         echo -e "binary=${binary}"
         echo "binary=${binary}" >> $GITHUB_OUTPUT
-    #### COMMANDS
+    ### CHECKOUT
     # get our the calling repo as we need to access files form there
     - name: "Checkout calling repository"
       uses: actions/checkout@v4
@@ -97,6 +97,7 @@ runs:
         repository: ${{ github.repository }}
         ref: ${{ github.ref }}
         path: '${{ github.workspace}}/_target'
+    #### COMMANDS
     - name: "terraform-version" 
       id: "version"
       shell: bash
