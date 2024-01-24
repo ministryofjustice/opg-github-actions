@@ -36,19 +36,21 @@ var (
 
 func logSetup() {
 	var (
-		level          string               = *logLevel
-		as             string               = *logAs
-		to             string               = *logTo
-		handlerOptions *slog.HandlerOptions = &slog.HandlerOptions{AddSource: true, Level: slog.LevelDebug}
-		validAsChoice  bool                 = slices.Contains(logAsChoices, as)
-		validToChoice  bool                 = slices.Contains(logToChoices, to)
-		out            io.Writer            = os.Stdout
+		level          string     = *logLevel
+		as             string     = *logAs
+		to             string     = *logTo
+		validAsChoice  bool       = slices.Contains(logAsChoices, as)
+		validToChoice  bool       = slices.Contains(logToChoices, to)
+		out            io.Writer  = os.Stdout
+		logLevel       slog.Level = slog.LevelError
+		handlerOptions *slog.HandlerOptions
 		log            *slog.Logger
 	)
 	// setup log level
 	if l, ok := logLevels[level]; ok {
-		handlerOptions.Level = l
+		logLevel = l
 	}
+	handlerOptions = &slog.HandlerOptions{AddSource: true, Level: logLevel}
 	// if chosen to change output to file, open the file and adjust out
 	if validToChoice && to == "file" {
 		logFile, _ = os.OpenFile("log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
