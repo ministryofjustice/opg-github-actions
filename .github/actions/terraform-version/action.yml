@@ -20,6 +20,7 @@ outputs:
 runs:
   using: "composite"
   steps:
+    ##### REPEATING BLOCK >>>
     # Check running as a remote call
     - name: "Ensure running as remote"
       if: ${{ github.action_ref == '' }}
@@ -97,12 +98,14 @@ runs:
         repository: ${{ github.repository }}
         ref: ${{ github.ref }}
         path: '${{ github.workspace}}/_target'
+    ##### <<< END REPEATING BLOCK 
+
     #### COMMANDS
     - name: "terraform-version" 
       id: "version"
       shell: bash
       env:
-        LOG_LEVEL: ${{ runner.debug == '1' && "debug" || "error" }}
+        LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}
         APP_BIN: "${{ steps.binary.outputs.binary }}"
         Directory: "${{ github.workspace}}/_target/${{ inputs.terraform_directory }}"
         VersionsFile: ${{ inputs.terraform_versions_file }}
