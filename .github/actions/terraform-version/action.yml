@@ -109,8 +109,5 @@ runs:
       run:
         echo -e "Running terraform-version"
 
-        ${APP_BIN} terraform-version \
-          --directory="${Directory}" \
-          --versions-file="${VersionsFile}" \
-          --simple="${SimpleFile}"
+        ${APP_BIN} terraform-version --directory="${Directory}" --versions-file="${VersionsFile}" --simple="${SimpleFile}"
           
