@@ -10,15 +10,22 @@ import (
 )
 
 // parseArgs handles the validation and verification of the arguments for this command
-func parseArgs() error {
+func parseArgs() (err error) {
 
 	if *directory == "" {
-		return fmt.Errorf(commonstrings.ErrorArgumentMissing, "directory")
+		err = fmt.Errorf(commonstrings.ErrorArgumentMissing, "directory")
 	} else if _, err := os.Stat(*directory); errors.Is(err, os.ErrNotExist) {
-		return fmt.Errorf(commonstrings.ErrorArgumentFileNotExist, "directory", *directory)
+		err = fmt.Errorf(commonstrings.ErrorArgumentFileNotExist, "directory", *directory)
 	}
+
+	if err != nil {
+		slog.Error(err.Error())
+		return
+	}
+
 	d := *directory
 	path := filepath.Join(d, *versionsFile)
+
 	slog.Debug(fmt.Sprintf("args: checking path: [%s][%s]=>[%s]", *directory, *versionsFile, path))
 
 	if *versionsFile == "" {
