@@ -11,10 +11,10 @@ outputs:
   safe:
     description: 'Alphanumeric and lowercase version of the branch, trimmed to 12 characters.'
     value: ${{ steps.safe.outputs.safe }}
-  source_commitish:
+  base_commitish:
     description: "Commit hashes / branches can be used for comparisions later"
     value: ${{ steps.safe.outputs.base_commitish }}
-  destination_commitish:
+  head_commitish:
     description: "Commit hashes / branches can be used for comparisions later"
     value: ${{ steps.safe.outputs.head_commitish }}
 

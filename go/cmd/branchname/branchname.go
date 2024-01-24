@@ -5,7 +5,7 @@ Both `--event_name` and `--event_data_file` aret typically fed from github event
 
 Returns an alphanumeric only version of the branch name as 'full_length' and a shorterned (12 chars) version as 'safe', which is intended to be used for creating tags.
 
-Will also return 'source_commitish' and 'destination_commitish' for comparison. For a pull request these are head & base barnches, for push these are before and after refs.
+Will also return 'base_commitish' and 'head_commitish' for comparison. For a pull request these are head & base barnches, for push these are before and after refs.
 
 Usage:
 

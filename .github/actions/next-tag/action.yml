@@ -7,7 +7,7 @@ inputs:
   prerelease_suffix:
     description: "If prerelease is set, this string is used as the ${suffix} in the tag pattern. (Default: beta)"
     default: "beta"
-  latest_tag:
+  last_prerelease:
     description: "Lastest tag to bump from."
     default: ""
   last_release:
@@ -18,50 +18,21 @@ inputs:
     default: "patch"
   with_v:
     description: "New tag will start with a v prefix"
-    default: ""
-  caller_repo_subfolder:
-    description: "Location to checkout active repository into. (Default: ./next-tag-caller-repository)"
-    default: "./next-tag-caller-repository"
-  commitish_a:
+    default: "true"
+  base_commitish:
     description: "Commit used to look for version bump triggers in messages"
     required: true
-  commitish_b:
+  head_commitish:
     description: "Commit used to look for version bump triggers in messages"
     required: true
-  ## Used to capture the intial values before they get overwritten
-  action_ref:
-    description: "Capture the starting value of github.action_ref. DO NOT SET"
-    default: ${{ github.action_ref }}
-  action_repository:
-    description: "Capture the starting value of github.action_repository. DO NOT SET"
-    default: ${{ github.action_repository }}
 
 outputs:
-  prerelease_suffix:
-    description: "Inputed prerelease_suffix variable."
-    value: ${{ inputs.prerelease_suffix }}
-  latest_tag:
-    description: "Inputed latest_tag variable."
-    value: ${{inputs.latest_tag}}
-  last_release:
-    description: "Inputed last_release variable."
-    value: ${{inputs.last_release}}
-  with_v:
-    description: "Inputed with_v variable."
-    value: ${{inputs.with_v}}
-
   prerelease:
     description: "Calculated prerelease variable."
-    value: ${{ steps.get_next_tag.outputs.prerelease_calculated }}
+    value: ${{ steps.get_next_tag.outputs.prerelease }}
   next_tag:
     description: "Next tag that should be created."
     value: ${{steps.get_next_tag.outputs.next_tag}}
-  commitish_a:
-    description: "Commit used to look for version bump triggers in messages"
-    value: ${{steps.get_next_tag.outputs.commitish_a}}
-  commitish_b:
-    description: "Commit used to look for version bump triggers in messages"
-    value: ${{steps.get_next_tag.outputs.commitish_b}}
   majors:
     description: "number of #major found."
     value: ${{steps.get_next_tag.outputs.majors}}
@@ -76,72 +47,113 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: "Checkout original repo to set folder"
+##### REPEATING BLOCK >>>
+    # Check running as a remote call
+    - name: "Ensure running as remote"
+      if: ${{ github.action_ref == '' }}
+      shell: bash
+      run: |
+        err="ERROR: this composite action must be run via full path (eg ministryofjustice/opg-github-actions/.github/actions/terraform-version@v2.3.1)"
+        echo -e "${err}"
+        echo -e "${err}" >&2
+        echo -e "${err}" >> $GITHUB_STEP_SUMMARY
+        exit 1
+    # Use bash shell script to fetch and work out releases    
+    - name: "Get release binary for this runner"
+      shell: bash
+      id: fetch
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_ACTION_REPOSITORY: "${{ github.action_repository }}"
+        GH_ACTION_REF: "${{ github.action_ref }}"
+        GH_WORKSPACE: "${{ github.workspace }}"
+        actionsRootDir: "${{ github.action_path }}/../"
+      run: |
+        echo -e "Get release binary"
+        cd ${actionsRootDir}
+        ./release-download.sh 2> $GITHUB_STEP_SUMMARY
+    ## LOCAL BUILD
+    # setup and build locally if the release data is not setup
+    - name: "Setup go"
+      uses: actions/setup-go@v4
+      if: ${{ steps.fetch.outputs.RELEASE == '' }}
+      with:
+        go-version-file: '${{ steps.fetch.outputs.SELF_BUILD }}/./go/go.mod'
+        cache: false
+    - name: Build directly from source
+      id: buildFromSource
+      if: ${{ steps.fetch.outputs.RELEASE == '' }}
+      shell: bash
+      env:
+        buildSource: '${{ steps.fetch.outputs.SELF_BUILD }}'
+        target: '${{ steps.fetch.outputs.TARGET_BUILD }}'
+      run: |
+        echo -e "Build from source"
+        cd ${buildSource}
+        echo -e "Building (with make) for ${target}"        
+        make release
+        release="${buildSource}/go/builds/${target}"
+        echo -e "RELEASE=${release}"
+        echo "RELEASE=${release}" >> $GITHUB_OUTPUT
+    ## DETERMINE BINARY PATH
+    - name: "Determine binary to use"
+      id: binary
+      shell: bash
+      env:
+        direct: ${{ steps.fetch.outputs.RELEASE }}
+        built: ${{ steps.buildFromSource.outputs.RELEASE }}
+      run: |
+        echo -e "Determine binary to use..."
+        binary=""
+        if [ "${direct}" != "" ]; then
+          binary="${direct}"
+        elif [ "${built}" != "" ]; then
+          binary="${built}"
+        fi
+        if [ "${binary}" == "" ]; then
+          err="error: no binary found"
+          echo -e "${err}"
+          echo -e "${err}" >&2
+          echo -e "${err}" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo -e "binary=${binary}"
+        echo "binary=${binary}" >> $GITHUB_OUTPUT
+    ### CHECKOUT
+    # get our the calling repo as we need to access files form there
+    - name: "Checkout calling repository"
       uses: actions/checkout@v4
       with:
         repository: ${{ github.repository }}
-        ref: ${{ github.ref}}
-        path: ${{inputs.caller_repo_subfolder}}
-        fetch-tags: true
-        fetch-depth: 0
-    - name: "Checkout this actions repo into a subfolder at this version"
-      uses: actions/checkout@v4
-      with:
-        repository: ${{ inputs.action_repository }}
-        ref: ${{ inputs.action_ref }}
-        path: ./_ghnexttagaction
-    - name: "Setup python"
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-    - name: pip
+        ref: ${{ github.ref }}
+        path: '${{ github.workspace}}/_target'
+    ##### <<< END REPEATING BLOCK 
+    #### COMMANDS    
+    - name: "next-tag" 
+      id: "get_next_tag"
       shell: bash
       env:
-        PY_APP_DIR: "${{github.workspace}}/./_ghnexttagaction/python"
-      run: |
-        echo -e "# pip setup:"
-        echo -e "PY_APP_DIR: ${PY_APP_DIR}"
-        cd ${PY_APP_DIR}
-        pip install -q -r ./requirements.txt
-        pip install -e .
-    - name: Get new Tag
-      id: get_next_tag
-      shell: bash
-      env:
-        PY_APP_DIR: "${{github.workspace}}/./_ghnexttagaction/python"
-        TARGET_REPO: "${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
-        COMMITISH_A: ${{inputs.commitish_a}}
-        COMMITISH_B: ${{inputs.commitish_b}}
-        PRERELEASE: ${{inputs.prerelease}}
-        PRERELEASE_SUFFIX: ${{inputs.prerelease_suffix}}
-        LATEST_TAG: ${{inputs.latest_tag}}
-        LAST_RELEASE: ${{inputs.last_release}}
-        WITH_V: ${{inputs.with_v}}
-        DEFAULT_BUMP: ${{inputs.default_bump}}
-        # used by the python code directly
-        github_pr_title: ${{ github.event.pull_request.title }}
-        github_pr_body: ${{ github.event.pull_request.body }}
-      run: |
-        echo -e "# next-tag setup:"
-        echo -e "PY_APP_DIR: ${PY_APP_DIR}"
-        echo -e "TARGET_REPO: ${TARGET_REPO}"
-        echo -e "COMMITISH_A: ${COMMITISH_A}"
-        echo -e "COMMITISH_B: ${COMMITISH_B}"
-        echo -e "PRERELEASE: ${PRERELEASE}"
-        echo -e "PRERELEASE_SUFFIX: ${PRERELEASE_SUFFIX}"
-        echo -e "LATEST_TAG: ${LATEST_TAG}"
-        echo -e "LAST_RELEASE: ${LAST_RELEASE}"
-        echo -e "WITH_V: ${WITH_V}"
-        echo -e "DEFAULT_BUMP: ${DEFAULT_BUMP}"
+        LOG_LEVEL: 'info' #${{ runner.debug == '1' && 'debug' || 'error' }}
+        APP_BIN: "${{ steps.binary.outputs.binary }}"
+        repository: '${{ github.workspace}}/_target'        
+        prerelease: '${{ inputs.prerelease }}'
+        prereleaseSuffix: '${{ inputs.prerelease_suffix }}'
+        lastRelease: '${{ inputs.last_release }}'
+        lastPrerelease: '${{ inputs.last_prerelease }}'
+        withV: '${{ inputs.with_v }}'
+        defaultBump: '${{ inputs.default_bump }}'
+        head: '${{ inputs.head_commitish }}'
+        base: '${{ inputs.base_commitish }}'
+      run:
+        echo -e "Running next-tag"
 
-         cd ${PY_APP_DIR}
-        python ./actions/commands/next_tag.py \
-          --repository_root="${TARGET_REPO}" \
-          --commitish_a="${COMMITISH_A}" \
-          --commitish_b="${COMMITISH_B}" \
-          --prerelease="${PRERELEASE}" \
-          --prerelease_suffix="${PRERELEASE_SUFFIX}" \
-          --latest_tag="${LATEST_TAG}" \
-          --last_release="${LAST_RELEASE}" \
-          --with_v="${WITH_V}" \
-          --default_bump="${DEFAULT_BUMP}"
+        ${APP_BIN} next-tag \
+        --repository="${repository}" \
+        --base="${base}" \
+        --head="${head}" \
+        --last-release="${lastRelease}" \
+        --last-prerelease="${lastPrerelease}" \
+        --prerelease="${prerelease}" \
+        --prerelease-suffix="${prereleaseSuffix}" \
+        --with-v="${withV}"
+        --default-bump="${defaultBump}"
+    

@@ -2,7 +2,7 @@
 nexttag determines the next semver tag to use based on information passed
 Requires an actual git repository to be present at repository_root to fetch existing tags.
 
-Find commits that are present in `--commitish_b` history, but not in `--commitish_a`s and uses those to look for semver version bump triggers.
+Find commits that are present in `--base_commitish` history, but not in `--head_commitish`s and uses those to look for semver version bump triggers.
 
 Version bumps are found in the message property and are - '#major', '#minor' or '#patch'.
 
@@ -19,12 +19,12 @@ The flags are:
 		This directory must exist and be an active repository already.
 	--base 		(required)
 		Base git reference (typically branch being merged into - 'main' or 'master' or the 'before' commit).
-		Commits between this point and `--commitish_b` are diff'd and commit messages checked for version bump triggers.
-			- destination_commitish from branch-name
+		Commits between this point and `--base_commitish` are diff'd and commit messages checked for version bump triggers.
+			- base_commitish from branch-name
 	--head	(required)
 		Head git reference (typically the active branch being merged or the 'after' commit).
-		Commits that exist on at this reference, but not witin `--commitish_a` are used to find semver version bump triggers.
-			- source_commitish from branch-name
+		Commits that exist on at this reference, but not witin `--head_commitish` are used to find semver version bump triggers.
+			- head_commitish from branch-name
 	--prerelease		(default: 'false')
 		String representation of a boolean.
 		Determines if the next flag should be considered as a prerelease or not
