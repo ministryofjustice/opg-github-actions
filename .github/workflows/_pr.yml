@@ -61,7 +61,7 @@ jobs:
           draft: true
           prerelease: true
           generateReleaseNotes: true
-          artifacts: '${{ github.workspace }}/go/builds/*.tar'
+          artifacts: '${{ github.workspace }}/go/builds/*.tar.gz'
             
 
   end:
