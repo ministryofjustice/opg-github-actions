@@ -35,7 +35,7 @@ runs:
       id: fetch
       env:
         GH_ACTION_REPOSITORY: "${{ github.action_repository }}"
-        GH_ACTION_REF:REF: "${{ github.action_ref }}"
+        GH_ACTION_REF: "${{ github.action_ref }}"
         ACTION_WORKSPACE: "${{ github.workspace}}/../opg-gha"
         actionDir: ${{ github.action_path }}
       run: |
