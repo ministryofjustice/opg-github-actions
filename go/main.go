@@ -39,7 +39,7 @@ func logSetup() {
 		level          string               = *logLevel
 		as             string               = *logAs
 		to             string               = *logTo
-		handlerOptions *slog.HandlerOptions = &slog.HandlerOptions{AddSource: true, Level: slog.LevelInfo}
+		handlerOptions *slog.HandlerOptions = &slog.HandlerOptions{AddSource: true, Level: slog.LevelError}
 		validAsChoice  bool                 = slices.Contains(logAsChoices, as)
 		validToChoice  bool                 = slices.Contains(logToChoices, to)
 		out            io.Writer            = os.Stdout

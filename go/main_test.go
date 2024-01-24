@@ -184,7 +184,7 @@ var (
 				Expected: map[string]string{"created_tag": "2.0.0-beta.0", "regenerated": "false"},
 			},
 		},
-		// Testing a prerelease
+		// Testing a prerelease with a patch bump, but no prior prerelease
 		{
 			Prerelease: true,
 			EventSetup: eventSetup{
