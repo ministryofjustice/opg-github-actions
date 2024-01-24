@@ -47,8 +47,7 @@ func Run(args []string) (output map[string]string, err error) {
 		return
 	}
 
-	simple := safestrings.Safestring(*isSimple)
-	simpleBool, err := simple.AsBool()
+	simpleBool, err := safestrings.ToBool(*isSimple)
 	if err != nil {
 		return
 	}
