@@ -28,9 +28,11 @@ DIRECT=$( echo "${releases}" | grep "^${ACTION_REF}" && echo "${ok}")
 set -e
 set -o pipefail
 
-# If direct worked, then move the downloaded artifact
+# If ref is in the release list, then we can download
+# and then move the artifact
 if [ "${DIRECT}" == "${ok}" ]; then
     echo " ✅"
+    cd ${BASE_PATH}
     mkdir -p ${ARTIFACT_PATH}
     gh release download "${ACTION_REF}" -R "${ACTION_REPO}" --clobber
     
@@ -44,13 +46,20 @@ if [ "${DIRECT}" != "${ok}" ]; then
     echo -e "Releases found:"
     echo -e "${releases}"
     echo -e "Will try to convert [${ACTION_REF}] to a known release tag."
-    echo -e "Cloning action repostitory [${ACTION_REPO}] locally..."
+    echo -e "Cloning action repostitory [${ACTION_REPO}] ..."
     REF=""
 
     gh repo clone ${ACTION_REPO} ${BASE_PATH} -- --mirror
+    echo "base"
+    cd ${BASE_PATH}
+    pwd
+    ls -la
+    echo "artifact"
     mkdir -p ${ARTIFACT_PATH}
     cd ${ARTIFACT_PATH}
-
+    pwd
+    ls -la
+    echo "tags"
     # look for semver tags at this ref
     tags=$(git tag --points-at="${ACTION_REF}")
     semverish=$(echo ${tags} | grep -E '^v[0-9]{1,}.[0-9]{1,}.[0-9]{1,}' )

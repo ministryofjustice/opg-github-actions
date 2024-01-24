@@ -42,7 +42,8 @@ runs:
       run: |
         cd ${actionDir}/../
         ls -la
-        ./releaseInstaller.sh 2> $GITHUB_STEP_SUMMARY
+        # ./releaseInstaller.sh 2> $GITHUB_STEP_SUMMARY
+        ./releaseInstaller.sh
         
 
       
