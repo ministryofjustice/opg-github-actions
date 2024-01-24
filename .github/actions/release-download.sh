@@ -55,6 +55,8 @@ if [ "${listed}" == "${ok}" ]; then
     fi
 else
     echo " ❌"
+    echo -e "Releases: "
+    echo -e "${releases}"
 fi
 # If we failed to download the artifact using the action_ref directly
 # then its likely someone has used a prerelease or a git hash ref 
