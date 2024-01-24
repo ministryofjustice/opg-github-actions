@@ -37,7 +37,7 @@ runs:
       shell: bash
       id: fetch
       env:
-        GH_TOKEN: ${{ input.github_token }}
+        GH_TOKEN: ${{ inputs.github_token }}
         GH_ACTION_REPOSITORY: "${{ github.action_repository }}"
         GH_ACTION_REF: "${{ github.action_ref }}"
         GH_WORKSPACE: "${{ github.workspace}}"
