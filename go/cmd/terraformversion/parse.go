@@ -19,7 +19,8 @@ func parseArgs() error {
 	}
 	d := *directory
 	path := filepath.Join(d, *versionsFile)
-	slog.Error(fmt.Sprintf("args: checking path: [%s][%s]=>[%s]", *directory, *versionsFile, path))
+	slog.Debug(fmt.Sprintf("args: checking path: [%s][%s]=>[%s]", *directory, *versionsFile, path))
+
 	if *versionsFile == "" {
 		return fmt.Errorf(commonstrings.ErrorArgumentMissing, "versions-file")
 	} else if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {

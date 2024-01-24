@@ -121,8 +121,14 @@ func main() {
 		defer logFile.Close()
 	}
 
-	slog.Info("flag parsed command:" + cmd)
-	slog.Error(fmt.Sprintf("arguments: [%s]", strings.Join(flag.Args(), ", ")))
+	slog.Info("sub-command:" + cmd)
+	slog.Debug(fmt.Sprintf("arguments: [%s]", strings.Join(flag.Args(), ", ")))
+
+	if cmd == "" {
+		err = fmt.Errorf("No sub-command set")
+		slog.Error(err.Error())
+		log.Fatal(err.Error())
+	}
 
 	switch cmd {
 	case branchname.Name:
@@ -137,7 +143,6 @@ func main() {
 		results, err = nexttag.Run(flag.Args()[1:])
 	case createtag.Name:
 		results, err = createtag.Run(flag.Args()[1:])
-
 	default:
 		err = fmt.Errorf("Sub command [%s] not recognised", cmd)
 	}
