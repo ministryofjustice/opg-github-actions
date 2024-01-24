@@ -101,7 +101,7 @@ runs:
       id: "version"
       shell: bash
       env:
-        LOG_LEVEL: "debug"
+        LOG_LEVEL: ${{ runner.debug == '1' && "debug" || "error" }}
         APP_BIN: "${{ steps.binary.outputs.binary }}"
         Directory: "${{ github.workspace}}/_target/${{ inputs.terraform_directory }}"
         VersionsFile: ${{ inputs.terraform_versions_file }}
