@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-set -e
-set -o pipefail
 
 ACTION_REPO="${GH_ACTION_REPOSITORY}"
 ACTION_REF="${GH_ACTION_REF}"
@@ -26,10 +24,14 @@ mkdir -p ${ARTIFACT_PATH}
 echo -n "Trying direct release download using [${ACTION_REF}] [${ACTION_REPO}]..."
 releases=$(gh release list --exclude-drafts=false --exclude-pre-releases=false -R "${ACTION_REPO}")
 # swallow the error as we want to move to hash lookup
-DIRECT=$(gh release download "${ACTION_REF}" -R "${ACTION_REPO}" --clobber 2>/dev/null && echo "${ok}")
+DIRECT=$( echo "${releases}" | grep "^${ACTION_REF}" && echo "${ok}")
+
+set -e
+set -o pipefail
 
 # If direct worked, then move the downloaded artifact
 if [ "${DIRECT}" == "${ok}" ]; then
+    gh release download "${ACTION_REF}" -R "${ACTION_REPO}" --clobber
     echo " ✅"
     mv *.tar.gz ${ARTIFACT_PATH}
 fi
