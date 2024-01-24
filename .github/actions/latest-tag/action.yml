@@ -117,7 +117,7 @@ runs:
       id: "latest"
       shell: bash
       env:
-        LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}
+        LOG_LEVEL: 'debug' # ${{ runner.debug == '1' && 'debug' || 'error' }}
         APP_BIN: "${{ steps.binary.outputs.binary }}"
         repository: '${{ github.workspace}}/_target'
         branch: '${{ inputs.branch_name }}'
@@ -126,5 +126,6 @@ runs:
         releaseBranches: '${{ inputs.release_branch }}'
       run:
         echo -e "Running latest-tag"
+
         ${APP_BIN} latest-tag --repository="${repository}" --branch="${branch}" --prerelease="${prerelease}" --prerelease-suffix="${prereleaseSuffix}" --release-branches="${releaseBranches}"
     
