@@ -96,16 +96,16 @@ runs:
       with:
         repository: ${{ github.repository }}
         ref: ${{ github.ref }}
-        path: '${{ github.workspace}}/../target'
+        path: '${{ github.workspace}}/_target'
     - name: "terraform-version" 
       id: "version"
       shell: bash
       env:
+        LOG_LEVEL: "debug"
         APP_BIN: "${{ steps.binary.outputs.binary }}"
-        Directory: "${{ github.workspace}}/../target/${{ inputs.terraform_directory }}"
+        Directory: "${{ github.workspace}}/_target/${{ inputs.terraform_directory }}"
         VersionsFile: ${{ inputs.terraform_versions_file }}
         SimpleFile: ${{ inputs.simple_file }}
-        LOG_LEVEL: "debug"
       run:
         echo -e "Running terraform-version"
 
