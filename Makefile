@@ -13,37 +13,35 @@ USER_PROFILE := ~/.zprofile
 
 
 .DEFAULT_GOAL: all
-.PHONY: all requirements darwin_arm64 darwin_amd64 linux_x86_64 tests build
-.ONESHELL: all requirements darwin_arm64 darwin_amd64 linux_x86_64 tests build
+.PHONY: all requirements darwin_arm64 darwin_amd64 linux_x86_64 tests release
+.ONESHELL: all requirements darwin_arm64 darwin_amd64 linux_x86_64 tests release
 .EXPORT_ALL_VARIABLES:
 
-# when running self, requires you run a target based on your arch
+# when running , requires you run a target based on your arch
 all: $(HOST_ARCH)
 
+release: $(HOST_ARCH)
+	@cd $(BUILD_FOLDER) && tar -czvf *.tar.gz *
 # for the github action builder - so dont run requirements
 linux_x86_64:
 	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)/
 	@cd $(PWD)/go && env GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -o $(BUILD_FOLDER)/$@ main.go
-	@cd $(PWD)/go && tar -czvf $(BUILD_FOLDER)/$@.tar.gz $(BUILD_FOLDER)/$@
 	@echo Build $@ complete.
 
 # LOCAL DEV VERSIONS
 darwin_x86_64: requirements
 	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)/
 	@cd $(PWD)/go && env GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -o $(BUILD_FOLDER)/$@ main.go
-	@cd $(PWD)/go && tar -czvf $(BUILD_FOLDER)/$@.tar.gz $(BUILD_FOLDER)/$@
 	@echo Build $@ complete.
 
 darwin_arm64: requirements
 	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)/
 	@cd $(PWD)/go && env GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -o $(BUILD_FOLDER)/$@ main.go
-	@cd $(PWD)/go && tar -czvf $(BUILD_FOLDER)/$@.tar.gz $(BUILD_FOLDER)/$@
 	@echo Build $@ complete.
 
 darwin_amd64: requirements
 	@cd $(PWD)/go && mkdir -p $(BUILD_FOLDER)/
 	@cd $(PWD)/go && env GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -o $(BUILD_FOLDER)/$@ main.go
-	@cd $(PWD)/go && tar -czvf $(BUILD_FOLDER)/$@.tar.gz $(BUILD_FOLDER)/$@
 	@echo Build $@ complete.
 
 

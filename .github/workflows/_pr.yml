@@ -41,7 +41,7 @@ jobs:
           gha_arc=$(uname -m)
           target="${gha_os}_${gha_arc}"
           echo -e "Building (with make) for ${target}"
-          make ${target}        
+          make release
       ## semver tagging  
       - name: "Semver tag and release"
         id: semver_tag
