@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-
-
 actionRepo="${GH_ACTION_REPOSITORY}"
 actionRef="${GH_ACTION_REF}"
 basePath="${GH_WORKSPACE}/../opg-gha"

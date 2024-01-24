@@ -13,15 +13,6 @@ inputs:
     default: ""
 
 outputs:
-  terraform_directory:
-    description: "Input value of terraform_directory"
-    value: ${{ inputs.terraform_directory }}
-  terraform_versions_file:
-    description: "Input value of terraform_versions_file"
-    value: ${{ inputs.terraform_versions_file }}
-  simple_file:
-    description: "Input value of simple_file"
-    value: ${{ inputs.simple_file }}
   version:
     description: 'Discovered terraform version range. This may be an exact number (like 1.5.5) or a semver range (like >= 1.0).'
     value: ${{ steps.version.outputs.version }}
@@ -53,14 +44,16 @@ runs:
         cd ${actionsRootDir}
         # ./release-download.sh 2> $GITHUB_STEP_SUMMARY
         ./release-download.sh
+    ## LOCAL BUILD
     # setup and build locally if the release data is not setup
-    - name: Setup go
+    - name: "Setup go"
       uses: actions/setup-go@v4
       if: ${{ steps.fetch.outputs.RELEASE == '' }}
       with:
         go-version-file: '${{ steps.fetch.outputs.SELF_BUILD }}/./go/go.mod'
         cache: false
     - name: Build directly from source
+      id: buildFromSource
       if: ${{ steps.fetch.outputs.RELEASE == '' }}
       shell: bash
       env:
@@ -68,11 +61,44 @@ runs:
         target: '${{ steps.fetch.outputs.TARGET_BUILD }}'
       run: |
         cd ${buildSource}
-        echo -e "Building (with make) for ${target}"
-        ls -la
+        echo -e "Building (with make) for ${target}"        
         make release
-        ls -la 
-        ls -la ./go/builds
-
-      
-
+        release="${buildSource}/go/builds/${target}"
+        echo -e "RELEASE=${release}"
+        echo "RELEASE=${release}" >> $GITHUB_OUTPUT
+    ## DETERMINE BINARY PATH
+    - name: "Determine binary to use"
+      id: binary
+      shell: bash
+      env:
+        direct: ${{ steps.fetch.outputs.RELEASE }}
+        built: ${{ steps.buildFromSource.outputs.RELEASE }}
+      run: |
+        binary=""
+        if [ "${direct}" != "" ]; then
+          binary="${direct}"
+        elif [ "${built}" != "" ]; then
+          binary="${built}"
+        fi
+        if [ "${binary}" == "" ]; then
+          err="error: no binary found"
+          echo -e "${err}"
+          echo -e "${err}" >&2
+          echo -e "${err}" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo -e "binary=${binary}"
+        echo "binary=${binary}" >> $GITHUB_OUTPUT
+    - name: "terraform-version" 
+      id: "version"
+      shell: bash
+      env:
+        APP_BIN: "${{ steps.binary.outputs.binary }}"
+        Directory: "${{ inputs.terraform_directory }}"
+        VersionsFile: ${{ inputs.terraform_versions_file }}
+        SimpleFile: ${{ inputs.simple_file }}
+      run:
+         ${APP_BIN} terraform-version \
+          --directory="${Directory}" \
+          --versions-file="${VersionsFile}" \
+          --simple="${SimpleFile}"
+          
