@@ -11,9 +11,9 @@ inputs:
   simple_file:
     description: "If set, change the parsing to presume terraform_versions_file is a plain text file that contains only a semver string."
     default: ""
-  # github_token:
-  #   description: "GITHUB_TOKEN"
-  #   required: true
+  github_token:
+    description: "GITHUB_TOKEN"
+    required: true
 
 outputs:
   terraform_directory:
@@ -37,7 +37,7 @@ runs:
       shell: bash
       id: fetch
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ input.github_token }}
         GH_ACTION_REPOSITORY: "${{ github.action_repository }}"
         GH_ACTION_REF: "${{ github.action_ref }}"
         GH_WORKSPACE: "${{ github.workspace}}"
