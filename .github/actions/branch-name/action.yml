@@ -26,7 +26,7 @@ runs:
       if: ${{ github.action_ref == '' }}
       shell: bash
       run: |
-        err="ERROR: this composite action must be run via full path (eg ministryofjustice/opg-github-actions/.github/actions/terraform-version@v2.3.1)"
+        err="ERROR: this composite action must be run via full path (eg ministryofjustice/opg-github-actions/.github/actions/branch-name@v2.3.1)"
         echo -e "${err}"
         echo -e "${err}" >&2
         echo -e "${err}" >> $GITHUB_STEP_SUMMARY
