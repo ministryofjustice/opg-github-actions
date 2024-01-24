@@ -47,7 +47,7 @@ if [ "${found}" == "${ok}" ]; then
     echo -n "Looking for binary for this runner [${artifactPath}/${hostBuild}]..."
     if [ -x "${hostBuild}" ]; then
         echo " ✅"
-        RELEASE="${artifactPath}/${$hostBuild}"
+        RELEASE="${artifactPath}/${hostBuild}"
         echo -e "Set release: [${RELEASE}]"
     else
         echo " ❌"
