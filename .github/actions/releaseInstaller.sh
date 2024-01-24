@@ -52,16 +52,14 @@ if [ "${DIRECT}" != "${ok}" ]; then
     gh repo clone ${ACTION_REPO} ${BASE_PATH} -- --mirror
     echo "base"
     cd ${BASE_PATH}
-    pwd
-    ls -la
-    echo "artifact"
-    mkdir -p ${ARTIFACT_PATH}
-    cd ${ARTIFACT_PATH}
-    pwd
-    ls -la
+    
     echo "tags"
+    git tag --points-at="${ACTION_REF}"
     # look for semver tags at this ref
     tags=$(git tag --points-at="${ACTION_REF}")
+    echo -e "tags:"
+    echo -e "${tags}"
+
     semverish=$(echo ${tags} | grep -E '^v[0-9]{1,}.[0-9]{1,}.[0-9]{1,}' )
     semverishCount=$(echo ${semverish} | wc -l | tr -d ' ')
 
@@ -69,6 +67,9 @@ if [ "${DIRECT}" != "${ok}" ]; then
         tag=$(echo ${semverish} | tail -n1 )
         echo -e "Using [${tag}] as release tag."
         REF=$(gh release download ${tag} --clobber && echo "${ok}")
+        
+        mkdir -p ${ARTIFACT_PATH}
+        mv *.tar.gz ${ARTIFACT_PATH}
     fi
 
     if [ "${REF}" != "${ok}" ]; then
@@ -79,6 +80,7 @@ if [ "${DIRECT}" != "${ok}" ]; then
 fi
 
 # make sure we have an artifact that matches this runner
+
 cd ${ARTIFACT_PATH}
 ls -la
 pwd
