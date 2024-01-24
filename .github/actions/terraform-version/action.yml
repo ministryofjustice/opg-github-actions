@@ -36,12 +36,13 @@ runs:
       env:
         GH_ACTION_REPOSITORY: "${{ github.action_repository }}"
         GH_ACTION_REF:REF: "${{ github.action_ref }}"
-        ACTION_WORKSPACE: "${{ github.workspace}}/opg-gha"
+        ACTION_WORKSPACE: "${{ github.workspace}}/../opg-gha"
         actionDir: ${{ github.action_path }}
       run: |
-        cd ${actionDir}
+        cd ${actionDir}/../
         ls -la
-        ls -la ../
+        ./installer.sh 2> $GITHUB_STEP_SUMMARY
+        
 
       
 
