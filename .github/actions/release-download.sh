@@ -64,7 +64,7 @@ fi
 if [ "${listed}" != "${ok}" ]; then
     # build from local 
     echo -e "Cloning action repostitory [${actionRepo}] to [${localBuildPath}] ..."
-    gh repo clone ${actionRepo} ${localBuildPath} 
+    gh repo clone ${actionRepo} ${localBuildPath} -- -q
     
     cd ${localBuildPath}
     # checkout to the git ref
