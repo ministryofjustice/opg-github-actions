@@ -67,6 +67,10 @@ fi
 if [ "${found}" != "${ok}" ]; then
     # build from local 
     echo -e "Cloning action repostitory [${actionRepo}] to [${localBuildPath}] ..."
+
+    if [ -d "${localBuildPath}" ]; then
+        rm -Rf ${localBuildPath}
+    fi
     gh repo clone ${actionRepo} ${localBuildPath} -- -q
     
     cd ${localBuildPath}
