@@ -65,26 +65,19 @@ func fetch(r *git.Repository) (err error) {
 		slog.Info("fetching remote data for: " + name)
 
 		specs := []config.RefSpec{
-			// "refs/*:refs/*",
+			"refs/*:refs/*",
+			"HEAD:refs/heads/HEAD",
 			"+refs/tags/*:refs/tags/*",
 			"+refs/heads/*:refs/remotes/origin/*",
-			// "HEAD:refs/heads/HEAD",
 		}
-		for _, spec := range specs {
-			slog.Info("ref spec: " + spec.String())
-			err = r.Fetch(&git.FetchOptions{
-				RemoteName: name,
-				RefSpecs:   []config.RefSpec{spec},
-			})
-			if err != nil {
-				slog.Error("Error fetching from origin: ")
-				slog.Error(err.Error())
-				// return
-			}
-		}
-
+		err = r.Fetch(&git.FetchOptions{
+			RemoteName: name,
+			RefSpecs:   specs,
+		})
 		if err != nil {
-			return
+			slog.Error("Error with fetch")
+			slog.Error(err.Error())
+			// return
 		}
 
 		refs, err = remote.List(&git.ListOptions{Auth: auth})
