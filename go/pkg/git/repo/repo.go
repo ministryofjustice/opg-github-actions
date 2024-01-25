@@ -52,11 +52,11 @@ func CloneRepo(directory string, url string) (r *git.Repository, err error) {
 }
 
 func fetch(r *git.Repository) (err error) {
-	slog.Debug("fetching remotes ...")
+	slog.Info("fetching remotes ...")
 	remotes, err := r.Remotes()
 	for _, remote := range remotes {
 		// fetch branches and tags for this remote
-		slog.Debug("fetching remote data for :" + remote.Config().Name)
+		slog.Info("fetching remote data for :" + remote.Config().Name)
 		r.Fetch(&git.FetchOptions{
 			RemoteName: remote.Config().Name,
 			RefSpecs:   []config.RefSpec{"refs/*:refs/*", "HEAD:refs/heads/HEAD", "+refs/tags/*:refs/tags/*"},
