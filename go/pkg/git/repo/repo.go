@@ -53,6 +53,9 @@ func CloneRepo(directory string, url string) (r *git.Repository, err error) {
 	return
 }
 
+// fetch might not be needed - added for when
+// repo is shallow and doesnt have all the refs
+// when then causes a failure on branch look up
 func fetch(r *git.Repository) (err error) {
 	slog.Info("fetching remotes ...")
 
@@ -78,30 +81,5 @@ func fetch(r *git.Repository) (err error) {
 			// return
 		}
 	}
-	// var refs []*plumbing.Reference
-	// w, _ := r.Worktree()
-	// 	refs, err = remote.List(&git.ListOptions{Auth: auth})
-	// 	if err != nil {
-	// 		slog.Error("Error fetching remote list")
-	// 		slog.Error(err.Error())
-	// 		// return
-	// 	}
-	// 	for _, rf := range refs {
-	// 		rfName := rf.Name()
-	// 		if rf.Name().IsBranch() {
-	// 			slog.Info(
-	// 				fmt.Sprintf("[%s] found branch, trying to checkout [%s] validate: [%v]",
-	// 					name, rfName.String(), rfName.Validate()),
-	// 			)
-
-	// 			err = w.Checkout(&git.CheckoutOptions{Create: false, Force: true, Branch: rfName})
-	// 			if err != nil {
-	// 				slog.Error("error checking out: " + rfName.String())
-	// 				slog.Error(err.Error())
-	// 			}
-	// 		}
-	// 	}
-
-	// }
 	return
 }

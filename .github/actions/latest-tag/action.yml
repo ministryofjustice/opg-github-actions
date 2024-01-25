@@ -119,6 +119,7 @@ runs:
       id: "latest"
       shell: bash
       env:
+        GITHUB_TOKEN: ${{ github.token }}
         LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}
         APP_BIN: "${{ steps.binary.outputs.binary }}"
         repository: '${{ github.workspace}}/_target'

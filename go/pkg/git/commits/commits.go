@@ -43,6 +43,7 @@ func StrToRef(r *git.Repository, str string) (ref *plumbing.Reference, err error
 	refName := str
 	// if the string doesnt start with "refs/", presume its a short form and look for a match
 	// comparing the last segment of the full reference
+	// This helps when the repo might be shallow and not be fully mapped
 	if !strings.Contains(refName, "refs/") {
 		refs, _ := r.References()
 		slog.Debug("commits: StrToReference looking for matching ref..")
