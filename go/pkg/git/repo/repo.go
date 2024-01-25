@@ -88,13 +88,15 @@ func fetch(r *git.Repository) (err error) {
 		}
 		for _, rf := range refs {
 			rfName := rf.Name()
-			slog.Debug(remote.Config().Name + " -> " + rfName.Short())
 			if rf.Name().IsBranch() {
-				slog.Info(remote.Config().Name + " found branch: " + rfName.Short())
+				slog.Info(
+					fmt.Sprintf("[%s] found branch, trying to checkout [%s] validate: [%v]",
+						name, rfName.String(), rfName.Validate()),
+				)
 
 				err = w.Checkout(&git.CheckoutOptions{Create: false, Force: true, Branch: rfName})
 				if err != nil {
-					slog.Error("error checking out")
+					slog.Error("error checking out: " + rfName.String())
 					slog.Error(err.Error())
 				}
 			}
