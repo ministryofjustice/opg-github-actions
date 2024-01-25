@@ -66,10 +66,11 @@ func fetch(r *git.Repository) (err error) {
 		err = r.Fetch(&git.FetchOptions{
 			RemoteName: name,
 			RefSpecs: []config.RefSpec{
-				"refs/*:refs/*",
-				"HEAD:refs/heads/HEAD",
 				"+refs/tags/*:refs/tags/*",
-				// "+refs/heads/*:refs/remotes/origin/*",
+				// "refs/*:refs/*",
+				// "HEAD:refs/heads/HEAD",
+
+				"+refs/heads/*:refs/remotes/origin/*",
 			},
 		})
 		if err != nil {
@@ -80,6 +81,7 @@ func fetch(r *git.Repository) (err error) {
 
 		refs, err = remote.List(&git.ListOptions{Auth: auth})
 		if err != nil {
+			slog.Error("Error fetching remote list")
 			slog.Error(err.Error())
 			return
 		}
