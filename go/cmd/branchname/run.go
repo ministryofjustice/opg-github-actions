@@ -18,6 +18,7 @@ func process(eventType string, content []byte) (output map[string]string, err er
 		baseRef string                 = ""
 		clean   safestrings.Safestring = ""
 	)
+	output = map[string]string{}
 
 	if eventType == "pull_request" {
 		event := &github.PullRequestEvent{}

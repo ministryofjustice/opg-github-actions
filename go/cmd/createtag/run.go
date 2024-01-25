@@ -20,6 +20,7 @@ func process(
 		originalTag    string = tagName
 		createdSuccess bool   = false
 	)
+	output = map[string]string{}
 
 	exists := tagSet.ExistsIn(tagName, allTags)
 	regenerated := false

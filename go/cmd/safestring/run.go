@@ -15,7 +15,7 @@ func process(
 		full string                 = string(*data.Safe())
 		safe string
 	)
-
+	output = map[string]string{}
 	if conditionalMatch == original {
 		full = conditionalValue
 		safe = conditionalValue
