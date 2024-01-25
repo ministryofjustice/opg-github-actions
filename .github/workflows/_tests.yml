@@ -29,18 +29,18 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |          
           cd ./go
-          # go install github.com/jstemmer/go-junit-report/v2@latest
-          go test -v -json ./... -run="TestRemoteRep*"
-      #     go test -v -json -count=5 ./... 2>&1 | go-junit-report -parser gojson -out report.xml -set-exit-code
-      #     ls -la
-      # - name: Test Report
-      #   id: report
-      #   uses: dorny/test-reporter@v1
-      #   if: always()
-      #   with:
-      #     name: Test Results          
-      #     path: ./go/report.xml 
-      #     reporter: jest-junit
-      # - name: Output results link
-      #   run:  |
-      #     echo "**[Test results](${{steps.report.outputs.url_html}})**" >> $GITHUB_STEP_SUMMARY
+          go install github.com/jstemmer/go-junit-report/v2@latest
+          echo "" > report.xml
+          go test -v -json -bench -count=5 ./... > test-results.json 2>&1 
+          go-junit-report -parser gojson -in test-results.json -out report.xml -set-exit-code
+      - name: Test Report
+        id: report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Test Results          
+          path: ./go/report.xml 
+          reporter: jest-junit
+      - name: Output results link
+        run:  |
+          echo "**[Test results](${{steps.report.outputs.url_html}})**" >> $GITHUB_STEP_SUMMARY
