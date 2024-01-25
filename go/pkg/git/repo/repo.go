@@ -57,7 +57,7 @@ func CloneRepo(directory string, url string) (r *git.Repository, err error) {
 func fetch(r *git.Repository) (err error) {
 	slog.Info("fetching remotes ...")
 	var refs []*plumbing.Reference
-	w, _ := r.Worktree()
+	// w, _ := r.Worktree()
 	remotes, err := r.Remotes()
 	for _, remote := range remotes {
 		// fetch branches and tags for this remote
