@@ -2,6 +2,7 @@ package tags
 
 import (
 	"fmt"
+	"opg-github-actions/pkg/git/commits"
 
 	"github.com/go-git/go-git/v5/plumbing"
 )
@@ -42,5 +43,11 @@ func RefStringify(refs []*plumbing.Reference, e error) (strs []string, err error
 
 // StringToHash tries to convert into a plumbing.Hash or fails and returns error
 func (t *Tags) StringToHash(str string) (*plumbing.Hash, error) {
-	return t.repository.ResolveRevision(plumbing.Revision(str))
+	ref, err := commits.StrToRef(t.repository, str)
+	if err != nil {
+		return nil, err
+	}
+	hash := ref.Hash()
+	return &hash, nil
+
 }

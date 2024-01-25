@@ -204,7 +204,7 @@ runs:
       id: nexttag
       shell: bash
       env:        
-        LOG_LEVEL: "debug"
+        LOG_LEVEL: "info"
         GITHUB_TOKEN: ${{ github.token }}
         RUN_AS_TEST: ${{ inputs.test }}
         appPath: '${{ steps.setup.outputs.path }}'
@@ -235,6 +235,7 @@ runs:
       id: createtag
       shell: bash
       env:        
+        LOG_LEVEL: "info"
         GITHUB_TOKEN: ${{ github.token }}
         RUN_AS_TEST: ${{ inputs.test }}
         appPath: '${{ steps.setup.outputs.path }}'

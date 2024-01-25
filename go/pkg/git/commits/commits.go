@@ -36,12 +36,15 @@ func New(directory string) (t *Commits, err error) {
 }
 
 func (c *Commits) StrToReference(str string) (ref *plumbing.Reference, err error) {
+	return StrToRef(c.repository, str)
+}
 
+func StrToRef(r *git.Repository, str string) (ref *plumbing.Reference, err error) {
 	refName := str
 	// if the string doesnt start with "refs/", presume its a short form and look for a match
 	// comparing the last segment of the full reference
 	if !strings.Contains(refName, "refs/") {
-		refs, _ := c.repository.References()
+		refs, _ := r.References()
 		slog.Debug("commits: StrToReference looking for matching ref..")
 		refs.ForEach(func(ref *plumbing.Reference) error {
 			name := ref.Name().String()
@@ -56,7 +59,7 @@ func (c *Commits) StrToReference(str string) (ref *plumbing.Reference, err error
 		})
 	}
 	rev := plumbing.Revision(refName)
-	hash, err := c.repository.ResolveRevision(rev)
+	hash, err := r.ResolveRevision(rev)
 	slog.Info(fmt.Sprintf("commits: StrToReference [%s:%s] => revision [%s] => hash [%s]", str, refName, rev, hash))
 	if err != nil {
 		return

@@ -28,6 +28,7 @@ func process(
 	// decide if need to regenerate or fail if this exists
 	if exists && !regen {
 		err = fmt.Errorf(ErrorTagExists, tagName)
+		slog.Error(err.Error())
 		return
 	} else if exists && regen {
 		regenerated = true
@@ -37,18 +38,21 @@ func process(
 	// generate at hash from the string
 	hash, err := tagSet.StringToHash(commitish)
 	if err != nil {
+		slog.Error(err.Error())
 		return
 	}
 
 	// create the new tag
 	at, err := tagSet.CreateAt(tagName, hash)
 	if err != nil {
+		slog.Error(err.Error())
 		return
 	}
 
 	// check if created successfully
 	foundAt, err := tags.RefStringify(tagSet.At(hash))
 	if err != nil {
+		slog.Error(err.Error())
 		return
 	}
 	// if the foundAt contains the new tagName at the same location
