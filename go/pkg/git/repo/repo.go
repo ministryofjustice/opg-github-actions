@@ -57,14 +57,24 @@ func CloneRepo(directory string, url string) (r *git.Repository, err error) {
 func fetch(r *git.Repository) (err error) {
 	slog.Info("fetching remotes ...")
 	var refs []*plumbing.Reference
+	w, _ := r.Worktree()
 	remotes, err := r.Remotes()
 	for _, remote := range remotes {
 		// fetch branches and tags for this remote
-		slog.Info("fetching remote data for :" + remote.Config().Name)
-		r.Fetch(&git.FetchOptions{
+		slog.Info("fetching remote data for: " + remote.Config().Name)
+		err = r.Fetch(&git.FetchOptions{
 			RemoteName: remote.Config().Name,
-			RefSpecs:   []config.RefSpec{"refs/*:refs/*", "HEAD:refs/heads/HEAD", "+refs/tags/*:refs/tags/*"},
+			RefSpecs: []config.RefSpec{
+				"refs/*:refs/*",
+				"HEAD:refs/heads/HEAD",
+				"+refs/tags/*:refs/tags/*",
+				"+refs/heads/*:refs/remotes/origin/*"},
 		})
+		if err != nil {
+			slog.Error(err.Error())
+			return
+		}
+
 		refs, err = remote.List(&git.ListOptions{Auth: auth})
 		if err != nil {
 			slog.Error(err.Error())
@@ -72,6 +82,9 @@ func fetch(r *git.Repository) (err error) {
 		}
 		for _, rf := range refs {
 			slog.Debug(remote.Config().Name + " -> " + rf.Name().Short())
+			if rf.Name().IsBranch() {
+				slog.Info(remote.Config().Name + " found branch: " + rf.Name().Short())
+			}
 		}
 
 	}
