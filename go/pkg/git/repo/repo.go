@@ -92,7 +92,11 @@ func fetch(r *git.Repository) (err error) {
 			if rf.Name().IsBranch() {
 				slog.Info(remote.Config().Name + " found branch: " + rfName.Short())
 
-				w.Checkout(&git.CheckoutOptions{Create: false, Force: true, Branch: rfName})
+				err = w.Checkout(&git.CheckoutOptions{Create: false, Force: true, Branch: rfName})
+				if err != nil {
+					slog.Error("error checking out")
+					slog.Error(err.Error())
+				}
 			}
 		}
 
