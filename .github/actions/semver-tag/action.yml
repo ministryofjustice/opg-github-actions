@@ -132,6 +132,8 @@ runs:
         repository: ${{ steps.setup.outputs.actionRepo }}
         ref: ${{ steps.setup.outputs.actionRef }}
         path: ${{ steps.setup.outputs.path }}
+        fetch-depth: 0
+        fetch-tags: true
     # figure out how to get the artifacts (todo)
 
     #### SELF CALL ####

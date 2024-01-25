@@ -24,6 +24,8 @@ jobs:
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
+          fetch-depth: 0
+          fetch-tags: true
       ## setup and build locally
       - name: Setup go
         uses: actions/setup-go@v4

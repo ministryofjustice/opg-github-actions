@@ -99,6 +99,8 @@ runs:
         repository: ${{ github.repository }}
         ref: ${{ github.ref }}
         path: '${{ github.workspace}}/_target'
+        fetch-depth: 0
+        fetch-tags: true
     ##### <<< END REPEATING BLOCK 
 
     #### COMMANDS
