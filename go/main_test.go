@@ -479,7 +479,12 @@ func TestRemoteRepo(t *testing.T) {
 	testlib.Testlogger(nil)
 	// clone self as a remote repo to test branch data works
 	dir, _ := os.MkdirTemp("./", "test_remote_repository_")
-	repo.CloneRepo(dir, "https://github.com/ministryofjustice/opg-github-actions.git")
+	_, err := repo.CloneRepo(dir, "https://github.com/ministryofjustice/opg-github-actions.git")
+	if err != nil {
+		t.Errorf("error: unexpected error")
+		t.Error(err)
+	}
+
 	defer os.RemoveAll(dir)
 
 	nextTagResult, e := nexttag.Run([]string{
