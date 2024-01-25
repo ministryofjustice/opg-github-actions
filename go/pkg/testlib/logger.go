@@ -20,6 +20,6 @@ func Testlogger(opts *slog.HandlerOptions) {
 		opts = DefaultOptions
 
 	}
-	handler = slog.NewTextHandler(ignore, opts)
+	handler = slog.NewTextHandler(stdout, opts)
 	slog.SetDefault(slog.New(handler))
 }
