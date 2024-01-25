@@ -10,6 +10,11 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
+var auth = &http.BasicAuth{
+	Username: "opg-github-actions",
+	Password: os.Getenv("GITHUB_TOKEN"),
+}
+
 // CreateAt will make a tag on this repository at the commit hash passed
 func (t *Tags) CreateAt(tagName string, ref *plumbing.Hash) (*plumbing.Reference, error) {
 	return t.repository.CreateTag(tagName, *ref, nil)
@@ -22,10 +27,7 @@ func (t *Tags) Push() (err error) {
 		&git.PushOptions{
 			RemoteName: "origin",
 			RefSpecs:   []config.RefSpec{config.RefSpec("refs/tags/*:refs/tags/*")},
-			Auth: &http.BasicAuth{
-				Username: "opg-github-actions",
-				Password: os.Getenv("GITHUB_TOKEN"),
-			},
+			Auth:       auth,
 		},
 	)
 	if err != nil {

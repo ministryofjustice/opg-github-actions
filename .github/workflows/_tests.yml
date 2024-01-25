@@ -13,7 +13,7 @@ jobs:
     secrets: inherit
 
   test_go:
-    name: "go test suite"
+    name: "Go test suite"
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout"

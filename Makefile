@@ -61,3 +61,7 @@ endif
 	@test -f ${USER_PROFILE} && source ${USER_PROFILE} || echo ${USER_PROFILE} not found	
 	@cd $(PWD)/go && go test -json ./... > ./test-results.json
 	@echo All tests completed
+
+
+tests:
+	@cd $(PWD)/go && env LOG_LEVEL="error"  LOG_TO="stdout" go test -v ./...

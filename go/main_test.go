@@ -490,8 +490,8 @@ func TestRemoteRepo(t *testing.T) {
 	nextTagResult, e := nexttag.Run([]string{
 		fmt.Sprintf(`--repository=%s`, dir),
 		fmt.Sprintf(`--base=%s`, "main"),
-		fmt.Sprintf(`--head=%s`, "go-version"),
-		fmt.Sprintf(`--prerelease=%s`, "true"),
+		fmt.Sprintf(`--head=%s`, "main"),
+		fmt.Sprintf(`--prerelease=%s`, "false"),
 		fmt.Sprintf(`--prerelease-suffix=%s`, "goversion"),
 		fmt.Sprintf(`--last-release=%s`, "v2.7.3"),
 		fmt.Sprintf(`--last-prerelease=%s`, ""),

@@ -7,8 +7,14 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
+
+var auth = &http.BasicAuth{
+	Username: "opg-github-actions",
+	Password: os.Getenv("GITHUB_TOKEN"),
+}
 
 // InitRepo will trigger a plain repository from an empty folder path at 'directoty'
 func InitRepo(directory string) (r *git.Repository, err error) {
@@ -37,11 +43,8 @@ func OpenRepo(directory string) (r *git.Repository, err error) {
 func CloneRepo(directory string, url string) (r *git.Repository, err error) {
 	slog.Debug(fmt.Sprintf("opening repo at [%s]", directory))
 	r, err = git.PlainClone(directory, false, &git.CloneOptions{
-		URL: url,
-		Auth: &http.BasicAuth{
-			Username: "opg-github-actions",
-			Password: os.Getenv("GITHUB_TOKEN"),
-		},
+		URL:  url,
+		Auth: auth,
 	})
 
 	if err != nil {
@@ -53,6 +56,7 @@ func CloneRepo(directory string, url string) (r *git.Repository, err error) {
 
 func fetch(r *git.Repository) (err error) {
 	slog.Info("fetching remotes ...")
+	var refs []*plumbing.Reference
 	remotes, err := r.Remotes()
 	for _, remote := range remotes {
 		// fetch branches and tags for this remote
@@ -61,6 +65,15 @@ func fetch(r *git.Repository) (err error) {
 			RemoteName: remote.Config().Name,
 			RefSpecs:   []config.RefSpec{"refs/*:refs/*", "HEAD:refs/heads/HEAD", "+refs/tags/*:refs/tags/*"},
 		})
+		refs, err = remote.List(&git.ListOptions{Auth: auth})
+		if err != nil {
+			slog.Error(err.Error())
+			return
+		}
+		for _, rf := range refs {
+			slog.Debug(remote.Config().Name + " -> " + rf.Name().Short())
+		}
+
 	}
 	return
 }
