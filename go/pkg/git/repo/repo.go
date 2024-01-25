@@ -65,10 +65,10 @@ func fetch(r *git.Repository) (err error) {
 		slog.Info("fetching remote data for: " + name)
 
 		specs := []config.RefSpec{
-			"refs/*:refs/*",
+			// "refs/*:refs/*",
 			"+refs/tags/*:refs/tags/*",
 			"+refs/heads/*:refs/remotes/origin/*",
-			"HEAD:refs/heads/HEAD",
+			// "HEAD:refs/heads/HEAD",
 		}
 		for _, spec := range specs {
 			slog.Info("ref spec: " + spec.String())
