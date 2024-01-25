@@ -476,7 +476,7 @@ func TestSemverEndToEnd(t *testing.T) {
 }
 
 func TestRemoteRepo(t *testing.T) {
-	testlib.Testlogger(testlib.InfoOptions)
+	testlib.Testlogger(nil)
 	// clone self as a remote repo to test branch data works
 	dir, _ := os.MkdirTemp("./", "test_remote_repository_")
 	repo.CloneRepo(dir, "https://github.com/ministryofjustice/opg-github-actions.git")
