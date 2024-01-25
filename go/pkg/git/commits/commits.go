@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"opg-github-actions/pkg/git/repo"
 	"os"
+	"strings"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -35,8 +36,28 @@ func New(directory string) (t *Commits, err error) {
 }
 
 func (c *Commits) StrToReference(str string) (ref *plumbing.Reference, err error) {
-	rev := plumbing.Revision(str)
+
+	refName := str
+	// if the string doesnt start with "refs/", presume its a short form and look for a match
+	// comparing the last segment of the full reference
+	if !strings.Contains(refName, "refs/") {
+		refs, _ := c.repository.References()
+		slog.Debug("commits: StrToReference looking for matching ref..")
+		refs.ForEach(func(ref *plumbing.Reference) error {
+			name := ref.Name().String()
+			end := strings.HasSuffix(name, "/"+str)
+			suf := "❌"
+			if end {
+				refName = name
+				suf = "✅"
+			}
+			slog.Debug(fmt.Sprintf("[%s] commits: StrToReference - str [%s] match ref [%s] ? [%t]", suf, str, name, end))
+			return nil
+		})
+	}
+	rev := plumbing.Revision(refName)
 	hash, err := c.repository.ResolveRevision(rev)
+	slog.Info(fmt.Sprintf("commits: StrToReference [%s:%s] => revision [%s] => hash [%s]", str, refName, rev, hash))
 	if err != nil {
 		return
 	}

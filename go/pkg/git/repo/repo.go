@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
@@ -56,21 +55,21 @@ func CloneRepo(directory string, url string) (r *git.Repository, err error) {
 func fetch(r *git.Repository) (err error) {
 	slog.Info("fetching remotes ...")
 
-	refs, _ := r.References()
-	w, _ := r.Worktree()
-	refs.ForEach(func(ref *plumbing.Reference) error {
-		fmt.Printf("ref: [%s]\n", ref.String())
-		if ref.Type() == plumbing.HashReference {
-			fmt.Printf("  -> hash ref? [%t]\n", true)
-			fmt.Println("  -> checking out")
-			err = w.Checkout(&git.CheckoutOptions{Create: false, Force: true, Branch: ref.Name()})
-			if err != nil {
-				fmt.Printf("  ->  error checking out: [%s]\n", err.Error())
-			}
-		}
-		fmt.Println("--")
-		return nil
-	})
+	// refs, _ := r.References()
+	// w, _ := r.Worktree()
+	// refs.ForEach(func(ref *plumbing.Reference) error {
+	// 	fmt.Printf("ref: [%s]\n", ref.String())
+	// 	if ref.Type() == plumbing.HashReference {
+	// 		fmt.Printf("  -> hash ref? [%t]\n", true)
+	// 		fmt.Println("  -> checking out")
+	// 		err = w.Checkout(&git.CheckoutOptions{Create: false, Force: true, Branch: ref.Name()})
+	// 		if err != nil {
+	// 			fmt.Printf("  ->  error checking out: [%s]\n", err.Error())
+	// 		}
+	// 	}
+	// 	fmt.Println("--")
+	// 	return nil
+	// })
 
 	// var refs []*plumbing.Reference
 	// w, _ := r.Worktree()
