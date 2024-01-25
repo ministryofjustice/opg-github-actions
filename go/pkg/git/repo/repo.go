@@ -79,8 +79,12 @@ func fetch(r *git.Repository) (err error) {
 			if err != nil {
 				slog.Error("Error fetching from origin: ")
 				slog.Error(err.Error())
-				return
+				// return
 			}
+		}
+
+		if err != nil {
+			return
 		}
 
 		refs, err = remote.List(&git.ListOptions{Auth: auth})
