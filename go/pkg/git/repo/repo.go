@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
@@ -55,46 +56,30 @@ func CloneRepo(directory string, url string) (r *git.Repository, err error) {
 func fetch(r *git.Repository) (err error) {
 	slog.Info("fetching remotes ...")
 
-	// refs, _ := r.References()
-	// w, _ := r.Worktree()
-	// refs.ForEach(func(ref *plumbing.Reference) error {
-	// 	fmt.Printf("ref: [%s]\n", ref.String())
-	// 	if ref.Type() == plumbing.HashReference {
-	// 		fmt.Printf("  -> hash ref? [%t]\n", true)
-	// 		fmt.Println("  -> checking out")
-	// 		err = w.Checkout(&git.CheckoutOptions{Create: false, Force: true, Branch: ref.Name()})
-	// 		if err != nil {
-	// 			fmt.Printf("  ->  error checking out: [%s]\n", err.Error())
-	// 		}
-	// 	}
-	// 	fmt.Println("--")
-	// 	return nil
-	// })
+	remotes, err := r.Remotes()
+	specs := []config.RefSpec{
+		"refs/*:refs/*",
+		"HEAD:refs/heads/HEAD",
+		"+refs/tags/*:refs/tags/*",
+		"+refs/heads/*:refs/remotes/origin/*",
+	}
+	for _, remote := range remotes {
+		// fetch branches and tags for this remote
+		name := remote.Config().Name
+		slog.Info("fetching remote data for: " + name)
 
+		err = r.Fetch(&git.FetchOptions{
+			RemoteName: name,
+			RefSpecs:   specs,
+		})
+		if err != nil {
+			slog.Error("Error with fetch")
+			slog.Error(err.Error())
+			// return
+		}
+	}
 	// var refs []*plumbing.Reference
 	// w, _ := r.Worktree()
-	// remotes, err := r.Remotes()
-	// for _, remote := range remotes {
-	// 	// fetch branches and tags for this remote
-	// 	name := remote.Config().Name
-	// 	slog.Info("fetching remote data for: " + name)
-
-	// 	specs := []config.RefSpec{
-	// 		"refs/*:refs/*",
-	// 		"HEAD:refs/heads/HEAD",
-	// 		"+refs/tags/*:refs/tags/*",
-	// 		"+refs/heads/*:refs/remotes/origin/*",
-	// 	}
-	// 	err = r.Fetch(&git.FetchOptions{
-	// 		RemoteName: name,
-	// 		RefSpecs:   specs,
-	// 	})
-	// 	if err != nil {
-	// 		slog.Error("Error with fetch")
-	// 		slog.Error(err.Error())
-	// 		// return
-	// 	}
-
 	// 	refs, err = remote.List(&git.ListOptions{Auth: auth})
 	// 	if err != nil {
 	// 		slog.Error("Error fetching remote list")
