@@ -84,7 +84,7 @@ func fetch(r *git.Repository) (err error) {
 		if err != nil {
 			slog.Error("Error fetching remote list")
 			slog.Error(err.Error())
-			return
+			// return
 		}
 		for _, rf := range refs {
 			rfName := rf.Name()

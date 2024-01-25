@@ -183,6 +183,7 @@ runs:
       id: latesttag
       shell: bash
       env:        
+        GITHUB_TOKEN: ${{ github.token }}
         RUN_AS_TEST: ${{ inputs.test }}
         appPath: '${{ steps.setup.outputs.path }}'
         binPath: '${{ steps.setup.outputs.path }}/go/builds/${{ steps.setup.outputs.target }}'
@@ -234,7 +235,7 @@ runs:
       id: createtag
       shell: bash
       env:        
-        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GITHUB_TOKEN: ${{ github.token }}
         RUN_AS_TEST: ${{ inputs.test }}
         appPath: '${{ steps.setup.outputs.path }}'
         binPath: '${{ steps.setup.outputs.path }}/go/builds/${{ steps.setup.outputs.target }}'
