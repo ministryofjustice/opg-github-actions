@@ -204,6 +204,7 @@ runs:
       shell: bash
       env:        
         LOG_LEVEL: "debug"
+        GITHUB_TOKEN: ${{ github.token }}
         RUN_AS_TEST: ${{ inputs.test }}
         appPath: '${{ steps.setup.outputs.path }}'
         binPath: '${{ steps.setup.outputs.path }}/go/builds/${{ steps.setup.outputs.target }}'
