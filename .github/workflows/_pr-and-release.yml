@@ -1,7 +1,10 @@
-name: "[Pull Request] Workflow (Updated)"
+name: "[PR & RELEASE] Workflow"
 
 on:
   pull_request:
+    branches: [main]
+    paths-ignore: ['terraform/**', '.github/workflows/_terraform.yml']
+  push:
     branches: [main]
     paths-ignore: ['terraform/**', '.github/workflows/_terraform.yml']
 
@@ -49,8 +52,7 @@ jobs:
         id: semver_tag
         uses: ./.github/actions/semver-tag
         with:          
-          prerelease: true
-          draft_release: true
+          prerelease: ${{ github.ref != 'refs/heads/main' }}
           releases_enabled: false # disable the release as we want to attach artifacts
       ## release with build artifacts
       - name: "Create a release [${{ steps.semver_tag.outputs.created_tag }}]"
@@ -60,7 +62,7 @@ jobs:
           tag: ${{ steps.semver_tag.outputs.created_tag }}
           name: ${{ steps.semver_tag.outputs.created_tag }}
           draft: false
-          prerelease: true
+          prerelease: ${{ github.ref != 'refs/heads/main' }}
           generateReleaseNotes: true
           artifacts: '${{ github.workspace }}/go/builds/*.tar.gz'
             
