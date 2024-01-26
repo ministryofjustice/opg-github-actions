@@ -79,6 +79,16 @@ runs:
   using: "composite"
   steps:
     #### SETUP ####
+    # Determine if self
+    - name: Setup
+      id: setup
+      shell: bash
+      env:
+        REPO: ${{ github.action_repository || github.repository }}
+        REF: ${{ github.action_ref || github.ref }}
+        SELF: ${{ github.repository == 'ministryofjustice/opg-github-actions' }}
+      run: |
+        echo "hello"
     # Determine if we are being called by self, or by external
     - name: Setup variables
       id: setup

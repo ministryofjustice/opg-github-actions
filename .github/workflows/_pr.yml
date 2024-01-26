@@ -51,15 +51,15 @@ jobs:
         with:          
           prerelease: true
           draft_release: true
-          releases_enabled: false # disable the release as we make here and include build assests
-      ## release with artifacts
+          releases_enabled: false # disable the release as we want to attach artifacts
+      ## release with build artifacts
       - name: "Create a release [${{ steps.semver_tag.outputs.created_tag }}]"
         id: create_release      
         uses: ncipollo/release-action@v1.13.0
         with:
           tag: ${{ steps.semver_tag.outputs.created_tag }}
           name: ${{ steps.semver_tag.outputs.created_tag }}
-          draft: true
+          draft: false
           prerelease: true
           generateReleaseNotes: true
           artifacts: '${{ github.workspace }}/go/builds/*.tar.gz'
