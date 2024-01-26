@@ -90,7 +90,7 @@ runs:
         GH_ACTION_REF: ${{ github.action_ref || github.ref }}
         GH_WORKSPACE: "${{ github.workspace }}"
         SELF: ${{ github.repository == 'ministryofjustice/opg-github-actions' }}
-        actionsRootDir: "${{ github.action_path }}/../"
+        actionsRootDir: ${{ github.action_path && format('{0}/../', github.action_path) || format('{0}/.github/actions/', github.workspace) }}
       run: |
         echo -e "Get release binary"
         cd ${actionsRootDir}
