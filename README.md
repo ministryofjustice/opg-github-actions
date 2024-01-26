@@ -6,7 +6,10 @@ Collection of re-usable, composite actions to share between teams foused on smal
 
 All actions have a github workflow that provides basic tests for their functionality, these are then run as part of the pr & release pipeline of this repository ensuring they pass.
 
-Most actions have now be converted to python and utilise a some shared [python code](./app/python/), there are tests covering most of the core functionality adjcent which is alos run as part of the pipeline.
+Most actions are now `go` based within a shared [shared library](./go/) with all related tests. There are end-to-end semver tests which mimic how `action.yml` run the commands within [`main_test.go`](./go/main_test.go) and chain them together as the semver action would.
+
+There is a [Makefile](./Makefile) to help build and create release versions of the go code and it also contains target to call tun tests.
+
 
 ## Available Actions
 
@@ -55,8 +58,6 @@ String is converted to lowercase version.
 
 ### Semver Tag
 
-Combines other composite actions ([branch-name](../branch-name/README.md), [latest-tag](../latest-tag/README.md), [next-tag](../next-tag/README.md) and [create-tag](../create-tag/README.md)) to find and then create the next semver-ish tag for the repository.
-
 With `test` enabled, the created tag will not be pushed to the remote and only kept locally.
 
 If the `release_branch` value matches the active branch a release is triggered.
@@ -82,11 +83,16 @@ A shared terraform workspace tool to track and list workspaces protected from de
 
 ## Tests
 
-All python code is tested using `pytest`:
+All `go` code can be tested using :
 
 ```bash
-cd ./python
-pip install -q -r ./requirements.txt
-pip install -e .
-pytest ./tests/
+cd ./go
+go test -v ./...
+```
+
+By default, the tests disable and minimise the log data, but this can be overridden with environment variables:
+
+```bash
+cd ./go
+env LOG_LEVEL="info" go test -v ./...
 ```

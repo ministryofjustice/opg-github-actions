@@ -14,20 +14,8 @@ Within you github workflow job you can place a step such as:
       uses: 'ministryofjustice/opg-github-actions/.github/actions/branch-name@v2.3.1'
 ```
 
-### Using the data
 
-Example of using the data in another step
-
-```yaml
-    - name: "Create tag"
-      id: create_tag
-      uses: './.github/actions/create-tag'
-      with:
-          commitish: ${{steps.branch_name.outputs.branch_name}}
-          tag_name: ${{steps.next_tag.outputs.next_tag}}
-```
-
-## Inputs and Outputs
+## Outputs
 
 It does not require any inputs and will return the following data:
 
@@ -41,6 +29,7 @@ It does not require any inputs and will return the following data:
 #### `branch_name`
 
 In a `pull_request` workflow, this is `github.pull_request.head.ref` value, and will be the name of the branch being worked on - eg `my-feature-1`.
+
 For a `push` workflow, this is `github.ref` value, typically the branch where the code has been pushed into - eg `main`.
 Both of these then have `refs/heads` removed from their value.
 

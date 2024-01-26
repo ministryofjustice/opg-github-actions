@@ -1,6 +1,6 @@
 # Semver Tag Composite Action
 
-Combines other composite actions ([branch-name](../branch-name/README.md), [latest-tag](../latest-tag/README.md), [next-tag](../next-tag/README.md) and [create-tag](../create-tag/README.md)) to find and then create the next semver-ish tag for the repository.
+Uses multiple steps to mimic the sequence of `branch-name`, `latest-tag`, `next-tag` & `create-tag` and calls the same function code underneath to create a semver tag.
 
 With `test` enabled, the created tag will not be pushed to the remote and only kept locally.
 
@@ -27,16 +27,13 @@ Within you github workflow job you can place a step such as:
 Inputs:
 - `prerelease`
 - `release_branch` (default: "main")
-- `with_v` (default: "true"| True)
-- `show_verbose_summary` (default: "" | False)
-- `test` (default: "" | False)
-- `releases_enabled` (default: 'true'|True)
-- `github_token`
+- `with_v` (default: "true")
+- `show_verbose_summary` (default: "")
+- `test` (default: "")
+- `releases_enabled` (default: 'true')
+- `draft_release` (default: 'false')
 
 Outputs:
-- `prerelease`
-- `release_branch`
-- `test`
 - **`created_tag`**
 - `release_id`
 - `release_url`
@@ -44,14 +41,13 @@ Outputs:
   - [`branch_original`](../branch-name/README.md)
   - [`branch_full_length`](../branch-name/README.md)
   - [`branch_safe`](../branch-name/README.md)
-  - [`latest_tag_latest`](../latest-tag/README.md)
+  - [`latest_tag_last_prerelease`](../latest-tag/README.md)
   - [`latest_tag_last_release`](../latest-tag/README.md)
   - [`next_tag`](../next-tag/README.md)
   - [`next_tag_commitish_a`](../latest-tag/README.md)
   - [`next_tag_commitish_b`](../latest-tag/README.md)
   - [`create_tag_latest`](../create-tag/README.md)
-  - [`create_tag_created`](../create-tag/README.md)
-  - [`create_tag_all`](../create-tag/README.md)
+  - [`create_tag_success`](../create-tag/README.md)
 
 
 ### Inputs
@@ -62,28 +58,23 @@ Flag to say if this is a prerelease or not. Can be overridden by logic within th
 #### `release_branch` (default: "main")
 The branch that should be considered a release when being pushed to.  If the active branch matches this value then a release is triggered.
 
-#### `with_v` (default: "true"|True)
+#### `with_v` (default: "true")
 Determines if the semver tags are created with a `v` prefix.
 
-#### `show_verbose_summary` (default: ""|False)
+#### `show_verbose_summary` (default: "")
 If this is "true" then the larger collated information will be outputed to the `${GITHUB_STEP_SUMMARY}`
 
-#### `test` (default: ""|False)
+#### `test` (default: "")
 When true ("True", "true" or true), the tag will be created, but not pushed to the remote and therefore will not persist.
 
-#### `releases_enabled` (default: "true"|True)
+#### `releases_enabled` (default: "true")
 When this is true and this is on a releaase branch and not a test, then a release will be created.
 
-#### `github_token`
-A github token that has permissions to create a release.
+#### `draft_release` (default: "false")
+If true, will mark and release created as being in draft.
+
 
 ### Outputs
-
-#### `prerelease`
-The computed version of if this is a prerelease or not.
-
-#### `release_branch`
-Mirror or the input value.
 
 #### `created_tag`
 Contains the tag that has been created.

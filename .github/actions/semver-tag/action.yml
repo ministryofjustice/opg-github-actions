@@ -28,13 +28,6 @@ inputs:
   
 
 outputs:
-  test:
-    description: "Inputed test variable."
-    value: ${{ inputs.test }}
-  release_branch:
-    description: "Inputed release_branch variable."
-    value: ${{ inputs.release_branch }}
-  
 
   branch_original:
     description: "Output from branch_name safety check - the branch_name return value"
@@ -46,12 +39,9 @@ outputs:
     description: "Output from branch_name safety check  - the safe return value"
     value: ${{ steps.branchname.outputs.safe }}
 
-  prerelease:
-    description: "Inputed prerelease variable."
-    value: ${{ steps.latesttag.outputs.prerelease }}
-  latest_tag_latest:
+  latest_tag_last_prerelease:
     description: "Output from latest_tag - the latest return value"
-    value: ${{ steps.latesttag.outputs.latest_prerelease }}
+    value: ${{ steps.latesttag.outputs.last_prerelease }}
   latest_tag_last_release:
     description: "Output from latest_tag - the last_release value"
     value: ${{ steps.latesttag.outputs.last_release }}
@@ -60,7 +50,7 @@ outputs:
     description: "Output from next_tag - the next_tag value"
     value: ${{ steps.nexttag.outputs.next_tag }}
   
-  create_tag_created:
+  create_tag_success:
     description: "Output from create_tag - flag if it worked"
     value: ${{ steps.createtag.outputs.success }}
   

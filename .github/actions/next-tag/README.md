@@ -20,7 +20,7 @@ Within you github workflow job you can place a step such as this for finding pre
       with:
           prerelease: "true"
           prerelease_suffix: "myfeature"
-          latest_tag: "1.1.0-myfeature.0"
+          last_prerelease: "1.1.0-myfeature.0"
           last_release: "1.0.1"
 ```
 or for release versions:
@@ -42,7 +42,7 @@ or for release versions:
 Inputs:
 - `prerelease`
 - `prerelease_suffix`
-- `latest_tag`
+- `last_prerelease`
 - `last_release`
 - `head_commitish`
 - `base_commitish`
@@ -52,13 +52,6 @@ Inputs:
 
 Outputs:
 - `prerelease`
-- `prerelease_suffix`
-- `latest_tag`
-- `last_release`
-- `head_commitish`
-- `base_commitish`
-- `default_bump` (default; "patch")
-- `with_v` (default: ""|False)
 - `majors`
 - `minors`
 - `patches`
@@ -72,8 +65,8 @@ A boolean-ish value, that when true ("true", "True", true etc) will look for exi
 #### `prerelease_suffix`
 A tag safe version of a branch name. This is used to find existing tags for this branch by looking for following pattern against prerelease tags: `${prerelease_suffix}.[0-9]+$"`.
 
-#### `latest_tag`
-The latest tag created with the prerelease suffix. This can be found by using [`latest-tag` action](../latest-tag/README.md)
+#### `last_prerelease`
+The last prerelease tag created with the prerelease suffix. This can be found by using [`latest-tag` action](../latest-tag/README.md)
 
 #### `last_release`
 The semver-ish tag of the last release version in the repository.
@@ -94,24 +87,6 @@ If enabled, the next_tag generated will start with a `v` prefix, such as `v1.1.0
 ### Outputs
 
 #### `prerelease`
-Mirror of the inputted value.
-
-#### `prerelease_suffix`
-Mirror of the inputted value.
-
-#### `latest_tag`
-Mirror of the inputted value.
-
-#### `last_release`
-Mirror of the inputted value.
-
-#### `head_commitish` and `base_commitish`
-Mirror of the inputted value.
-
-#### `default_bump` (default: "patch")
-Mirror of the inputted value.
-
-#### `with_v` (default: "" | False)
 Mirror of the inputted value.
 
 #### `majors`, `minors` and `patches`

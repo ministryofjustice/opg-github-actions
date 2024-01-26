@@ -27,18 +27,18 @@ Inputs:
 - `prerelease`
 - `prerelease_suffix`
 - `branch_name` (default: "beta")
-- `release_branches` (default: "main,master")
+- `release_branch` (default: "main")
 
 Outputs:
 - `prerelease`
 - `prerelease_suffix`
-- `last_release`
-- **`latest`**
+- **`last_release`**
+- **`last_prerelease`**
 
 ### Inputs
 
 #### `prerelease`
-A boolean-ish value, that when true ("true", "True", true etc) will look for existing tags that use the `prerelease_suffix`. This value can be overridden in the code if the `branch_name` passed is within the `release_branches` - typically if its flagged as being a prerelease, but its on `main` branch, it should be considered a release.
+A boolean-ish value, that when true ("true", "True", true etc) will look for existing tags that use the `prerelease_suffix`. This value can be overridden in the code if the `branch_name` passed is within the `release_branch` - typically if its flagged as being a prerelease, but its on `main` branch, it should be considered a release.
 
 #### `prerelease_suffix`
 A tag safe version of `branch_name`. This is used to find existing tags for this branch by looking for following pattern against prerelease tags: `${prerelease_suffix}.[0-9]+$"`.
@@ -53,13 +53,13 @@ These are used as a configurable item incase your release is to something like "
 ### Outputs
 
 #### `prerelease`
-A boolean value; this is the calculated version of the inputted `prerelease`, after release_branches have been compared to the branch_name and shows how the code thinks this tag should be classified.
+A boolean value; this is the calculated version of the inputted `prerelease`, after `release_branch` has been compared to the `branch_name` and shows how the code thinks this tag should be classified.
 
 #### `prerelease_suffix`
 The inputted suffix value.
 
 #### `last_release`
-The semver-ish tag of the last release version in the repository.
+The semver-ish tag of the last release tag in the repository.
 
-#### `latest`
-The latest tag created with the prerelease suffix.
+#### `last_prerelease`
+The last prerelease tag created with the prerelease suffix passed in.
