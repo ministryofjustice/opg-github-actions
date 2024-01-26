@@ -48,11 +48,10 @@ jobs:
       - name: "Semver tag and release"
         id: semver_tag
         uses: ./.github/actions/semver-tag
-        with:
-          test: false
+        with:          
           prerelease: true
+          draft_release: true
           releases_enabled: false # disable the release as we make here and include build assests
-          github_token: ${{ secrets.GITHUB_TOKEN }}
       ## release with artifacts
       - name: "Create a release [${{ steps.semver_tag.outputs.created_tag }}]"
         id: create_release      

@@ -8,7 +8,7 @@ inputs:
     description: "Release branch main - if branch name matches this the tag change to be a production style v1.1.0 without suffixes. (Default: main)"
     default: "main"
   prerelease:
-    description: "If set, creates a pre-release (draft)."
+    description: "If set, flags this as being a pre-release."
     default: ""
   default_bump:
     description: "If no # triggers are found, bump the version by this. (Default: patch)"
@@ -19,6 +19,9 @@ inputs:
   releases_enabled:
     description: "If set, allows the creation of a release when on a release branch (and not testing)"
     default: "true"
+  draft_release:
+    description: "If true and a release is created it will be marked as draft, so not visible to other users"
+    default: "false"
   show_verbose_summary:
     description: "Set this to any value to show the more verbose summary output data"
     default: "true"
@@ -258,7 +261,7 @@ runs:
       with:
         tag: ${{ steps.createtag.outputs.created_tag }}
         name: ${{ steps.createtag.outputs.created_tag }}
-        draft: ${{ steps.latesttag.outputs.prerelease == 'true' }}
+        draft: ${{ steps.latesttag.outputs.draft_release == 'true' }}
         prerelease: ${{ steps.latesttag.outputs.prerelease == 'true' }}
         generateReleaseNotes: true
     - name: "summary"
