@@ -66,16 +66,29 @@ fi
 # that it can be built
 if [ "${found}" != "${ok}" ]; then
     # build from local 
-    echo -e "Cloning action repostitory [${actionRepo}] to [${localBuildPath}] ..."
+    echo -n "Cloning action repostitory [${actionRepo}] to [${localBuildPath}] ..."
 
     if [ -d "${localBuildPath}" ]; then
         rm -Rf ${localBuildPath}
     fi
     gh repo clone ${actionRepo} ${localBuildPath} -- -q
-    
+    echo "✅"
+
     cd ${localBuildPath}
-    # checkout to the git ref
-    checkout=$(git checkout -q -f ${actionRef} -- 2> /dev/null && echo "${ok}")
+    
+    # If this is a pr, then use the gh cli to checkout for ease
+    if [[ "${actionRef}" == "refs/pull"* && "${actionRef}" == *"/merge" ]]; then        
+        echo -e "This seems to be a pull request: [${actionRef}]"
+        prNumber=$(echo "${actionRef}" | tr -cd '[:digit:]')
+        echo -e "pr number: ${prNumber}"
+        pr=$(gh pr checkout "${prNumber}" && echo "${ok}" )
+        checkout=$(echo "${pr}" | tail -n1)
+    # otherwise checkout directly
+    else     
+        checkout=$(git checkout -q -f ${actionRef} -- 2> /dev/null && echo "${ok}")
+    fi
+
+    
     if [ "${checkout}" == "${ok}" ]; then
         echo -e "Checked out action repo to [${actionRef}] [${localBuildPath}] ✅"
         echo -e "-- Commit --"
