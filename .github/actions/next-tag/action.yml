@@ -150,15 +150,5 @@ runs:
       run:
         echo -e "Running next-tag"
 
-        ${APP_BIN} next-tag \
-          --repository="${repository}" \
-          --base="${base}" \
-          --head="${head}" \
-          --last-release="${lastRelease}" \
-          --last-prerelease="${lastPrerelease}" \
-          --prerelease="${prerelease}" \
-          --prerelease-suffix="${prereleaseSuffix}" \
-          --with-v="${withV}" \
-          --default-bump="${defaultBump}" \
-          --extra-message="${extraMsg}"
+        ${APP_BIN} next-tag --repository="${repository}" --base="${base}" --head="${head}" --last-release="${lastRelease}" --last-prerelease="${lastPrerelease}" --prerelease="${prerelease}" --prerelease-suffix="${prereleaseSuffix}" --with-v="${withV}" --default-bump="${defaultBump}" --extra-message="${extraMsg}"
     
