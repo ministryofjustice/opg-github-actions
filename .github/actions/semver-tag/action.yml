@@ -8,7 +8,7 @@ inputs:
     description: "Release branch main - if branch name matches this the tag change to be a production style v1.1.0 without suffixes. (Default: main)"
     default: "main"
   prerelease:
-    description: "If set, creates a pre-release (draft)."
+    description: "If set, flags this as being a pre-release."
     default: ""
   default_bump:
     description: "If no # triggers are found, bump the version by this. (Default: patch)"
@@ -16,22 +16,16 @@ inputs:
   with_v:
     description: "New tag will start with a v prefix is this is any non-empty value."
     default: "true"
-  show_verbose_summary:
-    description: "Set this to any value to show the more verbose summary output data"
-    default: ""
-  github_token:
-    description: "A token authorised with write permissions to create a release."
-    default: ""
   releases_enabled:
     description: "If set, allows the creation of a release when on a release branch (and not testing)"
     default: "true"
-  ## Used to capture the intial values before they get overwritten
-  action_ref:
-    description: "Capture the starting value of github.action_ref. DO NOT SET"
-    default: ${{ github.action_ref }}
-  action_repository:
-    description: "Capture the starting value of github.action_repository. DO NOT SET"
-    default: ${{ github.action_repository }}
+  draft_release:
+    description: "If true and a release is created it will be marked as draft, so not visible to other users"
+    default: "false"
+  show_verbose_summary:
+    description: "Set this to any value to show the more verbose summary output data"
+    default: "true"
+  
 
 outputs:
   test:
@@ -40,47 +34,36 @@ outputs:
   release_branch:
     description: "Inputed release_branch variable."
     value: ${{ inputs.release_branch }}
-  prerelease:
-    description: "Inputed prerelease variable."
-    value: ${{ inputs.prerelease }}
+  
 
   branch_original:
     description: "Output from branch_name safety check - the branch_name return value"
-    value: ${{ steps.branch_name.outputs.branch_name }}
+    value: ${{ steps.branchname.outputs.branch_name }}
   branch_full_length:
     description: "Output from branch_name safety check - the full_length return value"
-    value: ${{ steps.branch_name.outputs.full_length }}
+    value: ${{ steps.branchname.outputs.full_length }}
   branch_safe:
     description: "Output from branch_name safety check  - the safe return value"
-    value: ${{ steps.branch_name.outputs.safe }}
+    value: ${{ steps.branchname.outputs.safe }}
 
+  prerelease:
+    description: "Inputed prerelease variable."
+    value: ${{ steps.latesttag.outputs.prerelease }}
   latest_tag_latest:
     description: "Output from latest_tag - the latest return value"
-    value: ${{ steps.latest_tag.outputs.latest }}
+    value: ${{ steps.latesttag.outputs.latest_prerelease }}
   latest_tag_last_release:
     description: "Output from latest_tag - the last_release value"
-    value: ${{ steps.latest_tag.outputs.last_release }}
+    value: ${{ steps.latesttag.outputs.last_release }}
 
   next_tag:
     description: "Output from next_tag - the next_tag value"
-    value: ${{ steps.next_tag.outputs.next_tag }}
-  next_tag_commitish_a:
-    description: "Output from next_tag - the commitish_a used to look in commits for triggers"
-    value: ""
-  next_tag_commitish_b:
-    description: "Output from next_tag - the commitish_b used to look in commits for triggers"
-    value: ""
-
-  create_tag_latest:
-    description: "Output from create_tag - the latest value"
-    value: ${{ steps.create_tag.outputs.latest }}
+    value: ${{ steps.nexttag.outputs.next_tag }}
+  
   create_tag_created:
-    description: "Output from create_tag - the created value"
-    value: ${{ steps.create_tag.outputs.created }}
-  create_tag_all:
-    description: "Output from create_tag - the all value"
-    value: ${{ steps.create_tag.outputs.all }}
-
+    description: "Output from create_tag - flag if it worked"
+    value: ${{ steps.createtag.outputs.success }}
+  
   release_id:
     description: "The id of the release if it was created"
     value: ${{steps.create_release.outputs.id}}
@@ -90,115 +73,203 @@ outputs:
 
   created_tag:
     description: "Output from create_tag - the created value"
-    value: ${{ steps.create_tag.outputs.created }}
-
-
+    value: ${{ steps.createtag.outputs.created_tag }}
 
 runs:
   using: "composite"
   steps:
-    - name: "Checkout this actions repo into a subfolder at this version"
+    #### SETUP ####    
+    # Use bash shell script to fetch and work out releases    
+    #  - use || or on the values to determine if this is called by self or remote
+    - name: "Get release binary for this runner"
+      shell: bash
+      id: fetch
+      env:
+        GH_TOKEN: ${{ github.token }}
+        # use either the action_repository or repository
+        # - this so it can be used locally with its own workflows and by remote call
+        GH_ACTION_REPOSITORY: ${{ github.action_repository || github.repository }}
+        GH_ACTION_REF: ${{ github.action_ref || github.ref }}
+        GH_WORKSPACE: "${{ github.workspace }}"
+        SELF: ${{ github.repository == 'ministryofjustice/opg-github-actions' }}
+        # if an action path is set, then the bash script will be one dir above,
+        # otherwise we're operating on self, so path is based on the repository root
+        actionsRootDir: ${{ github.action_path && format('{0}/../', github.action_path) || format('{0}/.github/actions/', github.workspace) }}
+      run: |
+        echo -e "Get release binary"
+        cd ${actionsRootDir}
+        ./release-download.sh 2> $GITHUB_STEP_SUMMARY
+    ## LOCAL BUILD
+    # setup and build locally if the release data is not setup
+    - name: "Setup go"
+      uses: actions/setup-go@v4
+      if: ${{ steps.fetch.outputs.RELEASE == '' }}
+      with:
+        go-version-file: '${{ steps.fetch.outputs.SELF_BUILD }}/./go/go.mod'
+        cache: false
+    # build from source locations
+    - name: Build directly from source
+      id: buildFromSource
+      if: ${{ steps.fetch.outputs.RELEASE == '' }}
+      shell: bash
+      env:
+        buildSource: '${{ steps.fetch.outputs.SELF_BUILD }}'
+        target: '${{ steps.fetch.outputs.TARGET_BUILD }}'
+      run: |
+        echo -e "Build from source"
+        cd ${buildSource}
+        echo -e "Building (with make) for ${target}"        
+        make release
+        release="${buildSource}/go/builds/${target}"
+        echo -e "RELEASE=${release}"
+        echo "RELEASE=${release}" >> $GITHUB_OUTPUT
+    ## DETERMINE BINARY PATH
+    - name: "Determine binary to use"
+      id: binary
+      shell: bash
+      env:
+        direct: ${{ steps.fetch.outputs.RELEASE }}
+        built: ${{ steps.buildFromSource.outputs.RELEASE }}
+      run: |
+        echo -e "Determine binary to use..."
+        binary=""
+        if [ "${direct}" != "" ]; then
+          binary="${direct}"
+        elif [ "${built}" != "" ]; then
+          binary="${built}"
+        fi
+        if [ "${binary}" == "" ]; then
+          err="error: no binary found"
+          echo -e "${err}"
+          echo -e "${err}" >&2
+          echo -e "${err}" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo -e "binary=${binary}"
+        echo "binary=${binary}" >> $GITHUB_OUTPUT
+    ### CHECKOUT
+    # get our the calling repo as we need to access files form there
+    - name: "Checkout calling repository"
       uses: actions/checkout@v4
       with:
-        repository: ${{ inputs.action_repository }}
-        ref: ${{ inputs.action_ref }}
-        path: ./_ghsemveraction
-    - name: "Generate safe branch name"
-      id: branch_name
-      uses: ./_ghsemveraction/.github/actions/branch-name
-      with:
-        action_repository: ${{ inputs.action_repository }}
-        action_ref: ${{ inputs.action_ref }}
-    - name: "Find latest tag"
-      id: latest_tag
-      uses: ./_ghsemveraction/.github/actions/latest-tag
-      with:
-          branch_name: ${{steps.branch_name.outputs.branch_name}}
-          release_branches: ${{inputs.release_branch}}
-          prerelease: ${{inputs.prerelease}}
-          prerelease_suffix: ${{steps.branch_name.outputs.safe}}
-          action_repository: ${{ inputs.action_repository }}
-          action_ref: ${{ inputs.action_ref }}
-    - name: "Find next tag"
-      id: next_tag
-      uses: ./_ghsemveraction/.github/actions/next-tag
-      with:
-          prerelease: ${{steps.latest_tag.outputs.prerelease}}
-          prerelease_suffix: ${{steps.latest_tag.outputs.prerelease_suffix}}
-          latest_tag: ${{steps.latest_tag.outputs.latest}}
-          last_release: ${{steps.latest_tag.outputs.last_release}}
-          with_v: ${{inputs.with_v}}
-          commitish_a: ${{steps.branch_name.outputs.source_commitish}}
-          commitish_b: ${{steps.branch_name.outputs.destination_commitish}}
-          default_bump: ${{inputs.default_bump}}
-          action_repository: ${{ inputs.action_repository }}
-          action_ref: ${{ inputs.action_ref }}
-    - name: "Create tag"
-      id: create_tag
-      uses: ./_ghsemveraction/.github/actions/create-tag
-      with:
-          test: ${{inputs.test}}
-          commitish: ${{steps.branch_name.outputs.branch_name}}
-          tag_name: ${{steps.next_tag.outputs.next_tag}}
-          action_repository: ${{ inputs.action_repository }}
-          action_ref: ${{ inputs.action_ref }}
-
-    # if the branch is release branch, releases are enabled and this is not a test
-    - id: create_release
-      name: Create release
-      if: ${{ ( contains(github.ref, inputs.release_branch) ) &&
-              ( inputs.releases_enabled == 'true' ) &&
-              ( inputs.test == '')  }}
+        repository: ${{ github.repository }}
+        ref: ${{ github.ref }}
+        path: '${{ github.workspace}}/_target'
+        fetch-depth: 0
+        fetch-tags: true
+    #### COMMANDS ####
+    # Get branch name info
+    - name: "branch-name"
+      id: branchname
+      shell: bash
+      env:        
+        RUN_AS_TEST: ${{inputs.test}}
+        LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}     
+        binPath: '${{ steps.binary.outputs.binary }}'
+      run: |
+        ${binPath} branch-name \
+          --event-name="${GITHUB_EVENT_NAME}" \
+          --event-data-file="${GITHUB_EVENT_PATH}"
+    # latest tag
+    - name: "latest-tag"
+      id: latesttag
+      shell: bash
+      env:        
+        GITHUB_TOKEN: ${{ github.token }}
+        RUN_AS_TEST: ${{ inputs.test }}   
+        LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}     
+        binPath: '${{ steps.binary.outputs.binary }}'
+        repo: '${{ github.workspace}}/_target'
+        branch: '${{ steps.branchname.outputs.branch_name }}'
+        prerelease: '${{ inputs.prerelease }}'
+        prereleaseSuffix: '${{ steps.branchname.outputs.safe }}'
+        releaseBranch: '${{ inputs.release_branch }}'
+      run: |        
+        ${binPath} latest-tag \
+          --repository="${repo}" \
+          --branch="${branch}" \
+          --prerelease="${prerelease}" \
+          --prerelease-suffix="${prereleaseSuffix}" \
+          --release-branches="${releaseBranch}"
+    # next tag
+    - name: "next-tag"
+      id: nexttag
+      shell: bash
+      env:                
+        GITHUB_TOKEN: ${{ github.token }}
+        RUN_AS_TEST: ${{ inputs.test }}
+        LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}     
+        binPath: '${{ steps.binary.outputs.binary }}'
+        repo: '${{ github.workspace}}/_target'
+        branch: '${{ steps.branchname.outputs.branch_name }}'
+        prerelease: '${{ steps.latesttag.outputs.prerelease }}'
+        prereleaseSuffix: '${{ steps.latesttag.outputs.prerelease_suffix }}'        
+        baseRef: '${{ steps.branchname.outputs.base_commitish }}'
+        headRef: '${{ steps.branchname.outputs.head_commitish }}'
+        lastRelease: '${{ steps.latesttag.outputs.last_release }}'
+        lastPrerelease: '${{ steps.latesttag.outputs.last_prerelease }}'
+        withV: '${{ inputs.with_v }}'
+        defaultBump: '${{ inputs.default_bump }}'
+        extraMsg: '${{ github.event.pull_request.title }}${{ github.event.pull_request.body }}'
+      run: |        
+        ${binPath} next-tag \
+          --repository="${repo}" \
+          --base="${baseRef}" \
+          --head="${headRef}" \
+          --prerelease="${prerelease}" \
+          --prerelease-suffix="${prereleaseSuffix}" \
+          --last-release="${lastRelease}" \
+          --last-prerelease="${lastPrerelease}" \
+          --with-v="${withV}" \
+          --default-bump="${defaultBump}" \
+          --extra-message="${extraMsg}"
+    # create tag
+    - name: "create-tag"
+      id: createtag
+      shell: bash
+      env:                
+        GITHUB_TOKEN: ${{ github.token }}
+        RUN_AS_TEST: ${{ inputs.test }}
+        LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}     
+        binPath: '${{ steps.binary.outputs.binary }}'
+        repo: '${{ github.workspace}}/_target'
+        commitish: '${{ steps.branchname.outputs.branch_name }}'
+        tagName: '${{ steps.nexttag.outputs.next_tag }}'
+        regen: 'true'
+        push: ${{ inputs.test != 'true' }}        
+      run: |
+        ${binPath} create-tag \
+          --repository="${repo}" \
+          --commitish="${commitish}" \
+          --tag-name="${tagName}" \
+          --regen="${regen}" \
+          --push="${push}" 
+    # Create a release object
+    - name: "Create a release"
+      id: create_release      
+      if: ${{ inputs.releases_enabled == 'true' }}
       uses: ncipollo/release-action@v1.13.0
-      env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
       with:
-        tag: ${{ steps.create_tag.outputs.created }}
-        name: ${{ steps.create_tag.outputs.created }}
-        draft: false
-        prerelease: false
+        tag: ${{ steps.createtag.outputs.created_tag }}
+        name: ${{ steps.createtag.outputs.created_tag }}
+        draft: ${{ inputs.draft_release == 'true' }}
+        prerelease: ${{ steps.latesttag.outputs.prerelease == 'true' }}
         generateReleaseNotes: true
-
-    - name: summary
-      shell: bash
-      if: ${{ (always()) && (inputs.show_verbose_summary == '') }}
-      run: |
-        set -eo pipefail
-        echo "### Semver tag summary" >> $GITHUB_STEP_SUMMARY
-        echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
-        echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
-        echo "| **Created Tag** | **${{ steps.create_tag.outputs.created }}** |"  >> $GITHUB_STEP_SUMMARY
-
-        if [ -n "${{ steps.create_release.outputs.id }}" ]; then
-          echo "| **Release** | [${{ steps.create_release.outputs.id }}](${{ steps.create_release.outputs.html_url }}) |"  >> $GITHUB_STEP_SUMMARY
-        fi
-
-
-    - name: Verbose summary
-      shell: bash
+    - name: "summary"
       if: ${{ (always()) && (inputs.show_verbose_summary != '') }}
+      shell: bash
       run: |
-        set -eo pipefail
         echo "### Semver tag summary" >> $GITHUB_STEP_SUMMARY
         echo "| Stage | Variable | Value |" >> $GITHUB_STEP_SUMMARY
         echo "| --- | --- | --- |"  >> $GITHUB_STEP_SUMMARY
-        echo "| Branch | original | ${{ steps.branch_name.outputs.branch_name }} |"  >> $GITHUB_STEP_SUMMARY
-        echo "| Branch | safe | ${{ steps.branch_name.outputs.safe }} |"  >> $GITHUB_STEP_SUMMARY
-        echo "| Branch | full_length | ${{ steps.branch_name.outputs.full_length }} |"  >> $GITHUB_STEP_SUMMARY
-
-        echo "| Latest Tag | latest | ${{ steps.latest_tag.outputs.latest }} |"  >> $GITHUB_STEP_SUMMARY
-        echo "| Latest Tag | last_release | ${{ steps.latest_tag.outputs.last_release }} |"  >> $GITHUB_STEP_SUMMARY
-
-        echo "| Next Tag | last_release | ${{ steps.next_tag.outputs.last_release }} |"  >> $GITHUB_STEP_SUMMARY
-        echo "| Next Tag | latest_tag | ${{ steps.next_tag.outputs.latest_tag }} |"  >> $GITHUB_STEP_SUMMARY
-        echo "| Next Tag | commitish_a | ${{ steps.next_tag.outputs.commitish_a }} |"  >> $GITHUB_STEP_SUMMARY
-        echo "| Next Tag | commitish_b | ${{ steps.next_tag.outputs.commitish_b }} |"  >> $GITHUB_STEP_SUMMARY
-        echo "| Next Tag | next_tag | ${{ steps.next_tag.outputs.next_tag }} |"  >> $GITHUB_STEP_SUMMARY
-
-        echo "| Create Tag | latest | ${{ steps.create_tag.outputs.latest }} |"  >> $GITHUB_STEP_SUMMARY
-        echo "| Create Tag | test | ${{ steps.create_tag.outputs.test }} |"  >> $GITHUB_STEP_SUMMARY
-        echo "| **Create Tag** | **created** | **${{ steps.create_tag.outputs.created }}** |"  >> $GITHUB_STEP_SUMMARY
-
+        echo "| Branch | branch_name | ${{ steps.branchname.outputs.branch_name }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Branch | safe | ${{ steps.branchname.outputs.safe }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Branch | full_length | ${{ steps.branchname.outputs.full_length }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Latest Tag | last_prerelease | ${{ steps.latesttag.outputs.last_prerelease }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Latest Tag | last_release | ${{ steps.latesttag.outputs.last_release }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Next Tag | next_tag | ${{ steps.nexttag.outputs.next_tag }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Create Tag | test | ${{ steps.createtag.outputs.test }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| Create Tag | requested_tag | ${{ steps.createtag.outputs.requested_tag }} |"  >> $GITHUB_STEP_SUMMARY
+        echo "| **Create Tag** | **created** | **${{ steps.createtag.outputs.created_tag }}** |"  >> $GITHUB_STEP_SUMMARY
         if [ -n "${{ steps.create_release.outputs.id }}" ]; then
           echo "| **Release** | **URL** | **[${{ steps.create_release.outputs.id }}](${{ steps.create_release.outputs.html_url }})** |"  >> $GITHUB_STEP_SUMMARY
-        fi
+        fi        

@@ -32,8 +32,8 @@ or for release versions:
       with:
           prerelease_suffix: "myfeature"
           last_release: "1.0.1"
-          commitish_a: "my-feature"
-          commitish_b: "main"
+          head_commitish: "my-feature"
+          base_commitish: "main"
 
 ```
 
@@ -44,8 +44,8 @@ Inputs:
 - `prerelease_suffix`
 - `latest_tag`
 - `last_release`
-- `commitish_a`
-- `commitish_b`
+- `head_commitish`
+- `base_commitish`
 - `default_bump` (default; "patch")
 - `with_v` (default: ""|False)
 
@@ -55,8 +55,8 @@ Outputs:
 - `prerelease_suffix`
 - `latest_tag`
 - `last_release`
-- `commitish_a`
-- `commitish_b`
+- `head_commitish`
+- `base_commitish`
 - `default_bump` (default; "patch")
 - `with_v` (default: ""|False)
 - `majors`
@@ -78,13 +78,13 @@ The latest tag created with the prerelease suffix. This can be found by using [`
 #### `last_release`
 The semver-ish tag of the last release version in the repository.
 
-#### `commitish_a` and `commitish_b`
+#### `head_commitish` and `base_commitish`
 The two points in git commit history to use as comparisions and look for the #major | #minor | #patch string which will then determine any version increments.
 
 This can be found by using [`branch-name` action](../branch-name/README.md)
 
 #### `default_bump` (default: "patch")
-If there are no version bump triggers found within the commits between `commitish_a` and `commitish_b` then this value will be used as the default increment for a version number.
+If there are no version bump triggers found within the commits between `head_commitish` and `base_commitish` then this value will be used as the default increment for a version number.
 In the case of prereleases, the prerelease counter is increased instead (1.1.0-myfeature.2 => 1.1.0-myfeature.3)
 
 #### `with_v` (default: "" | False)
@@ -105,7 +105,7 @@ Mirror of the inputted value.
 #### `last_release`
 Mirror of the inputted value.
 
-#### `commitish_a` and `commitish_b`
+#### `head_commitish` and `base_commitish`
 Mirror of the inputted value.
 
 #### `default_bump` (default: "patch")
@@ -115,7 +115,7 @@ Mirror of the inputted value.
 Mirror of the inputted value.
 
 #### `majors`, `minors` and `patches`
-These are counters showing how many of each trigger was found within the commits found between `commitish_a` and `commitish_b`.
+These are counters showing how many of each trigger was found within the commits found between `head_commitish` and `base_commitish`.
 
 #### `next_tag`
 The next_tag that should be used based on the commits and config passed in. This will be semver-ish and may contain a `v` prefix if that has been enabled.

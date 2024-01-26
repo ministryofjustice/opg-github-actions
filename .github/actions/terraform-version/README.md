@@ -26,12 +26,7 @@ Inputs:
 - `simple_file`
 
 Outputs:
-- `terraform_directory`
-- `terraform_versions_file`
-- `simple_file`
 - **`version`**
-
-
 
 ### Inputs
 
@@ -46,9 +41,6 @@ Override to allow a plain text file which contains just the version string and n
 
 
 ### Outputs
-
-#### `terraform_directory`, `terraform_versions_file` and `simple_file`
-Mirror of the inputted param.
 
 #### `version`
 The version string found within the file.

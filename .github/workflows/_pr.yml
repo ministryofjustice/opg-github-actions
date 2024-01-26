@@ -1,0 +1,76 @@
+name: "[Pull Request] Workflow (Updated)"
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore: ['terraform/**', '.github/workflows/_terraform.yml']
+
+jobs:
+  # test actions
+  run_tests:
+    name: "[Tests]"
+    uses: './.github/workflows/_tests.yml'
+    secrets: inherit
+
+
+
+  pr_workflow:
+    needs: [run_tests]
+    name: "PR Workflow"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout self"
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+          fetch-tags: true
+      ## setup and build locally
+      - name: Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: './go/go.mod'
+          cache: false
+      - name: "Build binary for runner"
+        id: build
+        shell: bash
+        env:
+          appPath: '${{ github.workspace }}/go'
+        run: |
+          echo -e "Building"
+          gha_os=$(uname | tr '[:upper:]' '[:lower:]')
+          gha_arc=$(uname -m)
+          target="${gha_os}_${gha_arc}"
+          echo -e "Building (with make) for ${target}"
+          make release
+      ## semver tagging  
+      - name: "Semver tag and release"
+        id: semver_tag
+        uses: ./.github/actions/semver-tag
+        with:          
+          prerelease: true
+          draft_release: true
+          releases_enabled: false # disable the release as we want to attach artifacts
+      ## release with build artifacts
+      - name: "Create a release [${{ steps.semver_tag.outputs.created_tag }}]"
+        id: create_release      
+        uses: ncipollo/release-action@v1.13.0
+        with:
+          tag: ${{ steps.semver_tag.outputs.created_tag }}
+          name: ${{ steps.semver_tag.outputs.created_tag }}
+          draft: false
+          prerelease: true
+          generateReleaseNotes: true
+          artifacts: '${{ github.workspace }}/go/builds/*.tar.gz'
+            
+
+  end:
+    name: 'End of PR workflow'
+    runs-on: 'ubuntu-latest'
+    needs: [run_tests, pr_workflow]
+    steps:
+      - id: end
+        name: End
+        run: |
+          echo "End"

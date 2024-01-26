@@ -33,8 +33,8 @@ It does not require any inputs and will return the following data:
 
 - `branch_name`
 - `full_length`
-- `source_commitish`
-- `destination_commitish`
+- `base_commitish`
+- `head_commitish`
 - **`safe`**
 
 
@@ -54,6 +54,6 @@ This is the `branch_name` value as only alphanumeric characters, so `branch_name
 
 This is a truncated form of `full_length`, limited to 12 characters. This is what you would typically use within git tags.
 
-#### `source_commitish` and `destination_commitish`
+#### `base_commitish` and `head_commitish`
 
 Useful for semver and similar processes, these variables contain a `commit-ish` reference for comparison between the points in history. On a `pull_request` workflow, they will contain the branch names being merged (so `my-feature-1` and `main`), and for a `push` workflow they contain the before and after commit references.

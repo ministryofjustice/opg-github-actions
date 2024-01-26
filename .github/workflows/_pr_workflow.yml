@@ -22,6 +22,8 @@ jobs:
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
+          fetch-depth: 0
+          fetch-tags: true
       - name: "Semver tag and release"
         id: semver_tag
         uses: ./.github/actions/semver-tag
