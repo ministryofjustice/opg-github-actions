@@ -119,4 +119,4 @@ runs:
         conditionalValue: ${{inputs.conditional_value}}
       run: |
         echo -e "Running safe-string"
-        ${APP_BIN} safe-string --string="${original}" --length="${length}" --suffix="${suffix}" --conditional-match="${conditinalMatch}" --conditional-value-"${conditionalValue}"
+        ${APP_BIN} safe-string --string="${original}" --length="${length}" --suffix="${suffix}" --conditional-match="${conditinalMatch}" --conditional-value="${conditionalValue}"
