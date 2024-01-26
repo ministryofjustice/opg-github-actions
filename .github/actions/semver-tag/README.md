@@ -44,8 +44,6 @@ Outputs:
   - [`latest_tag_last_prerelease`](../latest-tag/README.md)
   - [`latest_tag_last_release`](../latest-tag/README.md)
   - [`next_tag`](../next-tag/README.md)
-  - [`next_tag_commitish_a`](../latest-tag/README.md)
-  - [`next_tag_commitish_b`](../latest-tag/README.md)
   - [`create_tag_latest`](../create-tag/README.md)
   - [`create_tag_success`](../create-tag/README.md)
 
