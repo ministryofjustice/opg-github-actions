@@ -42,8 +42,9 @@ jobs:
         if: always()
         with:
           name: Test Results          
+          fail-on-error: false
           path: ./go/report.xml 
-          reporter: jest-junit
+          reporter: java-junit
       - name: Output results link
         run:  |
           echo "**[Test results](${{steps.report.outputs.url_html}})**" >> $GITHUB_STEP_SUMMARY
