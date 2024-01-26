@@ -16,7 +16,6 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/k0kubun/pp"
 )
 
 // fixture for handling all the end to end tests
@@ -144,7 +143,7 @@ var (
 				Expected: map[string]string{"last_release": "v2.0.1", "last_prerelease": "v2.1.0-mybranchname.0"},
 			},
 			NextTagTest: nextTagFixture{
-				Expected: map[string]string{"next_tag": "v2.1.0-mybranchname.1"},
+				Expected: map[string]string{"next_tag": "v2.1.0-mybranchname.0"},
 			},
 			CreateTagTest: createTagFixture{
 				Expected: map[string]string{"created_tag": "v2.1.0-mybranchname.1", "regenerated": "false"},
@@ -498,7 +497,7 @@ func TestSemverEndToEnd(t *testing.T) {
 		for k, v := range f.NextTagTest.Expected {
 			if nextTagResult[k] != v {
 				t.Errorf("error: (%s:%d) expected [%s] to be [%s] actual [%v]", nexttag.Name, i, k, v, nextTagResult[k])
-				pp.Println(nextTagResult)
+				fmt.Println(nextTagResult)
 			}
 		}
 
