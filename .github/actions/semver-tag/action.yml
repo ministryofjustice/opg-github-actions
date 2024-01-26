@@ -81,7 +81,7 @@ runs:
     #### SETUP ####
     # Determine if self
     - name: Setup
-      id: setup_test
+      id: setup
       shell: bash
       env:
         REPO: ${{ github.action_repository || github.repository }}
