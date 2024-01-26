@@ -103,96 +103,45 @@ runs:
       with:
         go-version-file: '${{ steps.fetch.outputs.SELF_BUILD }}/./go/go.mod'
         cache: false
-
-    ##### >> MESSY, but works:
-    # Determine if we are being called by self, or by external
-    - name: Setup variables
-      id: setup
+    # build from source locations
+    - name: Build directly from source
+      id: buildFromSource
+      if: ${{ steps.fetch.outputs.RELEASE == '' }}
       shell: bash
       env:
-        ACTION_REPO: "${{ github.action_repository }}"
-        ACTION_REF: "${{ github.action_ref }}"
-        # JSON_DEBUG: ${{ toJSON(github) }}
+        buildSource: '${{ steps.fetch.outputs.SELF_BUILD }}'
+        target: '${{ steps.fetch.outputs.TARGET_BUILD }}'
       run: |
-        echo -e "Setup variables."
-        # self / repo info
-        isSelf="${{ github.repository == 'ministryofjustice/opg-github-actions' }}"
-        echo "isSelf=${isSelf}" >> $GITHUB_OUTPUT
-        echo "actionRepo=${ACTION_REPO}" >> $GITHUB_OUTPUT
-        echo "actionRef=${ACTION_REF}" >> $GITHUB_OUTPUT
-        
-        # build target info
-        gha_os=$(uname | tr '[:upper:]' '[:lower:]')
-        gha_arc=$(uname -m)
-        make_target="${gha_os}_${gha_arc}"
-        echo "target=${make_target}" >> $GITHUB_OUTPUT
-
-        # where to put the target repo
-        target="${{ github.workspace }}/_targetRepo"
-        echo -e "targetDir=${target}"
-        echo "targetDir=${target}" >> $GITHUB_OUTPUT
-
-        if [ "${{ runner.debug }}" == "1" ]; then          
-          echo "${JSON_DEBUG}"
-        fi
-
-        if [ "${isSelf}" == "true" ]; then
-          echo -e "Warning: running against self."          
-          path="${{ github.workspace }}"          
-          echo "path=${path}" >> $GITHUB_OUTPUT
-        elif [ -n "${ACTION_REF}" ]; then   
-          echo -e "Info: running from remote"          
-          path="${{ github.workspace }}/opggha"
-          echo "path=${path}" >> $GITHUB_OUTPUT
-        else
-          echo -e "ERROR: failed to determine action code location"
-          echo -e "ERROR: failed to determine action code location" >> $GITHUB_STEP_SUMMARY
-          exit 1
-        fi
-    #### REMOTE CALL ####
-    # If called externally, then checkout self
-    - name: "Checkout action [ ${{ steps.gha.outputs.isSelf }} ]"
-      uses: actions/checkout@v4
-      if: ${{ steps.setup.outputs.isSelf != 'true' }}
-      with:
-        repository: ${{ steps.setup.outputs.actionRepo }}
-        ref: ${{ steps.setup.outputs.actionRef }}
-        path: ${{ steps.setup.outputs.path }}
-        fetch-depth: 0
-        fetch-tags: true
-    # figure out how to get the artifacts (todo)
-
-    #### SELF CALL ####
-    - name: Setup go
-      if: ${{ steps.setup.outputs.isSelf == 'true' }}
-      uses: actions/setup-go@v4
-      with:
-        go-version-file: '${{ steps.setup.outputs.path }}/go/go.mod'
-        cache: false
-    # run the build 
-    - name: "Build"
-      id: build
+        echo -e "Build from source"
+        cd ${buildSource}
+        echo -e "Building (with make) for ${target}"        
+        make release
+        release="${buildSource}/go/builds/${target}"
+        echo -e "RELEASE=${release}"
+        echo "RELEASE=${release}" >> $GITHUB_OUTPUT
+    ## DETERMINE BINARY PATH
+    - name: "Determine binary to use"
+      id: binary
       shell: bash
-      if: ${{ steps.setup.outputs.isSelf == 'true' }}
       env:
-        target: '${{ steps.setup.outputs.target }}'
-        appPath: '${{ steps.setup.outputs.path }}'
+        direct: ${{ steps.fetch.outputs.RELEASE }}
+        built: ${{ steps.buildFromSource.outputs.RELEASE }}
       run: |
-        echo -e "Building"
-        cd ${appPath}
-        echo "Building (via make) for ${target}"
-        make ${target}
-        cd ${{ github.workspace }}
-    #### FETCH THE TARGET REPO INTO A SUB FOLDER
-    - name: "Checkout target repo to set folder"
-      uses: actions/checkout@v4
-      with:
-        repository: ${{ github.repository }}
-        ref: ${{ github.ref }}
-        path: ${{ steps.setup.outputs.targetDir }}
-        fetch-tags: true
-        fetch-depth: 0
-    
+        echo -e "Determine binary to use..."
+        binary=""
+        if [ "${direct}" != "" ]; then
+          binary="${direct}"
+        elif [ "${built}" != "" ]; then
+          binary="${built}"
+        fi
+        if [ "${binary}" == "" ]; then
+          err="error: no binary found"
+          echo -e "${err}"
+          echo -e "${err}" >&2
+          echo -e "${err}" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo -e "binary=${binary}"
+        echo "binary=${binary}" >> $GITHUB_OUTPUT
     #### COMMANDS ####
     # Get branch name info
     - name: "branch-name"
@@ -200,8 +149,8 @@ runs:
       shell: bash
       env:        
         RUN_AS_TEST: ${{inputs.test}}
-        appPath: '${{ steps.setup.outputs.path }}'
-        binPath: '${{ steps.setup.outputs.path }}/go/builds/${{ steps.setup.outputs.target }}'
+        LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}     
+        binPath: '${{ steps.binary.outputs.binary }}'
       run: |
         ${binPath} branch-name \
           --event-name="${GITHUB_EVENT_NAME}" \
@@ -212,9 +161,9 @@ runs:
       shell: bash
       env:        
         GITHUB_TOKEN: ${{ github.token }}
-        RUN_AS_TEST: ${{ inputs.test }}
-        appPath: '${{ steps.setup.outputs.path }}'
-        binPath: '${{ steps.setup.outputs.path }}/go/builds/${{ steps.setup.outputs.target }}'
+        RUN_AS_TEST: ${{ inputs.test }}   
+        LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}     
+        binPath: '${{ steps.binary.outputs.binary }}'
         repo: '${{ steps.setup.outputs.targetDir }}'
         branch: '${{ steps.branchname.outputs.branch_name }}'
         prerelease: '${{ inputs.prerelease }}'
@@ -231,12 +180,11 @@ runs:
     - name: "next-tag"
       id: nexttag
       shell: bash
-      env:        
-        LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}
+      env:                
         GITHUB_TOKEN: ${{ github.token }}
         RUN_AS_TEST: ${{ inputs.test }}
-        appPath: '${{ steps.setup.outputs.path }}'
-        binPath: '${{ steps.setup.outputs.path }}/go/builds/${{ steps.setup.outputs.target }}'
+        LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}     
+        binPath: '${{ steps.binary.outputs.binary }}'
         repo: '${{ steps.setup.outputs.targetDir }}'
         branch: '${{ steps.branchname.outputs.branch_name }}'
         prerelease: '${{ steps.latesttag.outputs.prerelease }}'
@@ -262,23 +210,23 @@ runs:
     - name: "create-tag"
       id: createtag
       shell: bash
-      env:        
-        LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}
+      env:                
         GITHUB_TOKEN: ${{ github.token }}
         RUN_AS_TEST: ${{ inputs.test }}
-        appPath: '${{ steps.setup.outputs.path }}'
-        binPath: '${{ steps.setup.outputs.path }}/go/builds/${{ steps.setup.outputs.target }}'
+        LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}     
+        binPath: '${{ steps.binary.outputs.binary }}'
         repo: '${{ steps.setup.outputs.targetDir }}'
         commitish: '${{ steps.branchname.outputs.branch_name }}'
         tagName: '${{ steps.nexttag.outputs.next_tag }}'
-        prereleaseSuffix: '${{ steps.latesttag.outputs.prerelease_suffix }}'                
+        regen: 'true'
+        push: ${{ inputs.test != 'true' }}        
       run: |
         ${binPath} create-tag \
           --repository="${repo}" \
           --commitish="${commitish}" \
           --tag-name="${tagName}" \
-          --regen="true" \
-          --push="true" 
+          --regen="${regen}" \
+          --push="${push}" 
     # Create a release object
     - name: "Create a release"
       id: create_release      
@@ -287,7 +235,7 @@ runs:
       with:
         tag: ${{ steps.createtag.outputs.created_tag }}
         name: ${{ steps.createtag.outputs.created_tag }}
-        draft: ${{ steps.latesttag.outputs.draft_release == 'true' }}
+        draft: ${{ inputs.draft_release == 'true' }}
         prerelease: ${{ steps.latesttag.outputs.prerelease == 'true' }}
         generateReleaseNotes: true
     - name: "summary"

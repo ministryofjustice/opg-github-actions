@@ -45,10 +45,13 @@ if [ "${found}" == "${ok}" ]; then
     tar -xzvf ${tarball}
     # look for this arch
     echo -n "Looking for binary for this runner [${artifactPath}/${hostBuild}]..."
+    # make sure the binary is an executable
     if [ -x "${hostBuild}" ]; then
         echo " ✅"
         RELEASE="${artifactPath}/${hostBuild}"
         echo -e "Set release: [${RELEASE}]"
+    # if we fail to get an executable bin then we reset listed to empty
+    # so it will trigger the download and self build block below
     else
         echo " ❌"
         echo -e "Failed to find binary for this runner, will trigger the self build... "
@@ -56,7 +59,7 @@ if [ "${found}" == "${ok}" ]; then
     fi
 else
     echo " ❌"
-    echo -e "Releases: "
+    echo -e "Available releases: "
     echo -e "${releases}"
 fi
 # If we failed to download the artifact using the action_ref directly
@@ -67,16 +70,18 @@ fi
 if [ "${found}" != "${ok}" ]; then
     # build from local 
     echo -n "Cloning action repostitory [${actionRepo}] to [${localBuildPath}] ..."
-
+    # if the target directory exists, remove it before cloning
     if [ -d "${localBuildPath}" ]; then
         rm -Rf ${localBuildPath}
     fi
+    # use the gh cli to clone so we dont have to work out the url path
     gh repo clone ${actionRepo} ${localBuildPath} -- -q
     echo "✅"
 
     cd ${localBuildPath}
-    
-    # If this is a pr, then use the gh cli to checkout for ease
+
+    # If this is a pr, then use the gh cli to checkout instead
+    # of mapping refs 
     if [[ "${actionRef}" == "refs/pull"* && "${actionRef}" == *"/merge" ]]; then        
         echo -e "This seems to be a pull request: [${actionRef}]"
         prNumber=$(echo "${actionRef}" | tr -cd '[:digit:]')
@@ -88,7 +93,7 @@ if [ "${found}" != "${ok}" ]; then
         checkout=$(git checkout -q -f ${actionRef} -- 2> /dev/null && echo "${ok}")
     fi
 
-    
+    # if the checkout worked, then all ok, otherwise we exit with a code 1
     if [ "${checkout}" == "${ok}" ]; then
         echo -e "Checked out action repo to [${actionRef}] [${localBuildPath}] ✅"
         echo -e "-- Commit --"
@@ -105,6 +110,7 @@ if [ "${found}" != "${ok}" ]; then
   
 fi
 
+# export the import variables and push them to the github output as well
 export RELEASE=${RELEASE}
 export SELF_BUILD=${SELF_BUILD}
 export TARGET_BUILD=${TARGET_BUILD}
