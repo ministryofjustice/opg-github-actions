@@ -10,94 +10,120 @@ inputs:
   test:
     description: "If set, tag is not pushed to the remote."
     default: ""
-  caller_repo_subfolder:
-    description: "Location to checkout active repository into. (Default: ./create-tag-caller-repository)"
-    default: "./create-tag-caller-repository"
-  ## Used to capture the intial values before they get overwritten
-  action_ref:
-    description: "Capture the starting value of github.action_ref. DO NOT SET"
-    default: ${{ github.action_ref }}
-  action_repository:
-    description: "Capture the starting value of github.action_repository. DO NOT SET"
-    default: ${{ github.action_repository }}
 
 
-outputs:
-  commitish:
-    description: "Inputed commitish variable."
-    value: ${{ inputs.commitish }}
-  original_tag_name:
-    description: "Inputed tag_name variable."
-    value: ${{ inputs.tag_name }}
-  test:
-    description: "Inputed test variable."
-    value: ${{ inputs.test }}
-
-  latest:
-    description: "Latest tag found at commitish provided. This will be the 'biggest' release number and may not match the created tag."
-    value: ${{steps.create_tag.outputs.latest_tag}}
-  created:
-    description: "The tag name that is created. It may differ from inputs.tag_name if this tag already exists. Compare to requested variable to see if these match"
-    value: ${{steps.create_tag.outputs.created_tag}}
+outputs:  
   requested:
     description: "The tag name that was requested to be created. May differ from the created tag if there is a name clash."
     value: ${{steps.create_tag.outputs.requested_tag}}
-
-  all:
-    description: "All tags (comma seperated) that are found to be pointing to inputted commish"
-    value: ${{steps.create_tag.outputs.all_tags}}
+  created:
+    description: "The tag name that is created. It may differ from inputs.tag_name if this tag already exists. Compare to requested variable to see if these match"
+    value: ${{steps.create_tag.outputs.created_tag}}
+  success:
+    description: "Boolean to say if the tag was created successfully"
+    value: ${{steps.create_tag.outputs.success}}
+  regenerated:
+    description: "Boolean to say if the tag clashed and had to be recreated"
+    value: ${{steps.create_tag.outputs.regenerated}}    
 
 runs:
   using: "composite"
   steps:
-    - name: "Checkout original repo to set folder"
+    ##### REPEATING BLOCK >>>
+    # Check running as a remote call
+    - name: "Ensure running as remote"
+      if: ${{ github.action_ref == '' }}
+      shell: bash
+      run: |
+        err="ERROR: this composite action must be run via full path (eg ministryofjustice/opg-github-actions/.github/actions/terraform-version@v2.3.1)"
+        echo -e "${err}"
+        echo -e "${err}" >&2
+        echo -e "${err}" >> $GITHUB_STEP_SUMMARY
+        exit 1
+    # Use bash shell script to fetch and work out releases    
+    - name: "Get release binary for this runner"
+      shell: bash
+      id: fetch
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_ACTION_REPOSITORY: "${{ github.action_repository }}"
+        GH_ACTION_REF: "${{ github.action_ref }}"
+        GH_WORKSPACE: "${{ github.workspace }}"
+        actionsRootDir: "${{ github.action_path }}/../"
+      run: |
+        echo -e "Get release binary"
+        cd ${actionsRootDir}
+        ./release-download.sh 2> $GITHUB_STEP_SUMMARY
+    ## LOCAL BUILD
+    # setup and build locally if the release data is not setup
+    - name: "Setup go"
+      uses: actions/setup-go@v4
+      if: ${{ steps.fetch.outputs.RELEASE == '' }}
+      with:
+        go-version-file: '${{ steps.fetch.outputs.SELF_BUILD }}/./go/go.mod'
+        cache: false
+    - name: Build directly from source
+      id: buildFromSource
+      if: ${{ steps.fetch.outputs.RELEASE == '' }}
+      shell: bash
+      env:
+        buildSource: '${{ steps.fetch.outputs.SELF_BUILD }}'
+        target: '${{ steps.fetch.outputs.TARGET_BUILD }}'
+      run: |
+        echo -e "Build from source"
+        cd ${buildSource}
+        echo -e "Building (with make) for ${target}"        
+        make release
+        release="${buildSource}/go/builds/${target}"
+        echo -e "RELEASE=${release}"
+        echo "RELEASE=${release}" >> $GITHUB_OUTPUT
+    ## DETERMINE BINARY PATH
+    - name: "Determine binary to use"
+      id: binary
+      shell: bash
+      env:
+        direct: ${{ steps.fetch.outputs.RELEASE }}
+        built: ${{ steps.buildFromSource.outputs.RELEASE }}
+      run: |
+        echo -e "Determine binary to use..."
+        binary=""
+        if [ "${direct}" != "" ]; then
+          binary="${direct}"
+        elif [ "${built}" != "" ]; then
+          binary="${built}"
+        fi
+        if [ "${binary}" == "" ]; then
+          err="error: no binary found"
+          echo -e "${err}"
+          echo -e "${err}" >&2
+          echo -e "${err}" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo -e "binary=${binary}"
+        echo "binary=${binary}" >> $GITHUB_OUTPUT
+    ### CHECKOUT
+    # get our the calling repo as we need to access files form there
+    - name: "Checkout calling repository"
       uses: actions/checkout@v4
       with:
         repository: ${{ github.repository }}
-        ref: ${{ github.head_ref }}
-        path: ${{inputs.caller_repo_subfolder}}
-        fetch-tags: true
+        ref: ${{ github.ref }}
+        path: '${{ github.workspace}}/_target'
         fetch-depth: 0
-    - name: "Checkout this actions repo into a subfolder at this version"
-      uses: actions/checkout@v4
-      with:
-        repository: ${{ inputs.action_repository }}
-        ref: ${{ inputs.action_ref }}
-        path: ./_ghcreatetagaction
-    - name: "Setup python"
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-    - name: pip
-      shell: bash
-      env:
-        PY_APP_DIR: "${{github.workspace}}/./_ghcreatetagaction/python"
-      run: |
-        echo -e "# pip setup:"
-        echo -e "PY_APP_DIR: ${PY_APP_DIR}"
-        cd ${PY_APP_DIR}
-        pip install -q -r ./requirements.txt
-        pip install -e .
+        fetch-tags: true
+    ##### <<< END REPEATING BLOCK 
+    #### COMMANDS
     - name: Create tag
       id: create_tag
       shell: bash
       env:
-        PY_APP_DIR: "${{github.workspace}}/./_ghcreatetagaction/python"
-        ACTION_SRC: ${{ github.action_path }}
-        TARGET_REPO: "${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
-        COMMITISH: ${{inputs.commitish}}
-        TAG_NAME: ${{inputs.tag_name}}
+        GITHUB_TOKEN: ${{ github.token }}
+        LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}
+        APP_BIN: "${{ steps.binary.outputs.binary }}"
         RUN_AS_TEST: ${{ inputs.test }}
+        repository: '${{ github.workspace}}/_target'
+        commitish: '${{ inputs.commitish }}'
+        regen: 'true'
+        push: ${{ inputs.test != 'true' }}
       run: |
-        echo -e "# create-tag setup:"
-        echo -e "PY_APP_DIR: ${PY_APP_DIR}"
-        echo -e "TARGET_REPO: ${TARGET_REPO}"
-        echo -e "COMMITISH: ${COMMITISH}"
-        echo -e "TAG_NAME: ${TAG_NAME}"
-        echo -e "RUN_AS_TEST: ${RUN_AS_TEST}"
-
-        cd ${PY_APP_DIR}
-        python ./actions/commands/create_tag.py \
-          --repository_root="${TARGET_REPO}" \
-          --commitish="${COMMITISH}" \
-          --tag_name="${TAG_NAME}"
+        echo -e "Running create-tag"
+        ${APP_BIN} create-tag --repository="${repository}" --commitish="${commitish}" --regen="${regen}" --push="${push}"
