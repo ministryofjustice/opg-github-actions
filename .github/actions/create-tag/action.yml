@@ -121,9 +121,10 @@ runs:
         APP_BIN: "${{ steps.binary.outputs.binary }}"
         RUN_AS_TEST: ${{ inputs.test }}
         repository: '${{ github.workspace}}/_target'
+        tagName: '${{ inputs.tag_name }}'
         commitish: '${{ inputs.commitish }}'
         regen: 'true'
         push: ${{ inputs.test != 'true' }}
       run: |
         echo -e "Running create-tag"
-        ${APP_BIN} create-tag --repository="${repository}" --commitish="${commitish}" --regen="${regen}" --push="${push}"
+        ${APP_BIN} create-tag --repository="${repository}" --tag-name="${tagName}" --commitish="${commitish}" --regen="${regen}" --push="${push}"
