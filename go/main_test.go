@@ -143,7 +143,7 @@ var (
 				Expected: map[string]string{"last_release": "v2.0.1", "last_prerelease": "v2.1.0-mybranchname.0"},
 			},
 			NextTagTest: nextTagFixture{
-				Expected: map[string]string{"next_tag": "v2.1.0-mybranchname.0"},
+				Expected: map[string]string{"next_tag": "v2.1.0-mybranchname.1"},
 			},
 			CreateTagTest: createTagFixture{
 				Expected: map[string]string{"created_tag": "v2.1.0-mybranchname.1", "regenerated": "false"},
