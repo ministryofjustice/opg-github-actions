@@ -15,24 +15,11 @@ inputs:
     default: ""
   length:
     description: "If set, trim the string to this length"
-  ## Used to capture the intial values before they get overwritten
-  action_ref:
-    description: "Capture the starting value of github.action_ref. DO NOT SET"
-    default: ${{ github.action_ref }}
-  action_repository:
-    description: "Capture the starting value of github.action_repository. DO NOT SET"
-    default: ${{ github.action_repository }}
 
 outputs:
   original:
     description: "Original string"
-    value: ${{ inputs.original }}
-  suffix:
-    description: "Original suffix"
-    value: ${{ inputs.suffix }}
-  length:
-    description: "Originally requested length"
-    value: ${{ steps.make_safe.outputs.length }}
+    value: ${{ inputs.original }}  
   full_length:
     description: "Alphanumeric, lowercase, but full length version of the original string."
     value: ${{ steps.make_safe.outputs.full_length }}
@@ -43,51 +30,93 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: "Checkout this actions repo into a subfolder at this version"
-      uses: actions/checkout@v4
+   ##### REPEATING BLOCK >>>
+    # Check running as a remote call
+    - name: "Ensure running as remote"
+      if: ${{ github.action_ref == '' }}
+      shell: bash
+      run: |
+        err="ERROR: this composite action must be run via full path (eg ministryofjustice/opg-github-actions/.github/actions/terraform-version@v2.3.1)"
+        echo -e "${err}"
+        echo -e "${err}" >&2
+        echo -e "${err}" >> $GITHUB_STEP_SUMMARY
+        exit 1
+    # Use bash shell script to fetch and work out releases    
+    - name: "Get release binary for this runner"
+      shell: bash
+      id: fetch
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_ACTION_REPOSITORY: "${{ github.action_repository }}"
+        GH_ACTION_REF: "${{ github.action_ref }}"
+        GH_WORKSPACE: "${{ github.workspace }}"
+        actionsRootDir: "${{ github.action_path }}/../"
+      run: |
+        echo -e "Get release binary"
+        cd ${actionsRootDir}
+        ./release-download.sh 2> $GITHUB_STEP_SUMMARY
+    ## LOCAL BUILD
+    # setup and build locally if the release data is not setup
+    - name: "Setup go"
+      uses: actions/setup-go@v4
+      if: ${{ steps.fetch.outputs.RELEASE == '' }}
       with:
-        repository: ${{ inputs.action_repository }}
-        ref: ${{ inputs.action_ref }}
-        path: ./_ghsafestringsaction
-    - name: "Setup python"
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-    - name: pip
+        go-version-file: '${{ steps.fetch.outputs.SELF_BUILD }}/./go/go.mod'
+        cache: false
+    - name: Build directly from source
+      id: buildFromSource
+      if: ${{ steps.fetch.outputs.RELEASE == '' }}
       shell: bash
       env:
-        PY_APP_DIR: "${{github.workspace}}./_ghsafestringsaction/python"
+        buildSource: '${{ steps.fetch.outputs.SELF_BUILD }}'
+        target: '${{ steps.fetch.outputs.TARGET_BUILD }}'
       run: |
-        echo -e "# pip setup:"
-        echo -e "PY_APP_DIR: ${PY_APP_DIR}"
-        cd ${PY_APP_DIR}
-        pip install -q -r ./requirements.txt
-        pip install -e .
+        echo -e "Build from source"
+        cd ${buildSource}
+        echo -e "Building (with make) for ${target}"        
+        make release
+        release="${buildSource}/go/builds/${target}"
+        echo -e "RELEASE=${release}"
+        echo "RELEASE=${release}" >> $GITHUB_OUTPUT
+    ## DETERMINE BINARY PATH
+    - name: "Determine binary to use"
+      id: binary
+      shell: bash
+      env:
+        direct: ${{ steps.fetch.outputs.RELEASE }}
+        built: ${{ steps.buildFromSource.outputs.RELEASE }}
+      run: |
+        echo -e "Determine binary to use..."
+        binary=""
+        if [ "${direct}" != "" ]; then
+          binary="${direct}"
+        elif [ "${built}" != "" ]; then
+          binary="${built}"
+        fi
+        if [ "${binary}" == "" ]; then
+          err="error: no binary found"
+          echo -e "${err}"
+          echo -e "${err}" >&2
+          echo -e "${err}" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo -e "binary=${binary}"
+        echo "binary=${binary}" >> $GITHUB_OUTPUT
+    
+    ##### <<< END REPEATING BLOCK 
+    ##### COMMANDS
     - name: Create Safe strings
       id: make_safe
       shell: bash
       env:
-        PY_APP_DIR: "${{github.workspace}}./_ghsafestringsaction/python"
-        ORIGINAL_STRING: ${{inputs.original}}
-        STRING_SUFFIX: ${{inputs.suffix}}
-        STRING_LENGTH: ${{inputs.length}}
-        CONDITIONAL_MATCH: ${{inputs.conditional_match}}
-        CONDITIONAL_VALUE: ${{inputs.conditional_value}}
+        GITHUB_TOKEN: ${{ github.token }}
+        LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}
         RUN_AS_TEST: ${{inputs.test}}
+        APP_BIN: "${{ steps.binary.outputs.binary }}"
+        original: ${{inputs.original}}
+        suffix: ${{inputs.suffix}}
+        length: ${{inputs.length}}
+        conditinalMatch: ${{inputs.conditional_match}}
+        conditionalValue: ${{inputs.conditional_value}}
       run: |
-        echo -e "# safe-strings setup:"
-        echo -e "PY_APP_DIR: ${PY_APP_DIR}"
-        echo -e "ORIGINAL_STRING: ${ORIGINAL_STRING}"
-        echo -e "STRING_SUFFIX: ${STRING_SUFFIX}"
-        echo -e "STRING_LENGTH: ${STRING_LENGTH}"
-        echo -e "CONDITIONAL_MATCH: ${CONDITIONAL_MATCH}"
-        echo -e "CONDITIONAL_VALUE: ${CONDITIONAL_VALUE}"
-        echo -e "RUN_AS_TEST: ${RUN_AS_TEST}"
-
-        cd ${PY_APP_DIR}
-        python ./actions/commands/safe_strings.py \
-          --string="${ORIGINAL_STRING}" \
-          --suffix="${STRING_SUFFIX}" \
-          --length="${STRING_LENGTH}" \
-          --conditional_match="${CONDITIONAL_MATCH}" \
-          --conditional_value="${CONDITIONAL_VALUE}"
+        echo -e "Running safe-string"
+        ${APP_BIN} safe-string --string="${original}" --length="${length}" --suffix="${suffix}" --conditional-match="${conditinalMatch}" --conditional-value-"${conditionalValue}"
