@@ -17,9 +17,9 @@ jobs:
 
 
 
-  pr_workflow:
+  build_and_tag:
     needs: [run_tests]
-    name: "PR Workflow"
+    name: "Build, tag & release "
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout self"
@@ -68,9 +68,9 @@ jobs:
             
 
   end:
-    name: 'End of PR workflow'
+    name: 'End of workflow'
     runs-on: 'ubuntu-latest'
-    needs: [run_tests, pr_workflow]
+    needs: [run_tests, build_and_tag]
     steps:
       - id: end
         name: End
