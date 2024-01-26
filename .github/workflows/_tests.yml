@@ -49,3 +49,9 @@ jobs:
       - name: Output results link
         run:  |
           echo "**[Test results](${{steps.report.outputs.url_html}})**" >> $GITHUB_STEP_SUMMARY
+      - name: Test failure
+        if: ${{ steps.report.outputs.conclusion != 'success' }}
+        run: |
+          echo "Test failed, please see summary: ${{steps.report.outputs.url_html}}"
+          exit 1
+      
