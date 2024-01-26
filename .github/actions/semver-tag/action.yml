@@ -86,10 +86,14 @@ runs:
       id: fetch
       env:
         GH_TOKEN: ${{ github.token }}
+        # use either the action_repository or repository
+        # - this so it can be used locally with its own workflows and by remote call
         GH_ACTION_REPOSITORY: ${{ github.action_repository || github.repository }}
         GH_ACTION_REF: ${{ github.action_ref || github.ref }}
         GH_WORKSPACE: "${{ github.workspace }}"
         SELF: ${{ github.repository == 'ministryofjustice/opg-github-actions' }}
+        # if an action path is set, then the bash script will be one dir above,
+        # otherwise we're operating on self, so path is based on the repository root
         actionsRootDir: ${{ github.action_path && format('{0}/../', github.action_path) || format('{0}/.github/actions/', github.workspace) }}
       run: |
         echo -e "Get release binary"
@@ -142,6 +146,16 @@ runs:
         fi
         echo -e "binary=${binary}"
         echo "binary=${binary}" >> $GITHUB_OUTPUT
+    ### CHECKOUT
+    # get our the calling repo as we need to access files form there
+    - name: "Checkout calling repository"
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ github.repository }}
+        ref: ${{ github.ref }}
+        path: '${{ github.workspace}}/_target'
+        fetch-depth: 0
+        fetch-tags: true
     #### COMMANDS ####
     # Get branch name info
     - name: "branch-name"
@@ -164,7 +178,7 @@ runs:
         RUN_AS_TEST: ${{ inputs.test }}   
         LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}     
         binPath: '${{ steps.binary.outputs.binary }}'
-        repo: '${{ steps.setup.outputs.targetDir }}'
+        repo: '${{ github.workspace}}/_target'
         branch: '${{ steps.branchname.outputs.branch_name }}'
         prerelease: '${{ inputs.prerelease }}'
         prereleaseSuffix: '${{ steps.branchname.outputs.safe }}'
@@ -185,7 +199,7 @@ runs:
         RUN_AS_TEST: ${{ inputs.test }}
         LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}     
         binPath: '${{ steps.binary.outputs.binary }}'
-        repo: '${{ steps.setup.outputs.targetDir }}'
+        repo: '${{ github.workspace}}/_target'
         branch: '${{ steps.branchname.outputs.branch_name }}'
         prerelease: '${{ steps.latesttag.outputs.prerelease }}'
         prereleaseSuffix: '${{ steps.latesttag.outputs.prerelease_suffix }}'        
@@ -215,7 +229,7 @@ runs:
         RUN_AS_TEST: ${{ inputs.test }}
         LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}     
         binPath: '${{ steps.binary.outputs.binary }}'
-        repo: '${{ steps.setup.outputs.targetDir }}'
+        repo: '${{ github.workspace}}/_target'
         commitish: '${{ steps.branchname.outputs.branch_name }}'
         tagName: '${{ steps.nexttag.outputs.next_tag }}'
         regen: 'true'
