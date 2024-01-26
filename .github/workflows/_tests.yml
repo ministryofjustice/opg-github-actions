@@ -36,7 +36,7 @@ jobs:
           echo "" > report.xml
           go test -v -json -bench -count=5 ./... > test-results.json 2>&1 || true
           go-junit-report -parser gojson -in test-results.json -out report.xml || true
-      # todo - want report to run and generate, but fail afterwards
+
       - name: Test Report
         id: report
         uses: dorny/test-reporter@v1
