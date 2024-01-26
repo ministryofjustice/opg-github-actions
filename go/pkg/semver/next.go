@@ -29,6 +29,8 @@ func Next(
 			tag.MustBumpPrerelease(prereleaseSuffix)
 		} else {
 			tag.BumpMajor()
+			tag.SetMinor(0)
+			tag.SetPatch(0)
 			tag.SetPrerelease("")
 		}
 	} else if counters.Minor > 0 {
@@ -48,6 +50,7 @@ func Next(
 			// based on the release tag
 			// => v1.5.0
 			tag.BumpMinor()
+			tag.SetPatch(0)
 			tag.SetPrerelease("")
 		}
 	} else if counters.Patch > 0 {

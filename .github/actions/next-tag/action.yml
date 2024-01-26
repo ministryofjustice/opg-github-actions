@@ -146,8 +146,19 @@ runs:
         defaultBump: '${{ inputs.default_bump }}'
         head: '${{ inputs.head_commitish }}'
         base: '${{ inputs.base_commitish }}'
+        extraMsg: '${{ github.event.pull_request.title }}${{ github.event.pull_request.body }}'
       run:
         echo -e "Running next-tag"
 
-        ${APP_BIN} next-tag --repository="${repository}" --base="${base}" --head="${head}" --last-release="${lastRelease}" --last-prerelease="${lastPrerelease}" --prerelease="${prerelease}" --prerelease-suffix="${prereleaseSuffix}" --with-v="${withV}" --default-bump="${defaultBump}"
+        ${APP_BIN} next-tag \
+          --repository="${repository}" \
+          --base="${base}" \
+          --head="${head}" \
+          --last-release="${lastRelease}" \
+          --last-prerelease="${lastPrerelease}" \
+          --prerelease="${prerelease}" \
+          --prerelease-suffix="${prereleaseSuffix}" \
+          --with-v="${withV}" \
+          --default-bump="${defaultBump}" \
+          --extra-message="${extraMsg}"
     

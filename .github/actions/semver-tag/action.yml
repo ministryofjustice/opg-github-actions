@@ -209,6 +209,7 @@ runs:
         lastPrerelease: '${{ steps.latesttag.outputs.last_prerelease }}'
         withV: '${{ inputs.with_v }}'
         defaultBump: '${{ inputs.default_bump }}'
+        extraMsg: '${{ github.event.pull_request.title }}${{ github.event.pull_request.body }}'
       run: |        
         ${binPath} next-tag \
           --repository="${repo}" \
@@ -219,7 +220,8 @@ runs:
           --last-release="${lastRelease}" \
           --last-prerelease="${lastPrerelease}" \
           --with-v="${withV}" \
-          --default-bump="${defaultBump}"
+          --default-bump="${defaultBump}" \
+          --extra-message="${extraMsg}"
     # create tag
     - name: "create-tag"
       id: createtag

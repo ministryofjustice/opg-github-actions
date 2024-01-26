@@ -61,8 +61,9 @@ type latestTagFixture struct {
 }
 
 type nextTagFixture struct {
-	Expected map[string]string
-	Error    bool
+	ExtraMessage string
+	Expected     map[string]string
+	Error        bool
 }
 type createTagFixture struct {
 	Expected map[string]string
@@ -309,6 +310,56 @@ var (
 				Expected: map[string]string{"created_tag": "v1.11.0", "regenerated": "false"},
 			},
 		},
+		// Test a release with an extra pr message that triggers a #major
+		// => v2.0.0
+		{
+			Prerelease: false,
+			EventSetup: eventSetup{
+				Event: "push",
+			},
+			RepoSetup: repoSetup{
+				Btc: []branchCommitTags{
+					{
+						Branch: "alpha",
+						TagCom: []tagCommit{
+							{Msg: "commit", Tag: "v0.0.1-beta.0"},
+							{Msg: "this commit should not be used #patch"},
+						},
+					},
+					{
+						Capture: true,
+						Branch:  "master",
+						TagCom: []tagCommit{
+							{Msg: "release", Tag: "v1.10.0"},
+							{Msg: "commit test", Tag: "v1.9.0"},
+							{Msg: "commit #minor"},
+						},
+					},
+					{
+						Branch: "beta",
+						TagCom: []tagCommit{
+							{Msg: "commit", Tag: "v2.0.0-beta.0"},
+							{Msg: "this commit should not be used either #major"},
+						},
+					},
+				},
+			},
+			// branch name test setup
+			BranchTest: branchFixture{
+				Event:    "push",
+				Expected: map[string]string{"full_length": "master", "safe": "master", "branch_name": "master"},
+			},
+			LatestTagTest: latestTagFixture{
+				Expected: map[string]string{"last_release": "v1.10.0", "last_prerelease": "", "all_releases": "v1.9.0, v1.10.0", "all_prereleases": "v0.0.1-beta.0, v2.0.0-beta.0"},
+			},
+			NextTagTest: nextTagFixture{
+				ExtraMessage: "#major messsage",
+				Expected:     map[string]string{"next_tag": "v2.0.0", "last_release": "v1.10.0", "last_prerelease": ""},
+			},
+			CreateTagTest: createTagFixture{
+				Expected: map[string]string{"created_tag": "v2.0.0", "regenerated": "false"},
+			},
+		},
 	}
 )
 
@@ -437,6 +488,7 @@ func TestSemverEndToEnd(t *testing.T) {
 			fmt.Sprintf(`--last-prerelease=%s`, latestTagResult["last_prerelease"]),
 			fmt.Sprintf(`--with-v=%s`, latestTagResult["with_v"]),
 			fmt.Sprintf(`--default-bump=%s`, string(semver.Patch)[1:]),
+			fmt.Sprintf(`--extra-message=%s`, f.NextTagTest.ExtraMessage),
 		})
 		if e != nil {
 			t.Errorf("error: unexpected (%s:%d) error:", nexttag.Name, i)

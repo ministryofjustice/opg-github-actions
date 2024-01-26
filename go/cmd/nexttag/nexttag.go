@@ -66,13 +66,14 @@ var FlagSet = flag.NewFlagSet(Name, flag.ExitOnError) // FlagSet is the group of
 
 // Input arguments
 var (
-	repoDir          = FlagSet.String("repository", "", "Root directory of the repository to use.")                                                                  // path to the git repo root
-	baseRef          = FlagSet.String("base", "", "Used for commit comparisons (typically 'main')")                                                                  // git ref locations for comparison
-	headRef          = FlagSet.String("head", "", "Used for commit comparisons (typically the feature-branch)")                                                      // git ref locations for comparison
-	prerelease       = FlagSet.String("prerelease", "false", "If set, looks for pre-release tag patterns (v1.1.1-${suffix}.${count})")                               // determines if this is a release
-	prereleaseSuffix = FlagSet.String("prerelease-suffix", "beta", "If prerelease is set, this string is used as the ${suffix} in the tag pattern. (Default: beta)") // used to search and generate a prerelease tag
-	lastPrerelease   = FlagSet.String("last-prerelease", "", "Last tag for this prerelease branch. Used as a basis for working out the next")                        // semver last prerelease
-	lastRelease      = FlagSet.String("last-release", "", "Last production release semver tag")                                                                      // the last production release tag
-	withV            = FlagSet.String("with-v", "false", "If set, forces adding a prefix to the generated tag")                                                      // decides if the new tag has a v prefix
-	defaultBump      = FlagSet.String("default-bump", "patch", "Default version trigger")                                                                            // semver bump
+	repoDir          = FlagSet.String("repository", "", "Root directory of the repository to use.")                                                                     // path to the git repo root
+	baseRef          = FlagSet.String("base", "", "Used for commit comparisons (typically 'main')")                                                                     // git ref locations for comparison
+	headRef          = FlagSet.String("head", "", "Used for commit comparisons (typically the feature-branch)")                                                         // git ref locations for comparison
+	prerelease       = FlagSet.String("prerelease", "false", "If set, looks for pre-release tag patterns (v1.1.1-${suffix}.${count})")                                  // determines if this is a release
+	prereleaseSuffix = FlagSet.String("prerelease-suffix", "beta", "If prerelease is set, this string is used as the ${suffix} in the tag pattern. (Default: beta)")    // used to search and generate a prerelease tag
+	lastPrerelease   = FlagSet.String("last-prerelease", "", "Last tag for this prerelease branch. Used as a basis for working out the next")                           // semver last prerelease
+	lastRelease      = FlagSet.String("last-release", "", "Last production release semver tag")                                                                         // the last production release tag
+	withV            = FlagSet.String("with-v", "false", "If set, forces adding a prefix to the generated tag")                                                         // decides if the new tag has a v prefix
+	defaultBump      = FlagSet.String("default-bump", "patch", "Default version trigger")                                                                               // semver bump
+	extraMessage     = FlagSet.String("extra-message", "", "Provides a way to pass along extra data from pr's such as title and body which may include and increment.") // extra increments
 )

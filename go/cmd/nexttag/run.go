@@ -7,6 +7,7 @@ import (
 	"opg-github-actions/pkg/safestrings"
 	"opg-github-actions/pkg/semver"
 
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
@@ -98,6 +99,12 @@ func Run(args []string) (output map[string]string, err error) {
 		slog.Error("commit diff failed")
 		slog.Error(err.Error())
 		return
+	}
+
+	// check if extra message data from pr was passed along
+	if *extraMessage != "" {
+		slog.Info("extra-message content was passed along, adding to commits: " + *extraMessage)
+		diff = append(diff, &object.Commit{Hash: plumbing.ZeroHash, Message: *extraMessage})
 	}
 
 	isPre, _ := safestrings.ToBool(*prerelease)
