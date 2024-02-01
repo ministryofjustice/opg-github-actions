@@ -233,6 +233,20 @@ runs:
           --tag-name="${tagName}" \
           --regen="${regen}" \
           --push="${push}" 
+    # Create release body
+    - name: "Generate release body content"
+      id: release_body
+      if: ${{ inputs.releases_enabled == 'true' }}
+      shell: bash
+      env:
+        TAGNAME: ${{ steps.createtag.outputs.created_tag }}
+        GH_COMMIT: '${{ steps.branchname.outputs.branch_name }}'
+        GH_REPO: ${{ github.repository }}
+        actionsRootDir: ${{ github.action_path && format('{0}/../', github.action_path) || format('{0}/.github/actions/', github.workspace) }}
+      run: |
+        echo -e "Get release notes"
+        cd ${actionsRootDir}
+        ./release-notes.sh 2> $GITHUB_STEP_SUMMARY
     # Create a release object
     - name: "Create a release"
       id: create_release      
@@ -243,7 +257,8 @@ runs:
         name: ${{ steps.createtag.outputs.created_tag }}
         draft: ${{ inputs.draft_release == 'true' }}
         prerelease: ${{ steps.latesttag.outputs.prerelease == 'true' }}
-        generateReleaseNotes: true
+        generateReleaseNotes: false
+        body: ${{ steps.release_body.outputs.RELEASE_BODY }}
     - name: "summary"
       if: ${{ (always()) && (inputs.show_verbose_summary != '') }}
       shell: bash

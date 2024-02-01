@@ -76,7 +76,7 @@ if [ "${found}" != "${ok}" ]; then
     fi
     # use the gh cli to clone so we dont have to work out the url path
     gh repo clone ${actionRepo} ${localBuildPath} -- -q
-    echo "✅"
+    echo " ✅"
 
     cd ${localBuildPath}
 
