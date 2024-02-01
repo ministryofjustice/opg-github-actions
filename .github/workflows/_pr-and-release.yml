@@ -61,9 +61,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAGNAME: ${{ steps.semver_tag.outputs.created_tag }}
+          LAST_TAG: ${{ steps.semver_tag.outputs.latest_tag_last_release }}
           GH_COMMIT: '${{ steps.semver_tag.outputs.branch_original }}'
           GH_REPO: ${{ github.repository }}
-          actionsRootDir: ${{ format('{0}/.github/actions/', github.workspace) }}
+          DEBUG: ${{ runner.debug }}
+          actionsRootDir: ${{ format('{0}/.github/actions/', github.workspace) }}          
         run: |
           echo -e "Get release notes"
           cd ${actionsRootDir}

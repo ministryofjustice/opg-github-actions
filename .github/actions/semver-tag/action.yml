@@ -241,8 +241,10 @@ runs:
       env:
         GH_TOKEN: ${{ github.token }}
         TAGNAME: ${{ steps.createtag.outputs.created_tag }}
+        LAST_TAG: ${{ steps.latesttag.outputs.last_release }}
         GH_COMMIT: '${{ steps.branchname.outputs.branch_name }}'
         GH_REPO: ${{ github.repository }}
+        DEBUG: ${{ runner.debug }}
         actionsRootDir: ${{ github.action_path && format('{0}/../', github.action_path) || format('{0}/.github/actions/', github.workspace) }}
       run: |
         echo -e "Get release notes"
