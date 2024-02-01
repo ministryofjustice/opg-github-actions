@@ -59,6 +59,7 @@ jobs:
         id: release_body
         shell: bash
         env:
+          GH_TOKEN: ${{ github.token }}
           TAGNAME: ${{ steps.semver_tag.outputs.created_tag }}
           GH_COMMIT: '${{ steps.semver_tag.outputs.branch_original }}'
           GH_REPO: ${{ github.repository }}

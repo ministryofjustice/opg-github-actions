@@ -239,6 +239,7 @@ runs:
       if: ${{ inputs.releases_enabled == 'true' }}
       shell: bash
       env:
+        GH_TOKEN: ${{ github.token }}
         TAGNAME: ${{ steps.createtag.outputs.created_tag }}
         GH_COMMIT: '${{ steps.branchname.outputs.branch_name }}'
         GH_REPO: ${{ github.repository }}
