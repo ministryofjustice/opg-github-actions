@@ -57,7 +57,6 @@ jobs:
       # generate our own release notes
       - name: "Generate release body content"
         id: release_body
-        if: ${{ inputs.releases_enabled == 'true' }}
         shell: bash
         env:
           TAGNAME: ${{ steps.semver_tag.outputs.created_tag }}
