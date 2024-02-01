@@ -54,18 +54,32 @@ jobs:
         with:          
           prerelease: ${{ github.ref != 'refs/heads/main' }}
           releases_enabled: false # disable the release as we want to attach artifacts
+      # generate our own release notes
+      - name: "Generate release body content"
+        id: release_body
+        if: ${{ inputs.releases_enabled == 'true' }}
+        shell: bash
+        env:
+          TAGNAME: ${{ steps.semver_tag.outputs.created_tag }}
+          GH_COMMIT: '${{ steps.semver_tag.outputs.branch_original }}'
+          GH_REPO: ${{ github.repository }}
+          actionsRootDir: ${{ format('{0}/.github/actions/', github.workspace) }}
+        run: |
+          echo -e "Get release notes"
+          cd ${actionsRootDir}
+          ./release-notes.sh 2> $GITHUB_STEP_SUMMARY
       ## release with build artifacts
       - name: "Create a release [${{ steps.semver_tag.outputs.created_tag }}]"
         id: create_release      
         uses: ncipollo/release-action@v1.13.0
         with:
+          generateReleaseNotes: false
           tag: ${{ steps.semver_tag.outputs.created_tag }}
           name: ${{ steps.semver_tag.outputs.created_tag }}
           draft: false
-          prerelease: ${{ github.ref != 'refs/heads/main' }}
-          generateReleaseNotes: true
+          prerelease: ${{ github.ref != 'refs/heads/main' }}          
           artifacts: '${{ github.workspace }}/go/builds/*.tar.gz'
-            
+          body: ${{ steps.release_body.outputs.RELEASE_BODY }}
 
   end:
     name: 'End of workflow'
