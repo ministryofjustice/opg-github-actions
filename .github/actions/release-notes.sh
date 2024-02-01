@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Using this script as the github api and several common release actions that make use
+# of the generate release notes feature don't check the length of the body that is
+# created beforehand so can then fail on max length (125k chars).
+
 target="${GH_REPO}"
 commit="${GH_COMMIT}"
 previous="${LAST_TAG}"
@@ -23,7 +27,7 @@ if [ "${genLen}" -le "0" ]; then
 fi
 
 echo " ✅"
-body=$(echo ${generatedNotes} | jq ".body")
+body=$(echo ${generatedNotes} | jq ".body" --raw-output)
 len=${#body}
 echo -n "Generated release note body is [${len}] characters"
 
@@ -37,11 +41,11 @@ else
     echo " ✅"
 fi
 
-#if [ "${debug}" == "1" ]; then
-echo -e "==="
-echo -e "${body}"
-echo -e "==="
-#fi
+if [ "${debug}" == "1" ]; then
+    echo -e "=== Release body content ==="
+    echo -e "${body}"
+    echo -e "======="
+fi
 # export variables back for use in workflow
 export RELEASE_BODY=${body}
 echo "RELEASE_BODY=${body}" >> $GITHUB_OUTPUT
