@@ -37,11 +37,11 @@ else
     echo " ✅"
 fi
 
-if [ "${debug}" == "1" ]; then
-    echo -e "==="
-    echo -e "${body}"
-    echo -e "==="
-fi
+#if [ "${debug}" == "1" ]; then
+echo -e "==="
+echo -e "${body}"
+echo -e "==="
+#fi
 # export variables back for use in workflow
 export RELEASE_BODY=${body}
 echo "RELEASE_BODY=${RELEASE_NOTE_BODY}" >> $GITHUB_OUTPUT
