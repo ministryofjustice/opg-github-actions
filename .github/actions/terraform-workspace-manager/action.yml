@@ -4,10 +4,12 @@ description: "Tool for terraform workspace manager. "
 inputs:
   aws_access_key_id:
     description: "AWS Access Key ID."
-    required: true
+    default: ""
+    required: false
   aws_secret_access_key:
     description: "AWS Secret Access Key."
-    required: true
+    default: ""
+    required: false
   aws_region:
     description: "AWS Region"
     default: 'eu-west-1'
@@ -23,6 +25,9 @@ inputs:
   time_to_protect:
     description: "Time in hours to protect workspace for"
     default: "24"
+  oidc_role:
+    description: "OIDC role to use if any"
+    default: ""
 
 outputs:
   protected_workspaces:
@@ -44,7 +49,13 @@ runs:
         wget ${TWM_SOURCE} -O ${HOME}/terraform-workspace-manager.tar.gz
         sudo tar -xvf ${HOME}/terraform-workspace-manager.tar.gz -C /usr/local/bin
         sudo chmod +x /usr/local/bin/terraform-workspace-manager
+    - id: get_session_name
+      shell: bash
+      env:
+        GITHUB_REPO_NAME: ${{ github.repository }}
+      run: echo "session=$(echo ${GITHUB_REPO_NAME} | tr '/' '-')-twm" >> $GITHUB_OUTPUT
     - id: aws_creds
+      if: ${{ inputs.oidc_role == '' }}
       name: Configure AWS Credentials For Terraform
       uses: aws-actions/configure-aws-credentials@v4.0.1
       with:
@@ -52,7 +63,16 @@ runs:
         aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
         aws-region: ${{ inputs.aws_region }}
         role-duration-seconds: 600
-        role-session-name: "${{github.repository}}-TWM"
+        role-session-name: ${{ steps.get_session_name.outputs.session }}
+    - id: aws_creds_oidc
+      if: ${{ inputs.oidc_role != '' }}
+      name: Configure AWS Credentials For Terraform
+      uses: aws-actions/configure-aws-credentials@v4.0.1
+      with:
+        role-to-assume: ${{ inputs.oidc_role }}
+        aws-region: ${{ inputs.aws_region }}
+        role-duration-seconds: 900
+        role-session-name: ${{ steps.get_session_name.outputs.session }}
     - id: register
       if: ${{ inputs.register_workspace != '' }}
       name: Register workspace name [${{inputs.register_workspace}}]
