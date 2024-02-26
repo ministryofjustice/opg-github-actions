@@ -22,7 +22,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
       - name: "Run make test_release_notes"
-        with:
+        env:
           GH_TOKEN: ${{ github.token }}
         run: |
           make test_release_notes
@@ -37,12 +37,12 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
       - name: "Run make test_release_download_self_build"
-        with:
+        env:
           GH_TOKEN: "${{ github.token }}"
         run: |
           make test_release_download_self_build
       - name: "Run make test_release_download_binary"
-        with:
+        env:
           GH_TOKEN: "${{ github.token }}"
         run: |
           make test_release_download_binary
