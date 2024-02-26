@@ -55,8 +55,12 @@ fi
 
 debugger
 
+echo -e "start ouput"
 # export variables back for use in workflow
-export RELEASE_BODY="${body}"
-echo "RELEASE_BODY<<$EOF" >> $GITHUB_OUTPUT
+
+echo "RELEASE_BODY<<EOF" >> $GITHUB_OUTPUT
 echo "${body}" >> $GITHUB_OUTPUT
-echo "$EOF" >> $GITHUB_OUTPUT
+echo "EOF" >> $GITHUB_OUTPUT
+
+echo -e "done ouput"
+export RELEASE_BODY="${body}"
