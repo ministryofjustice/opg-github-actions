@@ -12,8 +12,8 @@ USER_PROFILE := ~/.zprofile
 
 
 .DEFAULT_GOAL: all
-.PHONY: all requirements darwin_arm64 darwin_amd64 linux_x86_64 tests release
-.ONESHELL: all requirements darwin_arm64 darwin_amd64 linux_x86_64 tests release
+.PHONY: all requirements darwin_arm64 darwin_amd64 linux_x86_64 tests release test_release_notes test_release_download_self_build test_release_download_binary
+.ONESHELL: all requirements darwin_arm64 darwin_amd64 linux_x86_64 tests release test_release_notes test_release_download_self_build test_release_download_binary
 .EXPORT_ALL_VARIABLES:
 
 # when running , requires you run a target based on your arch
@@ -65,3 +65,19 @@ endif
 
 tests:
 	@cd $(PWD)/go && env LOG_LEVEL="error" LOG_TO="stdout" go test -v ./...
+
+# this checks release note generation for multi line echos to github_output work correctly
+test_release_notes:
+	@cd $(PWD)/.github/actions/; env DEBUG="1" TAGNAME="v3.0.0" GH_REPO="ministryofjustice/opg-github-actions" GH_COMMIT="main" LAST_TAG="v2.7.3" ./release-notes.sh
+
+# this checks the self build version returns correctly with file path
+test_release_download_self_build:
+	@mkdir -p $(PWD)/test-release-download-self/tmp/
+	@cd $(PWD)/.github/actions/; env DEBUG="1" GH_WORKSPACE="$(PWD)/test-release-download-self/tmp" GH_ACTION_REPOSITORY="ministryofjustice/opg-github-actions" GH_ACTION_REF="refs/heads/main" SELF="true" ./release-download.sh
+
+# this test overwrites checks we can find a prebuilt version of the linux release binary
+test_release_download_binary:
+	@mkdir -p $(PWD)/test-release-download-bin/tmp
+	@mkdir -p $(PWD)/test-release-download-bin/opg-gha
+	@mkdir -p $(PWD)/test-release-download-bin/opg-gha-build
+	@cd $(PWD)/.github/actions/; env DEBUG="1" hostBuild="linux_x86_64" GH_WORKSPACE="$(PWD)/test-release-download-bin/tmp" GH_ACTION_REPOSITORY="ministryofjustice/opg-github-actions" GH_ACTION_REF="v2.8.0-goversion.0" SELF="true" ./release-download.sh

@@ -12,6 +12,42 @@ jobs:
     uses: './.github/workflows/test-terraform-workspace-manager.yml'
     secrets: inherit
 
+  test_release_notes_script:
+    name: "release-notes-bash-script"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: "Run make test_release_notes"
+        with:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          make test_release_notes
+
+  test_release_download_script:
+    name: "release-download-bash-script"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: "Run make test_release_download_self_build"
+        with:
+          GH_TOKEN: "${{ github.token }}"
+        run: |
+          make test_release_download_self_build
+      - name: "Run make test_release_download_binary"
+        with:
+          GH_TOKEN: "${{ github.token }}"
+        run: |
+          make test_release_download_binary
+    
+
   test_go:
     name: "Go test suite"
     runs-on: ubuntu-latest

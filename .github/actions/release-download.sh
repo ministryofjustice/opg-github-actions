@@ -7,7 +7,11 @@ artifactPath="${basePath}/releases"
 tarball="release.tar.gz"
 os=$(uname | tr '[:upper:]' '[:lower:]')
 arch=$(uname -m)
-hostBuild="${os}_${arch}"
+
+if [ -z "${hostBuild}" ]; then    
+    hostBuild="${os}_${arch}"
+fi
+
 ok=">ok<"
 
 ####
@@ -20,7 +24,7 @@ TARGET_BUILD="${hostBuild}"
 # Look for the reference in the existing releases
 # - if we find that, we'll use that directly
 echo -n "Trying direct release download using [${actionRef}] [${actionRepo}]..."
-releases=$(gh release list --exclude-drafts=false --exclude-pre-releases=false -R "${actionRepo}")
+releases=$(gh release list --exclude-drafts=false --exclude-pre-releases=false -R "${actionRepo}" 2>/dev/null)
 listed=$( echo "${releases}" | grep "^${actionRef}" && echo "${ok}")
 found=$(echo "${listed}" | tail -n1)
 
@@ -35,7 +39,7 @@ if [ "${found}" == "${ok}" ]; then
     cd ${basePath}
     echo -e "Downloading existing release [${actionRef}]..."
     # download the release tar ball
-    gh release download "${actionRef}" -R "${actionRepo}" --clobber
+    gh release download "${actionRef}" -R "${actionRepo}" --clobber 2>/dev/null
     # move them
     echo -e "Moving tarball to [${artifactPath}]"
     mv *.tar.gz ${artifactPath}
@@ -59,8 +63,8 @@ if [ "${found}" == "${ok}" ]; then
     fi
 else
     echo " ❌"
-    echo -e "Available releases: "
-    echo -e "${releases}"
+    echo -e "\nAvailable releases: "
+    echo -e "${releases}\n"
 fi
 # If we failed to download the artifact using the action_ref directly
 # then its likely someone has used a prerelease or a git hash ref 
@@ -75,7 +79,7 @@ if [ "${found}" != "${ok}" ]; then
         rm -Rf ${localBuildPath}
     fi
     # use the gh cli to clone so we dont have to work out the url path
-    gh repo clone ${actionRepo} ${localBuildPath} -- -q
+    gh repo clone ${actionRepo} ${localBuildPath} -- -q 2>/dev/null
     echo " ✅"
 
     cd ${localBuildPath}
@@ -114,6 +118,10 @@ fi
 export RELEASE=${RELEASE}
 export SELF_BUILD=${SELF_BUILD}
 export TARGET_BUILD=${TARGET_BUILD}
+
+echo -e "SELF_BUILD=${SELF_BUILD}"
+echo -e "RELEASE=${RELEASE}"
+echo -e "TARGET_BUILD=${TARGET_BUILD}"
 
 echo "SELF_BUILD=${SELF_BUILD}" >> $GITHUB_OUTPUT
 echo "RELEASE=${RELEASE}" >> $GITHUB_OUTPUT
