@@ -10,30 +10,20 @@ inputs:
   branch_name:
     description: "Current branch name"
     default: "beta"
-  release_branches:
-    description: "Branches that would trigger this as a release."
-    default: "main,master"
-  caller_repo_subfolder:
-    description: "Location to checkout active repository into. (Default: ./latest-tag-caller-repository)"
-    default: "./latest-tag-caller-repository"
-  ## Used to capture the intial values before they get overwritten
-  action_ref:
-    description: "Capture the starting value of github.action_ref. DO NOT SET"
-    default: ${{ github.action_ref }}
-  action_repository:
-    description: "Capture the starting value of github.action_repository. DO NOT SET"
-    default: ${{ github.action_repository }}
+  release_branch:
+    description: "Branch that would trigger this as a release."
+    default: "main"
 
 outputs:
   prerelease:
     description: "Inputed prerelease variable."
-    value: ${{ steps.latest.outputs.prerelease_calculated }}
+    value: ${{ steps.latest.outputs.prerelease }}
   prerelease_suffix:
     description: "Inputed prerelease_suffix variable."
     value: ${{ steps.latest.outputs.prerelease_suffix }}
-  latest:
+  last_prerelease:
     description: "Latest tag found"
-    value: ${{steps.latest.outputs.latest}}
+    value: ${{steps.latest.outputs.last_prerelease}}
   last_release:
     description: "Last release tag found"
     value: ${{steps.latest.outputs.last_release}}
@@ -42,52 +32,103 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: "Checkout original repo to set folder"
+    ##### REPEATING BLOCK >>>
+    # Check running as a remote call
+    - name: "Ensure running as remote"
+      if: ${{ github.action_ref == '' }}
+      shell: bash
+      run: |
+        err="ERROR: this composite action must be run via full path (eg ministryofjustice/opg-github-actions/.github/actions/terraform-version@v2.3.1)"
+        echo -e "${err}"
+        echo -e "${err}" >&2
+        echo -e "${err}" >> $GITHUB_STEP_SUMMARY
+        exit 1
+    # Use bash shell script to fetch and work out releases    
+    - name: "Get release binary for this runner"
+      shell: bash
+      id: fetch
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_ACTION_REPOSITORY: "${{ github.action_repository }}"
+        GH_ACTION_REF: "${{ github.action_ref }}"
+        GH_WORKSPACE: "${{ github.workspace }}"
+        actionsRootDir: "${{ github.action_path }}/../"
+      run: |
+        echo -e "Get release binary"
+        cd ${actionsRootDir}
+        ./release-download.sh 2> $GITHUB_STEP_SUMMARY
+    ## LOCAL BUILD
+    # setup and build locally if the release data is not setup
+    - name: "Setup go"
+      uses: actions/setup-go@v4
+      if: ${{ steps.fetch.outputs.RELEASE == '' }}
+      with:
+        go-version-file: '${{ steps.fetch.outputs.SELF_BUILD }}/./go/go.mod'
+        cache: false
+    - name: Build directly from source
+      id: buildFromSource
+      if: ${{ steps.fetch.outputs.RELEASE == '' }}
+      shell: bash
+      env:
+        buildSource: '${{ steps.fetch.outputs.SELF_BUILD }}'
+        target: '${{ steps.fetch.outputs.TARGET_BUILD }}'
+      run: |
+        echo -e "Build from source"
+        cd ${buildSource}
+        echo -e "Building (with make) for ${target}"        
+        make release
+        release="${buildSource}/go/builds/${target}"
+        echo -e "RELEASE=${release}"
+        echo "RELEASE=${release}" >> $GITHUB_OUTPUT
+    ## DETERMINE BINARY PATH
+    - name: "Determine binary to use"
+      id: binary
+      shell: bash
+      env:
+        direct: ${{ steps.fetch.outputs.RELEASE }}
+        built: ${{ steps.buildFromSource.outputs.RELEASE }}
+      run: |
+        echo -e "Determine binary to use..."
+        binary=""
+        if [ "${direct}" != "" ]; then
+          binary="${direct}"
+        elif [ "${built}" != "" ]; then
+          binary="${built}"
+        fi
+        if [ "${binary}" == "" ]; then
+          err="error: no binary found"
+          echo -e "${err}"
+          echo -e "${err}" >&2
+          echo -e "${err}" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo -e "binary=${binary}"
+        echo "binary=${binary}" >> $GITHUB_OUTPUT
+    ### CHECKOUT
+    # get our the calling repo as we need to access files form there
+    - name: "Checkout calling repository"
       uses: actions/checkout@v4
       with:
         repository: ${{ github.repository }}
         ref: ${{ github.ref }}
-        path: ${{inputs.caller_repo_subfolder}}
-        fetch-tags: true
+        path: '${{ github.workspace}}/_target'
         fetch-depth: 0
-    - name: "Checkout this actions repo into a subfolder at this version"
-      uses: actions/checkout@v4
-      with:
-        repository: ${{ inputs.action_repository }}
-        ref: ${{ inputs.action_ref }}
-        path: ./_ghlatesttagaction
-    - name: pip
+        fetch-tags: true
+    ##### <<< END REPEATING BLOCK 
+    #### COMMANDS
+    - name: "latest-tag" 
+      id: "latest"
       shell: bash
       env:
-        PY_APP_DIR: "${{github.workspace}}/./_ghlatesttagaction/python"
-      run: |
-        echo -e "# pip setup:"
-        echo -e "PY_APP_DIR: ${PY_APP_DIR}"
-        cd ${PY_APP_DIR}
-        pip install -q -r ./requirements.txt
-        pip install -e .
-    - name: Get latest Tag
-      id: latest
-      shell: bash
-      env:
-        PY_APP_DIR: "${{github.workspace}}/./_ghlatesttagaction/python"
-        TARGET_REPO: "${{github.workspace}}/${{inputs.caller_repo_subfolder}}"
-        BRANCH_NAME: ${{inputs.branch_name}}
-        RELEASE_BRANCHES: ${{inputs.release_branches}}
-        PRERELEASE: ${{inputs.prerelease}}
-        PRERELEASE_SUFFIX: ${{inputs.prerelease_suffix}}
-      run: |
-        echo -e "# latest-tag setup:"
-        echo -e "PY_APP_DIR: ${PY_APP_DIR}"
-        echo -e "TARGET_REPO: ${TARGET_REPO}"
-        echo -e "BRANCH_NAME: ${BRANCH_NAME}"
-        echo -e "RELEASE_BRANCHES: ${RELEASE_BRANCHES}"
-        echo -e "PRERELEASE_SUFFIX: ${PRERELEASE_SUFFIX}"
+        GITHUB_TOKEN: ${{ github.token }}
+        LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}
+        APP_BIN: "${{ steps.binary.outputs.binary }}"
+        repository: '${{ github.workspace}}/_target'
+        branch: '${{ inputs.branch_name }}'
+        prerelease: '${{ inputs.prerelease }}'
+        prereleaseSuffix: '${{ inputs.prerelease_suffix }}'
+        releaseBranches: '${{ inputs.release_branch }}'
+      run:
+        echo -e "Running latest-tag"
 
-        cd ${PY_APP_DIR}
-        python ./actions/commands/latest_tag.py \
-          --repository_root="${TARGET_REPO}" \
-          --branch_name="${BRANCH_NAME}" \
-          --release_branches="${RELEASE_BRANCHES}" \
-          --prerelease="${PRERELEASE}" \
-          --prerelease_suffix="${PRERELEASE_SUFFIX}"
+        ${APP_BIN} latest-tag --repository="${repository}" --branch="${branch}" --prerelease="${prerelease}" --prerelease-suffix="${prereleaseSuffix}" --release-branches="${releaseBranches}"
+    

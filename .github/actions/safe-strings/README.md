@@ -28,8 +28,6 @@ Inputs:
 
 Outputs:
 - `original`
-- `length`
-- `suffix`
 - `full_length`
 - **`safe`**
 
@@ -55,12 +53,6 @@ This designed to allow flexibility in naming of production or other fixed enviro
 ### Outputs
 
 #### `original`
-Mirror of the input value.
-
-#### `length`
-Mirror of the input value.
-
-#### `suffix`
 Mirror of the input value.
 
 #### `full_length`

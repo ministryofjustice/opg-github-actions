@@ -1,14 +1,10 @@
-name: "[Data] Test python code"
+name: "[Data] Test application code"
 
 on:
   workflow_dispatch:
   workflow_call:
 
 jobs:
-  # test terraform-version
-  test_terraform_version:
-    name: "terraform-version"
-    uses: './.github/workflows/test-terraform-version.yml'
 
   # test terraform-workspace-manager
   test_terraform_workspace_manager:
@@ -16,38 +12,46 @@ jobs:
     uses: './.github/workflows/test-terraform-workspace-manager.yml'
     secrets: inherit
 
-  # test terraform-workspace-manager
-  test_semver_tag:
-    name: "semver-tag"
-    uses: './.github/workflows/test-semver-tag.yml'
-
-  # test the python library
-  test_python_app_code:
-    name: "pytest suite"
+  test_go:
+    name: "Go test suite"
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout"
         uses: actions/checkout@v4
-      - name: "Setup python"
-        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-      - name: "Setup pip"
-        run: |
-          cd ./python
-          pip install -q -r ./requirements.txt
-          pip install -e .
-      - name: "Setup and run pytest"
-        shell: bash
+          fetch-depth: 0
+          fetch-tags: true
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: './go/go.mod'        
+          cache: false
+      - name: "Running tests"
         env:
-          RUN_AS_TEST: "true"
+          LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}
+          LOG_TO: "stdout"
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |          
+          cd ./go
+          go install github.com/jstemmer/go-junit-report/v2@latest
+          echo "" > report.xml
+          go test -v -json -bench -count=5 ./... > test-results.json 2>&1 || true
+          go-junit-report -parser gojson -in test-results.json -out report.xml || true
+
+      - name: Test Report
+        id: report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Test Results          
+          fail-on-error: false
+          path: ./go/report.xml 
+          reporter: java-junit
+      - name: Output results link
+        run:  |
+          echo "**[Test results](${{steps.report.outputs.url_html}})**" >> $GITHUB_STEP_SUMMARY
+      - name: Test failure
+        if: ${{ steps.report.outputs.conclusion != 'success' }}
         run: |
-          cd ./python
-          git config --global user.name "pytest"
-          git config --global user.email "dummy@dummymail.com"
-          pytest ./tests/
-          echo "$(cat ./branch_name_results.md)" >> $GITHUB_STEP_SUMMARY
-          echo "$(cat ./create_tag_results.md)" >> $GITHUB_STEP_SUMMARY
-          echo "$(cat ./latest_tag_results.md)" >> $GITHUB_STEP_SUMMARY
-          echo "$(cat ./next_tag_results.md)" >> $GITHUB_STEP_SUMMARY
-          echo "$(cat ./safe_strings_results.md)" >> $GITHUB_STEP_SUMMARY
+          echo "Test failed, please see summary: ${{steps.report.outputs.url_html}}"
+          exit 1
+      
