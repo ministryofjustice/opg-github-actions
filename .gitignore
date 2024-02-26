@@ -17,3 +17,4 @@ env/
 # build & test result files that makefile creates
 go/builds**
 go/test-results.json
+test-release-download**
