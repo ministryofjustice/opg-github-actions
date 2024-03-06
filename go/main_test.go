@@ -359,6 +359,57 @@ var (
 				Expected: map[string]string{"created_tag": "v2.0.0", "regenerated": "false"},
 			},
 		},
+
+		// Test a release that has prerelease set to true, should still generate a non-prerelease value
+		// => v2.0.0
+		{
+			Prerelease: true,
+			EventSetup: eventSetup{
+				Event: "push",
+			},
+			RepoSetup: repoSetup{
+				Btc: []branchCommitTags{
+					{
+						Branch: "alpha",
+						TagCom: []tagCommit{
+							{Msg: "commit", Tag: "v0.0.2-beta.0"},
+							{Msg: "this commit should not be used #patch"},
+						},
+					},
+					{
+						Capture: true,
+						Branch:  "master",
+						TagCom: []tagCommit{
+							{Msg: "release", Tag: "v1.10.0"},
+							{Msg: "commit test", Tag: "v1.9.0"},
+							{Msg: "commit #minor"},
+						},
+					},
+					{
+						Branch: "beta",
+						TagCom: []tagCommit{
+							{Msg: "commit", Tag: "v2.0.0-beta.0"},
+							{Msg: "this commit should not be used either #major"},
+						},
+					},
+				},
+			},
+			// branch name test setup
+			BranchTest: branchFixture{
+				Event:    "push",
+				Expected: map[string]string{"full_length": "master", "safe": "master", "branch_name": "master"},
+			},
+			LatestTagTest: latestTagFixture{
+				Expected: map[string]string{"last_release": "v1.10.0"},
+			},
+			NextTagTest: nextTagFixture{
+				ExtraMessage: "#major messsage",
+				Expected:     map[string]string{"next_tag": "v2.0.0", "last_release": "v1.10.0", "last_prerelease": ""},
+			},
+			CreateTagTest: createTagFixture{
+				Expected: map[string]string{"created_tag": "v2.0.0", "regenerated": "false"},
+			},
+		},
 	}
 )
 

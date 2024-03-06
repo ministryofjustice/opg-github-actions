@@ -80,4 +80,5 @@ test_release_download_binary:
 	@mkdir -p $(PWD)/test-release-download-bin/tmp
 	@mkdir -p $(PWD)/test-release-download-bin/opg-gha
 	@mkdir -p $(PWD)/test-release-download-bin/opg-gha-build
-	@cd $(PWD)/.github/actions/; env DEBUG="1" hostBuild="linux_x86_64" GH_WORKSPACE="$(PWD)/test-release-download-bin/tmp" GH_ACTION_REPOSITORY="ministryofjustice/opg-github-actions" GH_ACTION_REF="v2.8.0-goversion.0" SELF="true" ./release-download.sh
+	@cd $(PWD)/.github/actions/; env DEBUG="1" hostBuild="linux_x86_64" GH_WORKSPACE="$(PWD)/test-release-download-bin/tmp" GH_ACTION_REPOSITORY="ministryofjustice/opg-github-actions" GH_ACTION_REF="v3.0.1-releasenotem.1" SELF="true" ./release-download.sh
+	@cd $(PWD)/.github/actions/; env DEBUG="1" hostBuild="linux_x86_64" GH_WORKSPACE="$(PWD)/test-release-download-bin/tmp" GH_ACTION_REPOSITORY="ministryofjustice/opg-github-actions" GH_ACTION_REF="v3.0.2" SELF="true" ./release-download.sh
