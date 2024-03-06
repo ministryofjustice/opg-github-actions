@@ -82,7 +82,7 @@ func TestLatestTag(t *testing.T) {
 		},
 	}
 	for _, f := range fixtures {
-		actual, e := process(f.Tags, f.Prerelease, "beta", "beta")
+		actual, e := process(f.Tags, f.Prerelease, "beta", "beta", "master,main")
 		if e != nil {
 			t.Errorf("unexpected error")
 			t.Error(e)
