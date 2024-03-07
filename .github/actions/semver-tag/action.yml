@@ -289,9 +289,11 @@ runs:
       env:
         app_binary: '${{ steps.binary.outputs.binary }}'
         target_dir: '${{ github.workspace}}/_target'
+        DEBUG: ${{ runner.debug }}
       run: |
         echo -e "Clean up created resources"        
-        git status
         rm -Rf "${{ env.app_binary }}"
         rm -Rf "${{ env.target_dir }}"
-        git status
+        if [ "${{ env.DEBUG }}" == "1" ]; then
+          git status
+        fi
