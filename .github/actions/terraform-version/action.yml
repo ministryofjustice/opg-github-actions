@@ -117,4 +117,20 @@ runs:
         echo -e "Running terraform-version"
 
         ${APP_BIN} terraform-version --directory="${Directory}" --versions-file="${VersionsFile}" --simple="${SimpleFile}"
+    ######
+    # clean up directories and other resources created
+    - name: "Clean up"
+      if: ${{ always() }}
+      shell: bash
+      env:
+        app_binary: '${{ steps.binary.outputs.binary }}'
+        target_dir: '${{ github.workspace}}/_target'
+        DEBUG: ${{ runner.debug }}
+      run: |
+        echo -e "Clean up created resources"        
+        rm -Rf "${{ env.app_binary }}"
+        rm -Rf "${{ env.target_dir }}"
+        if [ "${{ env.DEBUG }}" == "1" ]; then
+          git status
+        fi         
           

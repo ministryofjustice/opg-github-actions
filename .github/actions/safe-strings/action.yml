@@ -120,3 +120,17 @@ runs:
       run: |
         echo -e "Running safe-string"
         ${APP_BIN} safe-string --string="${original}" --length="${length}" --suffix="${suffix}" --conditional-match="${conditinalMatch}" --conditional-value="${conditionalValue}"
+    ######
+    # clean up directories and other resources created
+    - name: "Clean up"
+      if: ${{ always() }}
+      shell: bash
+      env:
+        app_binary: '${{ steps.binary.outputs.binary }}'
+        DEBUG: ${{ runner.debug }}
+      run: |
+        echo -e "Clean up created resources"        
+        rm -Rf "${{ env.app_binary }}"
+        if [ "${{ env.DEBUG }}" == "1" ]; then
+          git status
+        fi       
