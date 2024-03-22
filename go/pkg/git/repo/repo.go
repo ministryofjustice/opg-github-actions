@@ -75,10 +75,12 @@ func fetch(r *git.Repository) (err error) {
 			RemoteName: name,
 			RefSpecs:   specs,
 		})
-		if err != nil {
+
+		if err != nil && err != git.NoErrAlreadyUpToDate {
 			slog.Error("Error with fetch")
 			slog.Error(err.Error())
-			// return
+		} else if err != nil {
+			slog.Warn(err.Error())
 		}
 	}
 	return
