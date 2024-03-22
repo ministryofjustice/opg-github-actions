@@ -77,7 +77,8 @@ jobs:
               echo -e "Prelease failure" 
               exit 1
             fi
-            if [ "${{ env.ogPreRel }}" != "${{ env.prereleaseShouldBe }}" ]; then
+            # original should always be true as we dont change the param
+            if [ "${{ env.ogPreRel }}" != "true" ]; then
               echo -e "Original release failure"
               exit 1
             fi
