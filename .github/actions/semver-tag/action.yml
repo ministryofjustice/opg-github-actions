@@ -9,7 +9,7 @@ inputs:
     default: "main"
   prerelease:
     description: "If set, flags this as being a pre-release."
-    default: ""
+    default: "true"
   default_bump:
     description: "If no # triggers are found, bump the version by this. (Default: patch)"
     default: "patch"
@@ -45,6 +45,12 @@ outputs:
   latest_tag_last_release:
     description: "Output from latest_tag - the last_release value"
     value: ${{ steps.latesttag.outputs.last_release }}
+  latest_tag_prerelease:
+    description: "Output from latest_tag - the last_release value"
+    value: ${{ steps.latesttag.outputs.prerelease }}
+  latest_tag_original_prerelease:
+    description: "Output from latest_tag - the last_release value"
+    value: ${{ steps.latesttag.outputs.original_prerelease }}
 
   next_tag:
     description: "Output from next_tag - the next_tag value"

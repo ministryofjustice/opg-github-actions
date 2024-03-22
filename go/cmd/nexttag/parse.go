@@ -3,6 +3,7 @@ package nexttag
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"opg-github-actions/pkg/commonstrings"
 	"opg-github-actions/pkg/safestrings"
 	"os"
@@ -28,7 +29,9 @@ func parseArgs() error {
 	}
 
 	if *prerelease == "" {
-		return fmt.Errorf(commonstrings.ErrorArgumentMissing, "prerelease")
+		slog.Warn("--prerelease was empty, setting to 'true'")
+		s := "true"
+		prerelease = &s
 	} else if _, e := safestrings.ToBool(*prerelease); e != nil {
 		return fmt.Errorf(commonstrings.ErrorArumentNotBoolean, "prerelease", *prerelease)
 	}

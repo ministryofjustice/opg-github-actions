@@ -3,6 +3,7 @@ package latesttag
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"opg-github-actions/pkg/commonstrings"
 	"opg-github-actions/pkg/safestrings"
 	"os"
@@ -16,10 +17,11 @@ func parseArgs() error {
 		return fmt.Errorf(commonstrings.ErrorArgumentDirNotExist, "repository", *repositoryDir)
 	}
 	// prerelease
-	p := safestrings.Safestring(*prerelease)
 	if *prerelease == "" {
-		return fmt.Errorf(commonstrings.ErrorArgumentMissing, "prerelease")
-	} else if _, e := p.AsBool(); e != nil {
+		slog.Warn("--prerelease was empty, setting to 'true'")
+		s := "true"
+		prerelease = &s
+	} else if _, e := safestrings.ToBool(*prerelease); e != nil {
 		return fmt.Errorf(commonstrings.ErrorArumentNotBoolean, "prerelease", *prerelease)
 	}
 	// prerelease_suffix

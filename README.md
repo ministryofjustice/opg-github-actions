@@ -83,6 +83,30 @@ A shared terraform workspace tool to track and list workspaces protected from de
 
 ## Tests
 
+Tests can be run using commands with the `Makefile` from the root of this directory.
+
+### Using the `Makefile`
+
+Run all tests:
+
+```bash
+make tests
+```
+
+Run a specific test:
+
+```bash
+make test test-name="TestRemoteRepo"
+```
+
+Run a series of tests based on a patter:
+
+```bash
+make test test-name="TestSemver*"
+```
+
+### Running tests without make
+
 All `go` code can be tested using :
 
 ```bash
