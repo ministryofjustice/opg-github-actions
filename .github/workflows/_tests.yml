@@ -71,12 +71,12 @@ jobs:
           preRel: ${{ steps.semvertest.outputs.latest_tag_prerelease }}
           ogPreRel: ${{ steps.semvertest.outputs.latest_tag_original_prerelease }}
         run: |
-            if [ "${preRel}" != "false" ]; then
-              echo -e "Prelease should be false" 
+            if [ "${preRel}" != "true" ]; then
+              echo -e "Prelease should be true" 
               exit 1
             fi
-            if [ "${ogPreRel}" != "false" ]; then
-              echo -e "Original release should be false"
+            if [ "${ogPreRel}" != "true" ]; then
+              echo -e "Original release should be true"
               exit 1
             fi
           

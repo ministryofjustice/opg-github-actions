@@ -29,8 +29,8 @@ func parseArgs() error {
 	}
 
 	if *prerelease == "" {
-		slog.Warn("--prerelease was empty, setting to 'false'")
-		s := "false"
+		slog.Warn("--prerelease was empty, setting to 'true'")
+		s := "true"
 		prerelease = &s
 	} else if _, e := safestrings.ToBool(*prerelease); e != nil {
 		return fmt.Errorf(commonstrings.ErrorArumentNotBoolean, "prerelease", *prerelease)

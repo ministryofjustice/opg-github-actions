@@ -9,7 +9,7 @@ inputs:
     default: "main"
   prerelease:
     description: "If set, flags this as being a pre-release."
-    default: "false"
+    default: "true"
   default_bump:
     description: "If no # triggers are found, bump the version by this. (Default: patch)"
     default: "patch"

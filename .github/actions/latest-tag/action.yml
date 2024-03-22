@@ -3,7 +3,7 @@ description: "Use the branch name passed (can be either refs/heads/name-of-thing
 inputs:
   prerelease:
     description: "If set, looks for pre-release tag patterns (v1.1.1-${suffix}.${count})"
-    default: "false"
+    default: "true"
   prerelease_suffix:
     description: "If prerelease is set, this string is used as the ${suffix} in the tag pattern. (Default: beta)"
     default: "beta"
