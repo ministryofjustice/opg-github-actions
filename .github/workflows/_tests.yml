@@ -54,10 +54,6 @@ jobs:
   test_semver_action:
     name: "Semver when theres no prerelease flag (issue 48)"
     runs-on: ubuntu-latest
-    env:
-      prereleaseShouldBe: ${{ github.ref == 'refs/heads/main' && 'false' || 'true' }}
-      preRel: ${{ steps.semvertest.outputs.latest_tag_prerelease }}
-      ogPreRel: ${{ steps.semvertest.outputs.latest_tag_original_prerelease }}
     steps:
       - name: "Checkout"
         uses: actions/checkout@v4
@@ -71,6 +67,10 @@ jobs:
           test: true
           releases_enabled: false
       - name: "Check prerelease output is [${{ env.prereleaseShouldBe }}]"
+        env:
+          prereleaseShouldBe: ${{ github.ref == 'refs/heads/main' && 'false' || 'true' }}
+          preRel: ${{ steps.semvertest.outputs.latest_tag_prerelease }}
+          ogPreRel: ${{ steps.semvertest.outputs.latest_tag_original_prerelease }}
         run: |
             echo -e "Check prerelease information aligns"
             if [ "${{ env.preRel }}" != "${{ env.prereleaseShouldBe }}" ]; then
