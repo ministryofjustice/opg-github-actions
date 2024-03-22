@@ -11,7 +11,8 @@ jobs:
     name: "terraform-workspace-manager"
     uses: './.github/workflows/test-terraform-workspace-manager.yml'
     secrets: inherit
-
+  
+  # test the generation of release notes in the bash script
   test_release_notes_script:
     name: "release-notes-bash-script"
     runs-on: ubuntu-latest
@@ -26,7 +27,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           make test_release_notes
-
+  
+  # test the release download script works for self
+  # and a known version
   test_release_download_script:
     name: "release-download-bash-script"
     runs-on: ubuntu-latest
@@ -47,7 +50,37 @@ jobs:
         run: |
           make test_release_download_binary
     
-
+  # test semver runs with empty prerelease
+  test_semver_action:
+    name: "Semver when theres no prerelease flag (issue 48)"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - id: "semvertest"
+        name: "Test semver tag and release"
+        uses: ./.github/actions/semver-tag
+        with:          
+          test: true
+          releases_enabled: false
+      - name: "Check prerelease output is false"
+        env:
+          preRel: ${{ steps.semvertest.outputs.latest_tag_prerelease }}
+          ogPreRel: ${{ steps.semvertest.outputs.latest_tag_original_prerelease }}
+        run: |
+            if [ "${preRel}" != "false" ]; then
+              echo -e "Prelease should be false" 
+              exit 1
+            fi
+            if [ "${ogPreRel}" != "false" ]; then
+              echo -e "Original release should be false"
+              exit 1
+            fi
+          
+  # run the full go test suite for this app
   test_go:
     name: "Go test suite"
     runs-on: ubuntu-latest
@@ -72,7 +105,7 @@ jobs:
           echo "" > report.xml
           go test -v -json -bench -count=5 ./... > test-results.json 2>&1 || true
           go-junit-report -parser gojson -in test-results.json -out report.xml || true
-
+        # generate test report for this run
       - name: Test Report
         id: report
         uses: dorny/test-reporter@v1
