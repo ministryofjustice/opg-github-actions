@@ -62,10 +62,12 @@ endif
 	@cd $(PWD)/go && go test -json ./... > ./test-results.json
 	@echo All tests completed
 
-
+# Run a test (or series of tests) that match the pattern $name
+# example - `make test name="Test*" ` would run all tests
 test:
-	@cd $(PWD)/go && env LOG_LEVEL="warn" LOG_TO="stdout" go test -v -run="$(test-name)"
+	@cd $(PWD)/go && env LOG_LEVEL="warn" LOG_TO="stdout" go test -v ./... -run="$(name)"
 
+# Run all tests
 tests:
 	@cd $(PWD)/go && env LOG_LEVEL="warn" LOG_TO="stdout" go test -v ./...
 

@@ -96,9 +96,14 @@ make tests
 Run a specific test:
 
 ```bash
-make test test-name=TestRemoteRepo
+make test test-name="TestRemoteRepo"
 ```
 
+Run a series of tests based on a patter:
+
+```bash
+make test test-name="TestSemver*"
+```
 
 ### Running tests without make
 
