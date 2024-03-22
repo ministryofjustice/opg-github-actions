@@ -12,8 +12,8 @@ USER_PROFILE := ~/.zprofile
 
 
 .DEFAULT_GOAL: all
-.PHONY: all requirements darwin_arm64 darwin_amd64 linux_x86_64 tests release test_release_notes test_release_download_self_build test_release_download_binary
-.ONESHELL: all requirements darwin_arm64 darwin_amd64 linux_x86_64 tests release test_release_notes test_release_download_self_build test_release_download_binary
+.PHONY: all requirements darwin_arm64 darwin_amd64 linux_x86_64 tests test release test_release_notes test_release_download_self_build test_release_download_binary
+.ONESHELL: all requirements darwin_arm64 darwin_amd64 linux_x86_64 tests test release test_release_notes test_release_download_self_build test_release_download_binary
 .EXPORT_ALL_VARIABLES:
 
 # when running , requires you run a target based on your arch
@@ -63,8 +63,12 @@ endif
 	@echo All tests completed
 
 
+test:
+	@cd $(PWD)/go && env LOG_LEVEL="warn" LOG_TO="stdout" go test -v -run="$(test-name)"
+
 tests:
-	@cd $(PWD)/go && env LOG_LEVEL="error" LOG_TO="stdout" go test -v ./...
+	@cd $(PWD)/go && env LOG_LEVEL="warn" LOG_TO="stdout" go test -v ./...
+
 
 # this checks release note generation for multi line echos to github_output work correctly
 test_release_notes:
