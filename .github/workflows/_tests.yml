@@ -5,6 +5,50 @@ on:
   workflow_call:
 
 jobs:
+  # test timer action
+  test_timer_action:
+    name: "timer"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      # make sure it runs as it would in a pipeline
+      - name: "timer start"
+        id: "timer_start"
+        uses: './github/actions/timer.yml'
+      - name: "timer end"
+        id: "timer_end"
+        uses: './github/actions/timer.yml'
+        with:
+          stop: true
+          timestamp: ${{ steps.timer_start.outputs.start }}          
+      # test with known timestamps
+      - name: "known timestamps"
+        id: "duration_test"
+        env:
+          ts_start: '2024-03-26T08:47:21.029473+00:00'
+          ts_end: '2024-03-26T08:47:41.794944+00:00'
+        uses: './github/actions/timer.yml'
+        with:
+          stop: true
+          timestamp: ${{ env.ts_start }}
+          _test_end_timestamp: ${{ env.ts_end }}
+      # check duration output from known times
+      - name: "Confirmation duration"
+        env:
+          dur: ${{ steps.duration_test.outputs.duration }}
+          expected: "21"
+        shell: bash
+        run: |
+          echo -e "Checking duration is execpted result"
+          if [ "${{env.dur }}" != "${{ env.expected }}" ]; then
+            echo "Duration did not match"
+            exit 1
+          fi
+
 
   # test terraform-workspace-manager
   test_terraform_workspace_manager:

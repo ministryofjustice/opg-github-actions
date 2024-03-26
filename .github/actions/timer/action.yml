@@ -1,0 +1,119 @@
+name: "Timer"
+description: "Provide start / stop & duration information."
+
+inputs:
+  start:
+    description: "Instruct the timer to start"
+    default: "true"
+  stop:
+    description: "Instruct the timer to stop"
+    default: ""
+  timestamp:
+    description: "ISO 8601 formatted timestamp used with 'stop' to determine the duration"
+    default: ""
+  _test_end_timestamp:
+    description: "Used to overwrite the stop timestamp for testing"
+    default: ""
+
+
+outputs:
+  start:
+    description: "ISO 8601 timestmap with milliseconds to track the start time"
+    value: ${{ steps.start.outputs.start }}
+  end:
+    description: "ISO 8601 timestmap with milliseconds to track the end time"
+    value: ${{ steps.stop.outputs.stop }}
+
+  duration:
+    description: "Time (to the closest second) between the start and end timestamps."
+    value: ${{ steps.duration.outputs.as_seconds_rounded }}  
+  
+  duration_as_milliseconds:
+    description: "Time (in milliseconds with deciminals) between the start and end timestamps."
+    value: ${{ steps.duration.outputs.as_milliseconds }}
+  duration_as_seconds:
+    description: "Time (in seconds with deciminals) between the start and end timestamps."
+    value: ${{ steps.duration.outputs.as_seconds }}
+  duration_as_minutes:
+    description: "Time (in minutes with deciminals) between the start and end timestamps."
+    value: ${{ steps.duration.outputs.as_minutes }}
+  duration_as_hours:
+    description: "Time (in hours with deciminals) between the start and end timestamps."
+    value: ${{ steps.duration.outputs.as_hours }}
+
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Start"
+      id: "start"
+      shell: python
+      if: ${{ inputs.stop == '' && inputs.start == 'true'}}
+      run: |
+        import os
+        from datetime import datetime, timezone        
+        iso8601 = datetime.now(timezone.utc).isoformat()
+        print(f'start={iso8601}')
+
+        if "GITHUB_OUTPUT" in os.environ:
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+            print(f'start={iso8601}', file=fh)
+    
+    - name: "Stop"
+      id: "stop"
+      shell: python
+      if: ${{ inputs.stop == 'true' && inputs.timestamp != ''}}      
+      run: |
+        import os
+        from datetime import datetime, timezone
+        iso8601 = datetime.now(timezone.utc).isoformat()
+        print(f'stop={iso8601}')
+
+        if "GITHUB_OUTPUT" in os.environ:
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+            print(f'stop={iso8601}', file=fh)
+    
+    - name: "Duration"
+      id: "duration"
+      shell: python
+      if: ${{ inputs.stop == 'true' && inputs.timestamp != ''}}
+      env:
+        test_stop: ${{ inputs._test_end_timestamp }}
+        start: ${{ inputs.timestamp }}
+        # stop timestamp is either the generated version or the overwrite passed in
+        stop: ${{ inputs._test_end_timestamp != '' && inputs._test_end_timestamp || steps.stop.outputs.stop }}
+      run: |
+        import os
+        import sys
+        from datetime import datetime, timezone, timedelta
+
+        start_ts = datetime.fromisoformat(os.environ.get("start")) if "start" in os.environ else ""
+        stop_ts = datetime.fromisoformat(os.environ.get("stop")) if "stop" in os.environ else ""
+
+        if start_ts == "" or stop_ts == "":
+          print('timestamps not passed.', file=sys.stderr)
+          sys.exit()
+
+        delta = stop_ts - start_ts
+
+        milliseconds = delta / timedelta(milliseconds=1)
+        seconds = delta / timedelta(seconds=1)
+        minutes = delta / timedelta(minutes=1)
+        hours = delta / timedelta(hours=1)
+
+        print(f'as_milliseconds={milliseconds}')
+        print(f'as_seconds_rounded={round(seconds)}')
+        print(f'as_seconds={seconds}')
+        print(f'as_minutes={minutes}')
+        print(f'as_hours={hours}')
+
+        if "GITHUB_OUTPUT" in os.environ:
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+            print(f'as_milliseconds={milliseconds}')
+            print(f'as_seconds={seconds}')
+            print(f'as_seconds_rounded={round(seconds)}')
+            print(f'as_minutes={minutes}')
+            print(f'as_hours={hours}')
+
+
+      
