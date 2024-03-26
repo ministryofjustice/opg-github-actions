@@ -18,10 +18,10 @@ jobs:
       # make sure it runs as it would in a pipeline
       - name: "timer start"
         id: "timer_start"
-        uses: './github/actions/timer.yml'
+        uses: './github/actions/timer'
       - name: "timer end"
         id: "timer_end"
-        uses: './github/actions/timer.yml'
+        uses: './github/actions/timer'
         with:
           stop: true
           timestamp: ${{ steps.timer_start.outputs.start }}          
@@ -31,7 +31,7 @@ jobs:
         env:
           ts_start: '2024-03-26T08:47:21.029473+00:00'
           ts_end: '2024-03-26T08:47:41.794944+00:00'
-        uses: './github/actions/timer.yml'
+        uses: './github/actions/timer'
         with:
           stop: true
           timestamp: ${{ env.ts_start }}
