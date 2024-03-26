@@ -81,6 +81,14 @@ A shared terraform workspace tool to track and list workspaces protected from de
 
 [More Details](./.github/actions/terraform-workspace-manager/README.md)
 
+
+### Timer
+
+Used to calculate duration within github actions - for example measuring how long each docker image takes to build.
+
+[More Details](./.github/actions/timer/README.md)
+
+
 ## Tests
 
 Tests can be run using commands with the `Makefile` from the root of this directory.
