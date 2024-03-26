@@ -37,14 +37,14 @@ jobs:
           timestamp: ${{ env.ts_start }}
           _test_end_timestamp: ${{ env.ts_end }}
       # check duration output from known times
-      - name: "Confirmation duration"
+      - name: "Confirm duration match"
         env:
           dur: ${{ steps.duration_test.outputs.duration }}
           expected: "21"
         shell: bash
         run: |
           echo -e "Checking duration is execpted result"
-          if [ "${{env.dur }}" != "${{ env.expected }}" ]; then
+          if [ "${{ env.dur }}" != "${{ env.expected }}" ]; then
             echo "Duration did not match"
             exit 1
           fi

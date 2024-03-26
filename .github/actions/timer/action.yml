@@ -98,22 +98,23 @@ runs:
 
         milliseconds = delta / timedelta(milliseconds=1)
         seconds = delta / timedelta(seconds=1)
+        dur = round(seconds)
         minutes = delta / timedelta(minutes=1)
         hours = delta / timedelta(hours=1)
 
         print(f'as_milliseconds={milliseconds}')
-        print(f'as_seconds_rounded={round(seconds)}')
+        print(f'as_seconds_rounded={dur}')
         print(f'as_seconds={seconds}')
         print(f'as_minutes={minutes}')
         print(f'as_hours={hours}')
 
         if "GITHUB_OUTPUT" in os.environ:
           with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
-            print(f'as_milliseconds={milliseconds}')
-            print(f'as_seconds={seconds}')
-            print(f'as_seconds_rounded={round(seconds)}')
-            print(f'as_minutes={minutes}')
-            print(f'as_hours={hours}')
+            print(f'as_milliseconds={milliseconds}', file=fh)
+            print(f'as_seconds={seconds}', file=fh)
+            print(f'as_seconds_rounded={dur}', file=fh)
+            print(f'as_minutes={minutes}', file=fh)
+            print(f'as_hours={hours}', file=fh)
 
 
       
