@@ -7,6 +7,7 @@ require (
 	github.com/dchest/uniuri v1.2.0
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/google/go-github/v58 v58.0.0
+	github.com/google/go-github/v63 v63.0.0
 )
 
 require (
