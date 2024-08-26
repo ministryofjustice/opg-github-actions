@@ -60,7 +60,7 @@ runs:
     ## LOCAL BUILD
     # setup and build locally if the release data is not setup
     - name: "Setup go"
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       if: ${{ steps.fetch.outputs.RELEASE == '' }}
       with:
         go-version-file: '${{ steps.fetch.outputs.SELF_BUILD }}/./go/go.mod'
