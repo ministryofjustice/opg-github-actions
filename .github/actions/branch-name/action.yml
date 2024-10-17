@@ -1,6 +1,11 @@
 name: "Branch Name"
 description: "Get branch data. Example: ref/heads/main-123-456-789 => main-123-456-789. Also return safe-strings versions."
 
+inputs:
+  length:
+    description: "Max length of the safe string"
+    default: "12"
+
 outputs:
   branch_name:
     description: "Branch name"
@@ -32,7 +37,7 @@ runs:
         echo -e "${err}" >&2
         echo -e "${err}" >> $GITHUB_STEP_SUMMARY
         exit 1
-    # Use bash shell script to fetch and work out releases    
+    # Use bash shell script to fetch and work out releases
     - name: "Get release binary for this runner"
       shell: bash
       id: fetch
@@ -64,7 +69,7 @@ runs:
       run: |
         echo -e "Build from source"
         cd ${buildSource}
-        echo -e "Building (with make) for ${target}"        
+        echo -e "Building (with make) for ${target}"
         make release
         release="${buildSource}/go/builds/${target}"
         echo -e "RELEASE=${release}"
@@ -92,15 +97,16 @@ runs:
         fi
         echo -e "binary=${binary}"
         echo "binary=${binary}" >> $GITHUB_OUTPUT
-    ##### <<< END REPEATING BLOCK  
+    ##### <<< END REPEATING BLOCK
     #### COMMANDS
     # RUN THE COMMAND
     - name: Generate branch info
       id: safe
       shell: bash
-      env:        
+      env:
         LOG_LEVEL: ${{ runner.debug == '1' && 'debug' || 'error' }}
         APP_BIN: "${{ steps.binary.outputs.binary }}"
+        length: "${{ inputs.length }}"
       run: |
-        echo -e "Run branch-name"        
-        ${APP_BIN} branch-name --event-name="${GITHUB_EVENT_NAME}" --event-data-file="${GITHUB_EVENT_PATH}"
+        echo -e "Run branch-name"
+        ${APP_BIN} branch-name --event-name="${GITHUB_EVENT_NAME}" --event-data-file="${GITHUB_EVENT_PATH}" --length="${{ env.length }}"

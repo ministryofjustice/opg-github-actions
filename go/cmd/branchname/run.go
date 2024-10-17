@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-github/v58/github"
 )
 
-func process(eventType string, content []byte) (output map[string]string, err error) {
+func process(eventType string, length int, content []byte) (output map[string]string, err error) {
 	var (
 		branch  string                 = ""
 		headRef string                 = ""
@@ -45,7 +45,7 @@ func process(eventType string, content []byte) (output map[string]string, err er
 		"branch_name":    branch,
 		"head_commitish": headRef,
 		"base_commitish": baseRef,
-		"safe":           string(*clean.SafeAndShort(Length)),
+		"safe":           string(*clean.SafeAndShort(length)),
 		"full_length":    string(*clean.Safe()),
 	}
 
@@ -67,7 +67,12 @@ func Run(args []string) (output map[string]string, err error) {
 		return
 	}
 
-	output, err = process(*eventName, content)
+	len := DefaultMaxLength
+	if Length != nil {
+		len = *Length
+	}
+
+	output, err = process(*eventName, len, content)
 	output["event_data_file"] = *eventDataFile
 	return
 }

@@ -25,11 +25,12 @@ package branchname
 import "flag"
 
 var (
-	Name          = "branch-name"                           // Command name
-	FlagSet       = flag.NewFlagSet(Name, flag.ExitOnError) // Argument group
-	Length        = 12                                      // Max length
-	eventName     = FlagSet.String("event-name", "", "Name of the event: [pull_request|push]")
-	eventDataFile = FlagSet.String("event-data-file", "", "File where event environment data is stored")
+	DefaultMaxLength int = 12
+	Name                 = "branch-name"                                                // Command name
+	FlagSet              = flag.NewFlagSet(Name, flag.ExitOnError)                      // Argument group
+	Length               = FlagSet.Int("length", DefaultMaxLength, "Max length to use") // Max length
+	eventName            = FlagSet.String("event-name", "", "Name of the event: [pull_request|push]")
+	eventDataFile        = FlagSet.String("event-data-file", "", "File where event environment data is stored")
 )
 
 var eventNameChoices = []string{"pull_request", "push"}
