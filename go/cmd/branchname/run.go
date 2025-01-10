@@ -8,7 +8,7 @@ import (
 	"opg-github-actions/pkg/safestrings"
 	"strings"
 
-	"github.com/google/go-github/v58/github"
+	"github.com/google/go-github/v64/github"
 )
 
 func process(eventType string, length int, content []byte) (output map[string]string, err error) {
