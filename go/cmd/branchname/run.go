@@ -3,9 +3,9 @@ package branchname
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log/slog"
 	"opg-github-actions/pkg/safestrings"
+	"os"
 	"strings"
 
 	"github.com/google/go-github/v64/github"
@@ -62,7 +62,7 @@ func Run(args []string) (output map[string]string, err error) {
 		return
 	}
 
-	content, err := ioutil.ReadFile(*eventDataFile)
+	content, err := os.ReadFile(*eventDataFile)
 	if err != nil {
 		return
 	}
