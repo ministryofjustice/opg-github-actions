@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/google/go-github/v58/github"
+	"github.com/google/go-github/v64/github"
 )
 
 func TestEventPullRequest(base string, head string, title string, body string) []byte {
