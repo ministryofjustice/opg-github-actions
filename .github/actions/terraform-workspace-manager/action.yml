@@ -101,11 +101,13 @@ runs:
       env:
         TWM_ACCOUNT_ID: ${{inputs.aws_account_id}}
         TWM_IAM_ROLE: ${{inputs.aws_iam_role}}
+        TWM_ASSUME_ROLE: ${{inputs.assume_role}}
       run: |
         echo "List protected workspace"
         workspaces=$(terraform-workspace-manager \
             -aws-account-id=${TWM_ACCOUNT_ID} \
             -aws-iam-role=${TWM_IAM_ROLE} \
-            -protected-workspaces=true)
+            -protected-workspaces=true \
+            -assume-role=${TWM_ASSUME_ROLE})
         echo "list=${workspaces}" >> $GITHUB_OUTPUT
         echo "workspace=${{inputs.register_workspace}}" >> $GITHUB_OUTPUT
