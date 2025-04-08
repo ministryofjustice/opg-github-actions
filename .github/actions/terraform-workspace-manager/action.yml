@@ -28,6 +28,9 @@ inputs:
   oidc_role:
     description: "OIDC role to use if any"
     default: ""
+  assume_role:
+    description: "Assume the passed iam role instead of base role"
+    default: "true"
 
 outputs:
   protected_workspaces:
@@ -45,7 +48,7 @@ runs:
       shell: bash
       env:
         # previous: https://github.com/TomTucka/terraform-workspace-manager/releases/download/v0.3.1/terraform-workspace-manager_Linux_x86_64.tar.gz
-        TWM_SOURCE: https://github.com/ministryofjustice/opg-terraform-workspace-manager/releases/download/v0.3.2/opg-terraform-workspace-manager_Linux_x86_64.tar.gz
+        TWM_SOURCE: https://github.com/ministryofjustice/opg-terraform-workspace-manager/releases/download/v0.3.3/opg-terraform-workspace-manager_Linux_x86_64.tar.gz
       run: |
         wget ${TWM_SOURCE} -O ${HOME}/terraform-workspace-manager.tar.gz
         sudo tar -xvf ${HOME}/terraform-workspace-manager.tar.gz -C /usr/local/bin
@@ -83,13 +86,15 @@ runs:
         TWM_IAM_ROLE: ${{inputs.aws_iam_role}}
         TWM_TTL: ${{inputs.time_to_protect}}
         TWM_REGISTER_WORKSPACE: ${{inputs.register_workspace}}
+        TWM_ASSUME_ROLE: ${{inputs.assume_role}}
       run: |
         echo "Registering workspace"
         terraform-workspace-manager \
             -aws-account-id=${TWM_ACCOUNT_ID} \
             -aws-iam-role=${TWM_IAM_ROLE} \
             -time-to-protect=${TWM_TTL} \
-            -register-workspace=${TWM_REGISTER_WORKSPACE}
+            -register-workspace=${TWM_REGISTER_WORKSPACE} \
+            -assume-role=${TWM_ASSUME_ROLE}
     - id: list
       name: List workspaces
       shell: bash
