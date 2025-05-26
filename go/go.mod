@@ -2,7 +2,7 @@ module opg-github-actions
 
 go 1.23.0
 
-toolchain go1.23.9
+toolchain go1.24.3
 
 require (
 	facette.io/natsort v0.0.0-20181210072756-2cd4dd1e2dcb
