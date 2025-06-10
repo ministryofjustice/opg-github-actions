@@ -2,12 +2,12 @@ module opg-github-actions
 
 go 1.23.0
 
-toolchain go1.23.9
+toolchain go1.24.4
 
 require (
 	facette.io/natsort v0.0.0-20181210072756-2cd4dd1e2dcb
 	github.com/dchest/uniuri v1.2.0
-	github.com/go-git/go-git/v5 v5.16.0
+	github.com/go-git/go-git/v5 v5.16.1
 	github.com/google/go-github/v64 v64.0.0
 )
 
