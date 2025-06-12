@@ -60,6 +60,18 @@ func TestBranchNameCleaned(t *testing.T) {
 			Content:  testlib.TestEventPush("renovate/my-feature-thingy-update", "commit123", "commit1234"),
 			Expected: map[string]string{"full_length": "renovatemyfeaturethingyupdate", "safe": "renovatemyfeat", "branch_name": "renovate/my-feature-thingy-update"},
 		},
+		{
+			Length:   DefaultMaxLength,
+			Event:    "workflow_dispatch",
+			Content:  testlib.TestEventWorkflowDispatch("main"),
+			Expected: map[string]string{"full_length": "main", "safe": "main", "branch_name": "main"},
+		},
+		{
+			Length:   DefaultMaxLength,
+			Event:    "workflow_dispatch",
+			Content:  testlib.TestEventWorkflowDispatch("long/string-with-others?!.><~@#♥"),
+			Expected: map[string]string{"full_length": "longstringwithothers", "safe": "longstringwi", "branch_name": "long/string-with-others?!.><~@#♥"},
+		},
 	}
 	for _, f := range fixtures {
 		out, e := process(f.Event, f.Length, f.Content)

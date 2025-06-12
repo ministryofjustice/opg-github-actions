@@ -56,3 +56,17 @@ func TestEventPush(head string, before string, after string) []byte {
 
 	return b
 }
+
+func TestEventWorkflowDispatch(head string) []byte {
+	var (
+		ref    string = fmt.Sprintf("refs/heads/%s", head)
+	)
+
+	p := &github.WorkflowDispatchEvent{
+		Ref:    &ref,
+	}
+
+	b, _ := json.Marshal(p)
+
+	return b
+}

@@ -29,10 +29,10 @@ var (
 	Name                 = "branch-name"                                                // Command name
 	FlagSet              = flag.NewFlagSet(Name, flag.ExitOnError)                      // Argument group
 	Length               = FlagSet.Int("length", DefaultMaxLength, "Max length to use") // Max length
-	eventName            = FlagSet.String("event-name", "", "Name of the event: [pull_request|push]")
+	eventName            = FlagSet.String("event-name", "", "Name of the event: [pull_request|push|workflow_dispatch]")
 	eventDataFile        = FlagSet.String("event-data-file", "", "File where event environment data is stored")
 )
 
-var eventNameChoices = []string{"pull_request", "push"}
+var eventNameChoices = []string{"pull_request", "push", "workflow_dispatch"}
 
 var ErrorIncorrectEventType string = "error: expected event to be [%s], recieved [%s]"

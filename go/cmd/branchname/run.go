@@ -33,6 +33,12 @@ func process(eventType string, length int, content []byte) (output map[string]st
 		headRef = *event.After
 		baseRef = *event.Before
 		branch = strings.ReplaceAll(*event.Ref, "refs/heads/", "")
+	} else if eventType == "workflow_dispatch" {
+		event := &github.WorkflowDispatchEvent{}
+		err = json.Unmarshal(content, &event)
+		headRef = *event.Ref
+		baseRef = *event.Ref
+		branch = strings.ReplaceAll(*event.Ref, "refs/heads/", "")
 	} else {
 		err = fmt.Errorf(ErrorIncorrectEventType, strings.Join(eventNameChoices, ", "), eventType)
 		return
