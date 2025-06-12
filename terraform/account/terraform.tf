@@ -1,11 +1,13 @@
 terraform {
 
   backend "s3" {
-    bucket         = "opg.terraform.state"
-    key            = "github-actions/account/terraform.tfstate"
-    encrypt        = true
-    region         = "eu-west-1"
-    role_arn       = "arn:aws:iam::311462405659:role/gh-reusable-actions-ci"
+    bucket  = "opg.terraform.state"
+    key     = "github-actions/account/terraform.tfstate"
+    encrypt = true
+    region  = "eu-west-1"
+    assume_role = {
+      role_arn = "arn:aws:iam::311462405659:role/gh-reusable-actions-ci"
+    }
     dynamodb_table = "remote_lock"
   }
 
