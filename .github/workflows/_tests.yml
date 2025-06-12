@@ -111,7 +111,7 @@ jobs:
         # generate test report for this run
       - name: Test Report
         id: report
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v2
         if: always()
         with:
           name: Test Results          
