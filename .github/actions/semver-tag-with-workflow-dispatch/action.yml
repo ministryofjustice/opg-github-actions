@@ -1,0 +1,73 @@
+name: "Either create semver tag or return most recent one, depending on event"
+description: "Push/pull request events create a new tag, workflow dispatch events return the most recent"
+inputs:
+  test:
+    description: "If set, acts as a dry run without creating items"
+    default: ""
+  release_branch:
+    description: "Release branch main - if branch name matches this the tag change to be a production style v1.1.0 without suffixes. (Default: main)"
+    default: "main"
+  prerelease:
+    description: "If set, flags this as being a pre-release."
+    default: "true"
+  default_bump:
+    description: "If no # triggers are found, bump the version by this. (Default: patch)"
+    default: "patch"
+  with_v:
+    description: "New tag will start with a v prefix is this is any non-empty value."
+    default: "true"
+  releases_enabled:
+    description: "If set, allows the creation of a release when on a release branch (and not testing)"
+    default: "true"
+  draft_release:
+    description: "If true and a release is created it will be marked as draft, so not visible to other users"
+    default: "false"
+  show_verbose_summary:
+    description: "Set this to any value to show the more verbose summary output data"
+    default: "true"
+
+outputs:
+  tag:
+    description: The newest version of the tag, created if necessary
+    value: ${{ steps.output.tag }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Generate semver tag
+      id: semver_tag
+      github:
+        ref: ${{github.ref}}
+      if: github.event_name == 'pull_request' || github.event_name == 'push'
+      uses: ministryofjustice/opg-github-actions/.github/actions/semver-tag@${{github.ref}}
+      with:
+        test: ${{inputs.test}}
+        release_branch: ${{inputs.release_branch}}
+        prerelease: ${{inputs.prerelease}}
+        default_bump: ${{inputs.default_bump}}
+        with_v: ${{inputs.with_v}}
+        releases_enabled: ${{inputs.releases_enabled}}
+        draft_release: ${{inputs.draft_release}}
+        show_verbose_summary: ${{inputs.show_verbose_summary}}
+
+    - name: Return latest tag
+      id: latest_tag
+      if: github.event_name == 'workflow_dispatch'
+      uses: ministryofjustice/opg-github-actions/.github/actions/latest-tag@${{github.ref}}
+      with:
+        branch_name: ${{ github.event.workflow_dispatch.branch }}
+        release_branch: ${{inputs.release_branch}}
+
+    - name: Output
+      id: output
+      shell: bash
+      run: |
+        if [ ${{ github.event_name }} == "workflow_dispatch" ]
+        then
+          tag=${{ steps.semver_tag.outputs.created_tag }}
+        else
+          tag=${{ steps.latest_tag.outputs.last_release }}
+        fi
+
+        echo "tag=$tag" >> $GITHUB_OUTPUT
+
