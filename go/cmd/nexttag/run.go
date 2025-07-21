@@ -29,7 +29,7 @@ func process(
 	)
 	output = map[string]string{}
 
-	// get counters and what to bump by.
+	// get counters and what to bump by
 	counter := commits.VersionBumpsInCommits(commitDiff, defaultBump)
 	if counter.Major > 0 {
 		by = semver.Major
