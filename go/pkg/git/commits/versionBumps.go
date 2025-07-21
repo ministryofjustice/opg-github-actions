@@ -1,6 +1,7 @@
 package commits
 
 import (
+	"fmt"
 	"opg-github-actions/pkg/semver"
 	"strings"
 
@@ -14,6 +15,9 @@ func VersionBumpsInCommits(commits []*object.Commit, defaultInc semver.Increment
 	if !strings.HasPrefix(string(defaultInc), "#") && defaultInc != semver.Pre {
 		defaultInc = semver.Increment("#" + string(defaultInc))
 	}
+
+	fmt.Printf("DEFAULT INC1: %v\n", string(defaultInc))
+
 	strs := []string{}
 	for _, c := range commits {
 		msg := strings.ToLower(c.Message)

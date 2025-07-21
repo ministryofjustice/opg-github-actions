@@ -21,6 +21,8 @@ func process(
 	withV bool,
 ) (output map[string]string, err error) {
 
+	fmt.Printf("DEFAULT BUMP: %v\n", string(defaultBump))
+
 	var (
 		latestRelease    *semver.Semver = nil
 		latestPrerelease *semver.Semver = nil
@@ -31,6 +33,7 @@ func process(
 
 	// get counters and what to bump by
 	counter := commits.VersionBumpsInCommits(commitDiff, defaultBump)
+	
 	if counter.Major > 0 {
 		by = semver.Major
 	} else if counter.Minor > 0 {
