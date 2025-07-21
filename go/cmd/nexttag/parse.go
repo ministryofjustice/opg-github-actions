@@ -48,8 +48,8 @@ func parseArgs() error {
 
 	if *defaultBump == "" {
 		return fmt.Errorf(commonstrings.ErrorArgumentMissing, "default-bump")
-	} else if *defaultBump != "#major" && *defaultBump != "#minor" && *defaultBump != "#patch" {
-		return fmt.Errorf(commonstrings.ErrorArgumentInvalidChoice, "default-bump", "#major,#minor,#patch", *defaultBump)
+	} else if *defaultBump != "major" && *defaultBump != "minor" && *defaultBump != "patch" {
+		return fmt.Errorf(commonstrings.ErrorArgumentInvalidChoice, "default-bump", "major,minor,patch", *defaultBump)
 	}
 	return nil
 }
