@@ -1,7 +1,6 @@
 package commits
 
 import (
-	"fmt"
 	"opg-github-actions/pkg/semver"
 	"strings"
 
