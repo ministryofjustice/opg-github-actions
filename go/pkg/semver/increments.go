@@ -54,6 +54,8 @@ func VersionBumpCount(data []string, defaultIncrement Increment) (counter *Incre
 	counter = &IncrementCounters{}
 	// check within the strings
 	for _, str := range data {
+    	fmt.Printf("Commit being scanned for bump: %s\n", str)
+
 		if strings.Contains(str, string(Major)) {
 			counter.Major++
 		}
@@ -70,7 +72,7 @@ func VersionBumpCount(data []string, defaultIncrement Increment) (counter *Incre
 		case Major:
 			counter.Major++
 		case Minor:
-			counter.Major++
+			counter.Minor++
 		case Patch:
 			counter.Patch++
 		}
