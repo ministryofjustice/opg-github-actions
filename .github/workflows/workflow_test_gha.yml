@@ -26,4 +26,4 @@ jobs:
       # pull in local version
       - id: "local_action"
         name: "Local"
-        uses: ./test-action
+        uses: ./actions/test
