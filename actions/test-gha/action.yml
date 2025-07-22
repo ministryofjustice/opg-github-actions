@@ -1,8 +1,8 @@
-name: "Test Action"
-description: "Do not use. This action is used only to help determine the state when an action is called via `use:`."
-
-
-
+name: "[Test] GitHub Action setup"
+description: >
+  DO NOT USE. This action is only meant for discovery and testing purposed to help
+  determine values of various github.action_$x context values when importing from
+  external workflows in various ways (semver tag, sha, latest etc).
 
 runs:
   using: "composite"
@@ -20,11 +20,7 @@ runs:
     - name: "list action path"
       shell: bash
       env:
-        root_path: "${{ github.action_path }}/../"
+        root_path: "${{ github.action_path }}/../../"
       run: |
         cd ${{ env.root_path }}
-        ls -lat *
-    - name: "env dump"
-      shell: bash
-      run: |
-        env
+        ls -lat
