@@ -11,7 +11,6 @@ import (
 //
 // Converts the commits to strings and then uses semver.VersionBumpCount
 func VersionBumpsInCommits(commits []*object.Commit, defaultInc semver.Increment) (counters *semver.IncrementCounters) {
-
 	strs := []string{}
 	for _, c := range commits {
 		msg := strings.ToLower(c.Message)

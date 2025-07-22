@@ -70,11 +70,10 @@ func VersionBumpCount(data []string, defaultIncrement Increment) (counter *Incre
 		case Major:
 			counter.Major++
 		case Minor:
-			counter.Major++
+			counter.Minor++
 		case Patch:
 			counter.Patch++
 		}
 	}
-
 	return
 }

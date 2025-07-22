@@ -6,6 +6,7 @@ import (
 	"opg-github-actions/pkg/git/commits"
 	"opg-github-actions/pkg/safestrings"
 	"opg-github-actions/pkg/semver"
+	"strings"
 
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -20,7 +21,6 @@ func process(
 	defaultBump semver.Increment,
 	withV bool,
 ) (output map[string]string, err error) {
-
 	var (
 		latestRelease    *semver.Semver = nil
 		latestPrerelease *semver.Semver = nil
@@ -31,6 +31,7 @@ func process(
 
 	// get counters and what to bump by
 	counter := commits.VersionBumpsInCommits(commitDiff, defaultBump)
+	
 	if counter.Major > 0 {
 		by = semver.Major
 	} else if counter.Minor > 0 {
@@ -109,8 +110,11 @@ func Run(args []string) (output map[string]string, err error) {
 
 	isPre, _ := safestrings.ToBool(*prerelease)
 	prefix, _ := safestrings.ToBool(*withV)
-	bump := semver.MustIncrement(semver.NewIncrement(*defaultBump))
 
+	if !strings.HasPrefix(string(*defaultBump), "#") {
+		*defaultBump = ("#" + string(*defaultBump))
+	}
+	bump := semver.MustIncrement(semver.NewIncrement(*defaultBump))
 	output, err = process(
 		diff,
 		isPre, *prereleaseSuffix,
