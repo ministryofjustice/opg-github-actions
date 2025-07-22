@@ -20,7 +20,7 @@ runs:
     - name: "list action path"
       shell: bash
       env:
-        root_path: "${{ github.action_path }}/../../"
+        root_path: "${{ github.action_path }}/../"
       run: |
         cd ${{ env.root_path }}
         ls -lat *
