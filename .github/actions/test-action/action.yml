@@ -22,8 +22,8 @@ runs:
       env:
         root_path: "${{ github.action_path }}/../../../"
       run: |
-        ls -laRt ${{ github.action_path }}*
-        ls -laRt ${{ env.root_path }}*
+        cd ${{ env.root_path }}
+        ls -lat *
     - name: "env dump"
       shell: bash
       run: |
