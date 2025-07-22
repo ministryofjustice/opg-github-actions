@@ -3,24 +3,25 @@ description: "Do not use. This action is used only to help determine the state w
 
 
 
+
 runs:
   using: "composite"
   steps:
     - name: "github action info"
       shell: bash
+      env:
+        action_repo: ${{ github.action_repository }}
+        action_path: ${{ github.action_path }}
+        action_ref: ${{ github.action_ref }}
       run: |
-        echo "action_repository: ${{ github.action_repository }}"
-        echo "action_path: ${{ github.action_path }}"
-        echo "action_ref: ${{ github.action_ref }}"
-    - name: "path"
-      shell: bash
-      run: |
-        pwd
-    - name: "list"
-      shell: bash
-      run: |
-        ls -laRt
-    - name: "list action"
+        echo "action_repository: ${{ env.action_repository }}"
+        echo "action_path: ${{ env.action_path }}"
+        echo "action_ref: ${{ env.action_ref }}"
+    - name: "list action path"
       shell: bash
       run: |
         ls -laRt ${{ github.action_path }}*
+    - name: "env dump"
+      shell: bash
+      run: |
+        env
