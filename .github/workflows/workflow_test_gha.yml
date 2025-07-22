@@ -16,6 +16,13 @@ jobs:
     name: "TEST GitHub Action"
     runs-on: ubuntu-latest
     steps:
+      # checkout self
+      - name: "Checkout"
+        id: checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       # pull in local version
       - id: "local_action"
         name: "Local"
