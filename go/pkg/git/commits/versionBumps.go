@@ -1,7 +1,6 @@
 package commits
 
 import (
-	"fmt"
 	"opg-github-actions/pkg/semver"
 	"strings"
 
@@ -12,8 +11,6 @@ import (
 //
 // Converts the commits to strings and then uses semver.VersionBumpCount
 func VersionBumpsInCommits(commits []*object.Commit, defaultInc semver.Increment) (counters *semver.IncrementCounters) {
-	fmt.Printf("DEFAULT INC1: %v\n", string(defaultInc))
-
 	strs := []string{}
 	for _, c := range commits {
 		msg := strings.ToLower(c.Message)

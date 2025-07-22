@@ -21,9 +21,6 @@ func process(
 	defaultBump semver.Increment,
 	withV bool,
 ) (output map[string]string, err error) {
-
-	fmt.Printf("DEFAULT BUMP: %v\n", string(defaultBump))
-
 	var (
 		latestRelease    *semver.Semver = nil
 		latestPrerelease *semver.Semver = nil
@@ -113,12 +110,11 @@ func Run(args []string) (output map[string]string, err error) {
 
 	isPre, _ := safestrings.ToBool(*prerelease)
 	prefix, _ := safestrings.ToBool(*withV)
-	fmt.Printf("DEFAULT FROM SCRIPT BUMP: %v\n", string(*defaultBump))
+
 	if !strings.HasPrefix(string(*defaultBump), "#") {
 		*defaultBump = ("#" + string(*defaultBump))
 	}
 	bump := semver.MustIncrement(semver.NewIncrement(*defaultBump))
-	fmt.Printf("BUMP MUST INC BUMP: %v\n", string(bump))
 	output, err = process(
 		diff,
 		isPre, *prereleaseSuffix,

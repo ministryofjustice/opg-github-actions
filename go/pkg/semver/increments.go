@@ -67,12 +67,6 @@ func VersionBumpCount(data []string, defaultIncrement Increment) (counter *Incre
 		}
 	}
 	// deal with default element
-	fmt.Printf("Major before: %v\n", counter.Major)
-	fmt.Printf("Minor before: %v\n", counter.Minor)
-	fmt.Printf("Patch before: %v\n", counter.Patch)
-
-	fmt.Printf("DEFAULT INC: %v\n", string(defaultIncrement))
-
 	if counter.Major == 0 && counter.Minor == 0 && counter.Patch == 0 {
 		switch defaultIncrement {
 		case Major:
@@ -83,8 +77,5 @@ func VersionBumpCount(data []string, defaultIncrement Increment) (counter *Incre
 			counter.Patch++
 		}
 	}
-	fmt.Printf("Major after: %v\n", counter.Major)
-	fmt.Printf("Minor after: %v\n", counter.Minor)
-	fmt.Printf("Patch after: %v\n", counter.Patch)
 	return
 }
