@@ -19,8 +19,11 @@ runs:
         echo "action_ref: ${{ env.action_ref }}"
     - name: "list action path"
       shell: bash
+      env:
+        root_path: "${{ github.action_path }}/../../../"
       run: |
         ls -laRt ${{ github.action_path }}*
+        ls -laRt ${{ env.root_path }}*
     - name: "env dump"
       shell: bash
       run: |

@@ -8,7 +8,7 @@ github.action_repository
 github.action_ref
 ```
 
-Both `github.action_repository` and `github.action_ref` have to be referenced within `env` to be readable
+Both `github.action_repository` and `github.action_ref` have to be referenced within `env` to be readable.
 
 You can read more about them in the [github reference doc](https://docs.github.com/en/actions/reference/contexts-reference#github-context).
 
@@ -29,8 +29,12 @@ When being used within from another repository like this:
 ```
     - id: "remote_action"
       name: "Remote action"
-      uses: ministryofjustice/opg-github-actions/.github/actions/test-action@v-restructured-test
+      uses: ministryofjustice/opg-github-actions/.github/actions/test-action@v-test
 ```
+
+In this case, `github.action_repository` is the name of this repository and `github.action_ref` is the tag name (`v-test` in the above example)
+
+The `github.action_path` points to the sub action folder
 
 
 ## Used externally by via pinned sha
@@ -40,5 +44,9 @@ When being used within from another repository like this:
 ```
     - id: "remote_action"
       name: "Remote action"
-      uses: ministryofjustice/opg-github-actions/.github/actions/test-action@56dc197f27b49f50f5807e97d6b79e9c39536dab #v-restructured-test
+      uses: ministryofjustice/opg-github-actions/.github/actions/test-action@56dc19 #v-restructured-test
 ```
+
+In this case, `github.action_repository` is the name of this repository and `github.action_ref` is the sha (`56dc19` in the above example)
+
+The `github.action_path` points to the sub action folder
