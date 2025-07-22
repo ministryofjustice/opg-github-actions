@@ -1,0 +1,22 @@
+name: "[Workflow] TEST GITHUB ACTION"
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  actions: read
+  contents: write
+  id-token: write
+
+
+jobs:
+  test_uses:
+    name: "TEST GitHub Action"
+    runs-on: ubuntu-latest
+    steps:
+      # pull in local version
+      - id: "local_action"
+        name: "Local"
+        uses: .github/actions/test-action
