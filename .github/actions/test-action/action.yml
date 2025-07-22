@@ -1,0 +1,16 @@
+name: "Test Action"
+description: "Do not use. This action is used only to help determine the state when an action is called via `use:`."
+
+
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Path"
+      shell: bash
+      run: |
+        pwd
+    - name: "List"
+      shell: bash
+      run: |
+        ls -laRt
