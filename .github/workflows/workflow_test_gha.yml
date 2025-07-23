@@ -46,7 +46,6 @@ jobs:
       # summary
       - name: "Summary"
         run: |
-          echo "### BranchName from env" >> $GITHUB_STEP_SUMMARY
           echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
           echo "| branch_name | ${{ steps.branchname.outputs.branch_name }} |"  >> $GITHUB_STEP_SUMMARY
@@ -73,7 +72,6 @@ jobs:
       # summary
       - name: "Summary"
         run: |
-          echo "### BranchName with fixed input" >> $GITHUB_STEP_SUMMARY
           echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
           echo "| branch_name | ${{ steps.branchname.outputs.branch_name }} |"  >> $GITHUB_STEP_SUMMARY
