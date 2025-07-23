@@ -1,0 +1,81 @@
+name: "Branch Name"
+description: >
+  Branch name is used to convert either the `name` input or GitHub environment values
+  into a shorter, alphanumeric only string.
+
+  By default the `github.head_ref` or `github.ref_name` environment variables are used,
+  depending on event type (pull request and push respestively)
+
+  If neither environment variable is found and no name is passed then an error will occur.
+
+inputs:
+  name:
+    description: "Value to convert to a branch safe string. If empty, github environment variables are used instead"
+    default: ""
+
+  length:
+    description: "Max length of the safe string"
+    default: "12"
+
+outputs:
+  branch_name:
+    description: "The original value used to generate a safe branch name from"
+    value: ""
+  full_length:
+    description: 'Alphanumeric, lowercase, but full length version of the branch.'
+    value: ""
+  safe:
+    description: 'Alphanumeric and lowercase version of the branch, trimmed to set length.'
+    value: ""
+
+runs:
+  using: composite
+  steps:
+    ####### BUILD THE BINARY #######
+    # get root directory of this action
+    - name: "Setup directories"
+      id: directories
+      shell: bash
+      env:
+        # No trailing slashes
+        action_directory: ${{ github.action_path }}
+        build_directory: "${{ github.action_path }}/builds"
+        root_directory: "${{ github.action_path }}/../.."
+        cmd_directory: "${{ github.action_path }}/../../action/cmd"
+      run: |
+        echo "ACTION_DIRECTORY=${{ env.action_directory }}" >> $GITHUB_OUTPUT
+        echo "BUILD_DIRECTORY=${{ env.build_directory }}" >> $GITHUB_OUTPUT
+        echo "ROOT_DIRECTORY=${{ env.root_directory }}" >> $GITHUB_OUTPUT
+        echo "CMD_DIRECTORY=${{ env.cmd_directory }}" >> $GITHUB_OUTPUT
+
+        mkdir -p ${{ env.build_directory }}
+    # Setup go version ot use from the mod file it the base
+    - name: "Setup go version"
+      uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 #v5.5.0
+      with:
+        go-version-file: '${{ steps.directories.outputs.ROOT_DIRECTORY }}/go.mod'
+        cache: false
+    # Build the binary
+    - name: "Build binary"
+      id: builder
+      shell: bash
+      env:
+        source: "${{ steps.directories.outputs.cmd_directory }}/branch-name"
+        binary: "${{ steps.directories.outputs.BUILD_DIRECTORY }}/branch-name"
+        # TODO: disable cgo
+      # TODO: remove echo
+      run: |
+        echo 'go build -ldflags="-w -s" -o ${{ env.binary }} ${{ env.source }}/'
+    ####### END BUILD #######
+    ####### GET ENV VALUES #######
+    - name: "Get branch name from input or environment"
+      if: ${{ inputs.name == '' }}
+      shell: bash
+      env:
+        from_input: ${{ inputs.name }}
+        from_pull_request: ${{ github.head_ref }}
+        from_push: ${{ github.ref_name }}
+      run: |
+        echo "FROM_INPUT=${{ env.from_input }}"
+        echo "FROM_PULL_REQUEST=${{ env.from_pull_request }}"
+        echo "FROM_PUSH=${{ env.from_push }}"
