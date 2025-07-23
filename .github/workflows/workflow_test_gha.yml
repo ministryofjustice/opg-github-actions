@@ -69,7 +69,7 @@ jobs:
         id: "branchname"
         uses: ./actions/branch-name
         with:
-          name: "test !/branch name"
+          name: "test !/branch name thats really long and has odd things in &!@£$"
       # summary
       - name: "Summary"
         run: |
