@@ -68,40 +68,15 @@ runs:
         echo 'go build -ldflags="-w -s" -o ${{ env.binary }} ${{ env.source }}/'
     ####### END BUILD
     ####### RUN COMMAND
-    # get the base branch name
-    - name: "Get branch name from input or environment"
-      id: branch
-      if: ${{ inputs.name == '' }}
-      shell: bash
-      env:
-        from_input: ${{ inputs.name }}
-        from_pull_request: ${{ github.head_ref }}
-        from_push: ${{ github.ref_name }}
-      # push in order of precedence which value to use as the branch name
-      run: |
-        if [ "${{ env.from_input }}" != "" ]; then
-          echo "INPUT=${{ env.from_input }}"
-          echo "BRANCH=${{ env.from_input }}" >> $GITHUB_OUTPUT
-        elif [ "${{ env.from_pull_request }}" != "" ]; then
-          echo "PULL_REQUEST=${{ env.from_pull_request }}"
-          echo "BRANCH=${{ env.from_pull_request }}" >> $GITHUB_OUTPUT
-        elif [ "${{ env.from_push }}" != "" ]; then
-          echo "PUSH=${{ env.from_push }}"
-          echo "BRANCH=${{ env.from_push }}" >> $GITHUB_OUTPUT
-        done
     # run the command if the branch name is set
     - name: "Generate safe branch name"
       id: cmd
-      if: ${{ steps.branch.outputs.BRANCH != '' }}
       shell: bash
       env:
         cmd: "${{ steps.directories.outputs.BUILD_DIRECTORY }}/branch-name"
-        branch: ${{ steps.branch.outputs.BRANCH != '' }}
+        NAME: ${{ inputs.name }}
+        ALTERNATIVE_NAME: ${{ github.head_ref != '' && github.head_ref || github.ref_name }}
       run: |
-        echo "branch=${{ env.branch }}"
-    # fail if branch is empty
-    - name: "Fail on empty branch"
-      if: ${{ steps.branch.outputs.BRANCH == '' }}
-      shell: bash
-      run: |
-        exit 1
+        echo "cmd=${{ env.cmd }}"
+        echo "NAME=${{ env.NAME }}"
+        echo "ALTERNATIVE_NAME=${{ env.ALTERNATIVE_NAME }}"
