@@ -7,6 +7,7 @@ import (
 	"opg-github-actions/action/internal/logger"
 	"opg-github-actions/action/internal/strs"
 	"os"
+	"strings"
 )
 
 var (
@@ -19,16 +20,17 @@ var (
 const ErrMissingValues string = "error: --source argument not passed."
 
 // Run processes the input and returns the values
-func Run(lg *slog.Logger, source string, length int) (err error) {
+func Run(lg *slog.Logger, source string, length int) (result map[string]string, err error) {
 	var (
 		safe         string
 		safeAndShort string
-		result       map[string]string
 	)
 	if source == "" {
 		err = fmt.Errorf(ErrMissingValues)
 		return
 	}
+	// remove any head references for fully formed branch values
+	source = strings.TrimPrefix(source, "refs/heads/")
 
 	safeAndShort, safe = strs.Safe(source, length)
 
@@ -37,7 +39,6 @@ func Run(lg *slog.Logger, source string, length int) (err error) {
 		"safe":        safeAndShort,
 		"full_length": safe,
 	}
-	logger.Result(lg, result)
 
 	return
 }
@@ -53,10 +54,11 @@ func main() {
 	// process the arguments and fetch the fallback value from environment values
 	flag.Parse()
 	// run the command
-	err := Run(lg, original, maxLength)
+	res, err := Run(lg, original, maxLength)
 	if err != nil {
 		lg.Error(err.Error())
 		os.Exit(1)
 	}
+	logger.Result(lg, res)
 
 }
