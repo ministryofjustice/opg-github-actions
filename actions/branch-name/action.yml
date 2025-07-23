@@ -62,10 +62,10 @@ runs:
       env:
         source: "${{ steps.directories.outputs.cmd_directory }}/branch-name"
         binary: "${{ steps.directories.outputs.BUILD_DIRECTORY }}/branch-name"
-        # TODO: decide about cgo usage
-      # TODO: remove echo
+        # dont use CGO for branch name command
+        CGO_ENABLED: 0
       run: |
-        echo 'go build -ldflags="-w -s" -o ${{ env.binary }} ${{ env.source }}/'
+        go build -ldflags="-w -s" -o ${{ env.binary }} ${{ env.source }}/'
     ####### END BUILD
     ####### RUN COMMAND
     # run the command if the branch name is set
@@ -76,6 +76,7 @@ runs:
         binary: "${{ steps.directories.outputs.BUILD_DIRECTORY }}/branch-name"
         head_ref: ${{ github.head_ref }}
         ref_name:  ${{ github.ref_name }}
+        # order here matters ... user input takes precendence, the pr, then push
         SOURCE: ${{ inputs.name != '' && inputs.name || github.head_ref != '' && github.head_ref || github.ref_name }}
       run: |
         echo "binary=${{ env.binary }}"
