@@ -10,11 +10,13 @@ on:
       - main
     paths:
       - terraform/**
+      - .github/workflows/workflow_terraform.yml
   push:
     branches:
       - main
     paths:
       - terraform/**
+      - .github/workflows/workflow_terraform.yml
 
 permissions:
   contents: read
