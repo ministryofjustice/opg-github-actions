@@ -76,10 +76,7 @@ runs:
         binary: "${{ steps.directories.outputs.BUILD_DIRECTORY }}/branch-name"
         head_ref: ${{ github.head_ref }}
         ref_name:  ${{ github.ref_name }}
-        gh_value: ${{ github.head_ref != '' && github.head_ref || github.ref_name }}
-        input_value: ${{ inputs.name }}
-        ORIGINAL: ${{ env.input_value != '' && env.input_value || env.gh_value }}
-
+        SOURCE: ${{ inputs.name != '' && inputs.name || github.head_ref != '' && github.head_ref || github.ref_name }}
       run: |
         echo "binary=${{ env.binary }}"
-        echo "ORIGINAL=${{ env.ORIGINAL }}"
+        echo "SOURCE=${{ env.SOURCE }}"
