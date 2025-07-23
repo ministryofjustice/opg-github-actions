@@ -27,7 +27,13 @@ jobs:
       - name: "Local"
         id: "local_action"
         uses: ./actions/test-gha
-      # run the branch-name action
+      # run the branch-name action from env values
       - name: "Branch Name"
         id: "branch_name"
         uses: ./actions/branch-name
+      # run the branch-name action from env values
+      - name: "Branch Name"
+        id: "branch_name"
+        uses: ./actions/branch-name
+        with:
+          name: "test !/branch name"
