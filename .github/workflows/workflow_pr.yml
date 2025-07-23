@@ -27,8 +27,7 @@ jobs:
     outputs:
       git_sha: ${{ steps.revhead.outputs.gitsha}}
       # SEMVER & BRANCH NAMES
-      branch_name: ${{ steps.semver_tag.outputs.branch }}
-      semver_tag: ${{ steps.semver_tag.outputs.tag }}
+      semver_tag: ${{ steps.semver_tag.outputs.created_tag }}
     steps:
       # Check the code base
       - name: "Checkout"
