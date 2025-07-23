@@ -73,12 +73,13 @@ runs:
       id: cmd
       shell: bash
       env:
+        binary: "${{ steps.directories.outputs.BUILD_DIRECTORY }}/branch-name"
         head_ref: ${{ github.head_ref }}
         ref_name:  ${{ github.ref_name }}
-        cmd: "${{ steps.directories.outputs.BUILD_DIRECTORY }}/branch-name"
-        NAME: ${{ inputs.name }}
-        ALTERNATIVE_NAME: ${{ github.head_ref != '' && github.head_ref || github.ref_name }}
+        gh_value: ${{ github.head_ref != '' && github.head_ref || github.ref_name }}
+        input_value: ${{ inputs.name }}
+        ORIGINAL: ${{ env.input_value != '' && env.input_value || env.gh_value }}
+
       run: |
-        echo "cmd=${{ env.cmd }}"
-        echo "NAME=${{ env.NAME }}"
-        echo "ALTERNATIVE_NAME=${{ env.ALTERNATIVE_NAME }}"
+        echo "binary=${{ env.binary }}"
+        echo "ORIGINAL=${{ env.ORIGINAL }}"
