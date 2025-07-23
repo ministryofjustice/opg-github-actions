@@ -79,8 +79,10 @@ runs:
         binary: "${{ steps.directories.outputs.BUILD_DIRECTORY }}/branch-name"
         head_ref: ${{ github.head_ref }}
         ref_name:  ${{ github.ref_name }}
+        LENGTH: ${{ inputs.length }}
         # order here matters ... user input takes precendence, the pr, then push
         SOURCE: ${{ inputs.name != '' && inputs.name || github.head_ref != '' && github.head_ref || github.ref_name }}
       run: |
-        echo "binary=${{ env.binary }}"
-        echo "SOURCE=${{ env.SOURCE }}"
+        ${{ env.binary }} \
+          --length=${{ env.LENGTH }} \
+          --source=${{ env.SOURCE }}
