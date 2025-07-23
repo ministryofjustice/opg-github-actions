@@ -1,4 +1,6 @@
+BUILD_DIR = ./builds/
 
+.PHONY: tests
 tests:
 	@go clean -testcache
 	@clear
@@ -13,8 +15,9 @@ tests:
 		AWS_SESSION_TOKEN="${AWS_SESSION_TOKEN}" \
 		go test -count=1 -cover -covermode=atomic ./... && echo "" && echo "passed"
 	@echo "==="
-.PHONY: tests
 
+
+.PHONY: test
 test:
 	@go clean -testcache
 	@clear
@@ -29,9 +32,10 @@ test:
 		AWS_SESSION_TOKEN="${AWS_SESSION_TOKEN}" \
 		go test -count=1 -cover -covermode=atomic ./... -run="$(name)" && echo "" && echo "passed"
 	@echo "==="
-.PHONY: tests
+
 
 ## Run the go code coverage tool
+.PHONY: coverage
 coverage:
 	@rm -Rf ./code-coverage.out
 	@clear
@@ -46,4 +50,12 @@ coverage:
 		AWS_SESSION_TOKEN="${AWS_SESSION_TOKEN}" \
 		go test -count=1 -covermode=count -coverprofile=code-coverage.out -cover ./...
 	@go tool cover -html=code-coverage.out
-.PHONY: coverage
+
+
+#========= LOCAL =========
+.PHONY: local/build
+local/build:
+	@rm -Rf ${BUILD_DIR}
+	@mkdir -p ${BUILD_DIR}
+	@env CGO_ENABLED=0 \
+		go build -o ${BUILD_DIR}/branch-name ./action/cmd/branch-name
