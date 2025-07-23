@@ -85,4 +85,4 @@ runs:
       run: |
         ${{ env.binary }} \
           --length=${{ env.LENGTH }} \
-          --source=${{ env.SOURCE }}
+          --source="${{ env.SOURCE }}"

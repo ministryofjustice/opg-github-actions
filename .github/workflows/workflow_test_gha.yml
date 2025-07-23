@@ -29,7 +29,7 @@ jobs:
         uses: ./actions/test-gha
 
   test_branch_name_from_env:
-    name: "TEST Branch Name from envt"
+    name: "TEST Branch Name from env"
     runs-on: ubuntu-latest
     steps:
       # checkout self
