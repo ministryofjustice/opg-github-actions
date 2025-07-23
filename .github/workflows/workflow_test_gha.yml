@@ -29,11 +29,11 @@ jobs:
         uses: ./actions/test-gha
       # run the branch-name action from env values
       - name: "Branch Name"
-        id: "branch_name"
+        id: "env_branch_name"
         uses: ./actions/branch-name
       # run the branch-name action from env values
       - name: "Branch Name"
-        id: "branch_name"
+        id: "fixed_branch_name"
         uses: ./actions/branch-name
         with:
           name: "test !/branch name"
