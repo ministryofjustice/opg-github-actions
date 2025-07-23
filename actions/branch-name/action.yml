@@ -73,6 +73,8 @@ runs:
       id: cmd
       shell: bash
       env:
+        head_ref: ${{ github.head_ref }}
+        ref_name:  ${{ github.ref_name }}
         cmd: "${{ steps.directories.outputs.BUILD_DIRECTORY }}/branch-name"
         NAME: ${{ inputs.name }}
         ALTERNATIVE_NAME: ${{ github.head_ref != '' && github.head_ref || github.ref_name }}
