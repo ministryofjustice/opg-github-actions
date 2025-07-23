@@ -14,7 +14,13 @@ secrets.auto.tfvars
 .env
 venv/
 env/
-# build & test result files that makefile creates
-go/builds**
-go/test-results.json
-test-release-download**
+# Ignore zip & tars
+*.zip
+*.tar.gz
+# Ignore code coverage files
+code-coverage.out
+# Ignore build folders
+builds/**
+# Ignore todo / temp files
+todo.txt
+scratch.txt

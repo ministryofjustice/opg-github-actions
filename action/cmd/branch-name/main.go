@@ -1,0 +1,62 @@
+package main
+
+import (
+	"flag"
+	"fmt"
+	"log/slog"
+	"opg-github-actions/action/internal/logger"
+	"opg-github-actions/action/internal/strs"
+	"os"
+)
+
+var (
+	maxLength int    = 12
+	original  string = ""
+	envKey    string = "NAME_FROM_ENVIRONMENT_VARS" // this is where we merged github env values into and can use that if no input is passed
+	envVal    string = ""
+)
+
+const ErrMissingValues string = "error: --source argument not passed."
+
+// Run processes the input and returns the values
+func Run(lg *slog.Logger, source string, length int) (err error) {
+	var (
+		safe         string
+		safeAndShort string
+		result       map[string]string
+	)
+	if source == "" {
+		err = fmt.Errorf(ErrMissingValues)
+		return
+	}
+
+	safeAndShort, safe = strs.Safe(source, length)
+
+	result = map[string]string{
+		"branch_name": source,
+		"safe":        safeAndShort,
+		"full_length": safe,
+	}
+	logger.Result(lg, result)
+
+	return
+}
+
+// init does the setup of args
+func init() {
+	flag.IntVar(&maxLength, "length", maxLength, "Set the max length of the safe string to return")
+	flag.StringVar(&original, "source", original, "The value to convert into a safe branch name.")
+}
+
+func main() {
+	var lg *slog.Logger = logger.New("INFO", "TEXT")
+	// process the arguments and fetch the fallback value from environment values
+	flag.Parse()
+	// run the command
+	err := Run(lg, original, maxLength)
+	if err != nil {
+		lg.Error(err.Error())
+		os.Exit(1)
+	}
+
+}
