@@ -27,17 +27,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout"
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       # TODO: this is an older version of self, swap when we impliment the new version
       - name: "Get terraform account version"
         id: terraform_account_version
-        uses: ministryofjustice/opg-github-actions/.github/actions/terraform-version@4202ec51fd9d613351e4c062606d857982ad70eb #v3.0.6
+        uses: ministryofjustice/opg-github-actions/.github/actions/terraform-version@4202ec51fd9d613351e4c062606d857982ad70eb # v3.0.6
         with:
           terraform_directory: ./terraform/account
       # configure the aws role
       - name: "Configure AWS credentials for terraform"
         id: configure_aws_creds
-        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df #v4.2.1
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
