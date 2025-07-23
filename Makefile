@@ -57,5 +57,6 @@ coverage:
 local/build:
 	@rm -Rf ${BUILD_DIR}
 	@mkdir -p ${BUILD_DIR}
+	@go mod tidy
 	@env CGO_ENABLED=0 \
-		go build -o ${BUILD_DIR}/branch-name ./action/cmd/branch-name
+		go build -ldflags="-w -s" -o ${BUILD_DIR}/branch-name ./action/cmd/branch-name

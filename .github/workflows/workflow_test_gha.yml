@@ -1,4 +1,4 @@
-name: "[Workflow] TEST GITHUB ACTION"
+name: "[Workflow] TEST GITHUB ACTIONS"
 
 on:
   pull_request:
