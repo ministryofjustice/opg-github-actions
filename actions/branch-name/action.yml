@@ -65,7 +65,7 @@ runs:
         # dont use CGO for branch name command
         CGO_ENABLED: 0
       run: |
-        go build -ldflags="-w -s" -o ${{ env.binary }} ${{ env.source }}/'
+        go build -ldflags="-w -s" -o ${{ env.binary }} ${{ env.source }}/
     ####### END BUILD
     ####### RUN COMMAND
     # run the command if the branch name is set
