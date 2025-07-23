@@ -1,12 +1,15 @@
 name: "Branch Name"
 description: >
-  Branch name is used to convert either the `name` input or GitHub environment values
-  into a shorter, alphanumeric only string.
+  Branch Name is used to generate a safe string from a branch name or passed value that
+  can then be used for tagging in various places (semver, aws, docker images).
 
-  By default the `github.head_ref` or `github.ref_name` environment variables are used,
-  depending on event type (pull request and push respestively)
+  It willconvert either the `name` input or GitHub environment values into a shorter,
+  alphanumeric only string, removing other characters like forward slashes.
 
-  If neither environment variable is found and no name is passed then an error will occur.
+  If the name is not passed, then the `github.head_ref` or `github.ref_name` context
+  variables are used - depending on event type (pull request and push respestively)
+
+  When no name or suitable context variable is found, then an error will occur.
 
 inputs:
   name:
@@ -20,13 +23,13 @@ inputs:
 outputs:
   branch_name:
     description: "The original value used to generate a safe branch name from"
-    value: ""
+    value: ${{ steps.cmd.outputs.branch_name }}
   full_length:
     description: 'Alphanumeric, lowercase, but full length version of the branch.'
-    value: ""
+    value: ${{ steps.cmd.outputs.full_length }}
   safe:
-    description: 'Alphanumeric and lowercase version of the branch, trimmed to set length.'
-    value: ""
+    description: 'Alphanumeric and lowercase version of the branch, trimmed to the required length.'
+    value: ${{ steps.cmd.outputs.safe }}
 
 runs:
   using: composite
