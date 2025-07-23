@@ -12,8 +12,8 @@ permissions:
 
 
 jobs:
-  test_uses:
-    name: "TEST GitHub Action"
+  test_actions:
+    name: "TEST GitHub Actions"
     runs-on: ubuntu-latest
     steps:
       # checkout self
@@ -23,7 +23,11 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-      # pull in local version
-      - id: "local_action"
-        name: "Local"
+      # run action to test github.actions_x properties
+      - name: "Local"
+        id: "local_action"
         uses: ./actions/test-gha
+      # run the branch-name action
+      - name: "Branch Name"
+        id: "branch_name"
+        uses: ./actions/branch-name
