@@ -60,3 +60,5 @@ local/build:
 	@go mod tidy
 	@env CGO_ENABLED=0 \
 		go build -ldflags="-w -s" -o ${BUILD_DIR}/branch-name ./action/cmd/branch-name
+	@env CGO_ENABLED=0 \
+		go build -ldflags="-w -s" -o ${BUILD_DIR}/terraform-version ./action/cmd/terraform-version

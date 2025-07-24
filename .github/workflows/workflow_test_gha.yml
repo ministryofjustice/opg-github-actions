@@ -76,6 +76,29 @@ jobs:
           echo "| full_length | ${{ steps.branchname.outputs.full_length }} |"  >> $GITHUB_STEP_SUMMARY
           echo "| safe | ${{ steps.branchname.outputs.safe }} |"  >> $GITHUB_STEP_SUMMARY
 
+  test_terraform_version:
+    name: "TEST Terraform Version"
+    runs-on: ubuntu-latest
+    steps:
+      # checkout self
+      - name: "Checkout"
+        id: checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: "Terraform Version"
+        id: "terraformversion"
+        uses: ./actions/terraform-version
+        with:
+          terraform_directory: ./terraform/account
+      # summary
+      - name: "Summary"
+        run: |
+          echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
+          echo "| version | ${{ steps.terraformversion.outputs.version }} |"  >> $GITHUB_STEP_SUMMARY
+
   end:
     name: 'End'
     runs-on: 'ubuntu-latest'
@@ -83,6 +106,7 @@ jobs:
       - test_action_values
       - test_branch_name_from_env
       - test_branch_name_fixed
+      - test_terraform_version
     steps:
       - name: "End"
         id: end
