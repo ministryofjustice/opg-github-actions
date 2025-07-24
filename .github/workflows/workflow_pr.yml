@@ -90,6 +90,8 @@ jobs:
     needs:
       - setup
       - tests
+    outputs:
+      release_uri: ${{ steps.create.outputs.release_uri }}
     steps:
       # checkout self
       - name: "Checkout"
@@ -98,18 +100,22 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-      # create a release, attaching the build binaries to it
+      # create a release
       - name: "Create release [${{ needs.setup.outputs.semver_tag }}]"
+        id: create
         env:
           GH_TOKEN: ${{ github.token }}
           pre: ${{ env.PRERELEASE == 'true' && '--prerelease' || '' }}
           latest:  ${{ env.PATH_TO_LIVE == 'true' && '--latest=true' || '--latest=false' }}
           tag: ${{ needs.setup.outputs.semver_tag }}
         run: |
-          gh release create ${{ env.tag }} \
+          echo "Creating release ... ${{ env.tag }}"
+          release_uri=$(gh release create ${{ env.tag }} \
             ${{ env.pre }} ${{ env.latest }} --verify-tag \
             -t ${{ env.tag }} \
-            --notes-from-tag
+            --notes-from-tag)
+          echo "release_uri=${release_uri}" >> $GITHUB_OUTPUT
+
   # final step
   end:
     name: 'End'
@@ -117,6 +123,12 @@ jobs:
     needs:
       - release
     steps:
+      - name: "Information"
+        run: |
+          echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
+          echo "| release_uri | ${{ needs.release.outouts.release_uri }} |"  >> $GITHUB_STEP_SUMMARY
+
       - id: end
         name: End
         run: echo "End"
