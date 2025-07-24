@@ -106,6 +106,13 @@ jobs:
           name: branch-name
           source: ./action/cmd/branch-name/
           destination: ${{ env.BUILD_DIR }}
+      # build the tf version command
+      - name: "Build command [terraform-version]"
+        uses: ./.github/actions/build-go
+        with:
+          name: terraform-version
+          source: ./action/cmd/terraform-version/
+          destination: ${{ env.BUILD_DIR }}
       # create a release, attaching the build binaries to it
       - name: "Create release [${{ needs.setup.outputs.semver_tag }}]"
         env:
