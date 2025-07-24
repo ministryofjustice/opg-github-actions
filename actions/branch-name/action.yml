@@ -1,0 +1,76 @@
+name: "Branch Name"
+description: >
+  Branch Name is used to generate a safe string from a branch name or passed value that
+  can then be used for tagging in various places (semver, aws, docker images).
+
+  It willconvert either the `name` input or GitHub environment values into a shorter,
+  alphanumeric only string, removing other characters like forward slashes.
+
+  If the name is not passed, then the `github.head_ref` or `github.ref_name` context
+  variables are used - depending on event type (pull request and push respestively)
+
+  When no name or suitable context variable is found, then an error will occur.
+
+inputs:
+  name:
+    description: "Value to convert to a branch safe string. If empty, github environment variables are used instead"
+    default: ""
+
+  length:
+    description: "Max length of the safe string"
+    default: "12"
+
+outputs:
+  branch_name:
+    description: "The original value used to generate a safe branch name from"
+    value: ${{ steps.cmd.outputs.branch_name }}
+  full_length:
+    description: 'Alphanumeric, lowercase, but full length version of the branch.'
+    value: ${{ steps.cmd.outputs.full_length }}
+  safe:
+    description: 'Alphanumeric and lowercase version of the branch, trimmed to the required length.'
+    value: ${{ steps.cmd.outputs.safe }}
+
+runs:
+  using: composite
+  steps:
+    ####### BUILD THE BINARY
+    # Setup go version ot use from the mod file it the base
+    - name: "Setup go version"
+      uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+      with:
+        # relative path to where the go.mod file sites from inside the ./action/$name path
+        go-version-file: '${{ github.action_path }}/../../go.mod'
+        cache: false
+    # Build the binary
+    - name: "Build binary"
+      id: builder
+      shell: bash
+      env:
+        source: "${{ github.action_path }}/../../action/cmd/branch-name"
+        build_directory: "${{ github.action_path }}/builds"
+        binary: "${{ github.action_path }}/builds/branch-name"
+        # dont use CGO for branch name command
+        CGO_ENABLED: 0
+      run: |
+        echo "Build binary from source ... "
+        mkdir -p ${{ env.build_directory }}
+        go build -ldflags="-w -s" -o ${{ env.binary }} ${{ env.source }}/
+    ####### END BUILD
+    ####### RUN COMMAND
+    # run the command if the branch name is set
+    - name: "Generate safe branch name"
+      id: cmd
+      shell: bash
+      env:
+        binary: "${{ github.action_path }}/builds/branch-name"
+        head_ref: ${{ github.head_ref }}
+        ref_name:  ${{ github.ref_name }}
+        LENGTH: ${{ inputs.length }}
+        # order here matters ... user input takes precendence, the pr, then push
+        SOURCE: ${{ inputs.name != '' && inputs.name || github.head_ref != '' && github.head_ref || github.ref_name }}
+      run: |
+        echo "Running branch-name command ... "
+        ${{ env.binary }} \
+          --length=${{ env.LENGTH }} \
+          --source="${{ env.SOURCE }}"
