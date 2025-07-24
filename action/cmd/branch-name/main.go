@@ -13,8 +13,6 @@ import (
 var (
 	maxLength int    = 12
 	original  string = ""
-	envKey    string = "NAME_FROM_ENVIRONMENT_VARS" // this is where we merged github env values into and can use that if no input is passed
-	envVal    string = ""
 )
 
 const ErrMissingValues string = "error: --source argument not passed."
