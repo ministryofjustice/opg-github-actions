@@ -1,0 +1,64 @@
+name: "Terraform Version"
+description: >
+  Terraform Version is used to find the semver range from the terraform versions.tf file
+  (by default) and return its value. Used with `hashicorp/setup-terraform` to configure
+  terraform within workflows.
+
+  No processing or changes are made to this value, so it will return as set, so can and
+  will contain range notation like `>`, `~>` and so on.
+
+inputs:
+
+  terraform_directory:
+    description: "Directory where terraform will be run from. Looks for versions.tf file in this path."
+    required: true
+
+  terraform_versions_file:
+    description: "Name of file that contains the required_version config is stored. (Default `./versions.tf`)"
+    default: "./versions.tf"
+
+outputs:
+  version:
+    description: 'Discovered terraform version range. This may be an exact number (like 1.5.5) or a semver range (like >= 1.0).'
+    value: ${{ steps.cmd.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    ####### BUILD THE BINARY
+    # Setup go version to use from the mod file it the base
+    - name: "Setup go version"
+      uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+      with:
+        # relative path to where the go.mod file sites from inside the ./action/$name path
+        go-version-file: '${{ github.action_path }}/../../go.mod'
+        cache: false
+    # Build the binary
+    - name: "Build binary"
+      id: builder
+      shell: bash
+      env:
+        source: "${{ github.action_path }}/../../action/cmd/terraform-version"
+        build_directory: "${{ github.action_path }}/builds"
+        binary: "${{ github.action_path }}/builds/terraform-version"
+        # we dont use CGO for this command
+        CGO_ENABLED: 0
+      run: |
+        echo "Build binary from source ... "
+        mkdir -p ${{ env.build_directory }}
+        go build -ldflags="-w -s" -o ${{ env.binary }} ${{ env.source }}/
+    ####### END BUILD
+    ####### RUN COMMAND
+    # run the command
+    - name: "Find terraform version"
+      id: cmd
+      shell: bash
+      env:
+        binary: "${{ github.action_path }}/builds/terraform-version"
+        TF_DIRECTORY: ${{ inputs.terraform_directory }}
+        TF_FILE: ${{ inputs.terraform_versions_file }}
+      run: |
+        echo "Running terraform-version command ... "
+        ${{ env.binary }} \
+          --directory=${{ env.TF_DIRECTORY }} \
+          --file="${{ env.TF_FILE }}"
