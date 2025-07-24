@@ -90,8 +90,6 @@ jobs:
     needs:
       - setup
       - tests
-    outputs:
-      release_uri: ${{ steps.create.outputs.release_uri }}
     steps:
       # checkout self
       - name: "Checkout"
@@ -110,11 +108,10 @@ jobs:
           tag: ${{ needs.setup.outputs.semver_tag }}
         run: |
           echo "Creating release ... ${{ env.tag }}"
-          release_uri=$(gh release create ${{ env.tag }} \
+          gh release create ${{ env.tag }} \
             ${{ env.pre }} ${{ env.latest }} --verify-tag \
             -t ${{ env.tag }} \
-            --notes-from-tag)
-          echo "release_uri=${release_uri}" >> $GITHUB_OUTPUT
+            --notes-from-tag
 
   # final step
   end:
@@ -123,12 +120,6 @@ jobs:
     needs:
       - release
     steps:
-      - name: "Information"
-        run: |
-          echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
-          echo "| release_uri | ${{ needs.release.outouts.release_uri }} |"  >> $GITHUB_STEP_SUMMARY
-
       - id: end
         name: End
         run: echo "End"
