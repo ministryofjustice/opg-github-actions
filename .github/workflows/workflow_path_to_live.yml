@@ -14,7 +14,6 @@ permissions:
   id-token: write
 
 env:
-  BUILD_DIR: ./builds/
   PRERELEASE: "false"
   PATH_TO_LIVE: "true"
 
@@ -84,9 +83,9 @@ jobs:
           go mod tidy
           go test -count=1 -cover -covermode=atomic ./...
 
-  # Build all binaries and attach to this release tag
-  build_and_release:
-    name: "Build & Create release"
+  # make release tag
+  release:
+    name: "Create release"
     runs-on: ubuntu-latest
     needs:
       - setup
@@ -99,20 +98,6 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-      # build the branch-name command
-      - name: "Build command [branch-name]"
-        uses: ./.github/actions/build-go
-        with:
-          name: branch-name
-          source: ./action/cmd/branch-name/
-          destination: ${{ env.BUILD_DIR }}
-      # build the tf version command
-      - name: "Build command [terraform-version]"
-        uses: ./.github/actions/build-go
-        with:
-          name: terraform-version
-          source: ./action/cmd/terraform-version/
-          destination: ${{ env.BUILD_DIR }}
       # create a release, attaching the build binaries to it
       - name: "Create release [${{ needs.setup.outputs.semver_tag }}]"
         env:
@@ -121,7 +106,7 @@ jobs:
           latest:  ${{ env.PATH_TO_LIVE == 'true' && '--latest=true' || '--latest=false' }}
           tag: ${{ needs.setup.outputs.semver_tag }}
         run: |
-          gh release create ${{ env.tag }} ${{ env.BUILD_DIR }}/* \
+          gh release create ${{ env.tag }} \
             ${{ env.pre }} ${{ env.latest }} --verify-tag \
             -t ${{ env.tag }} \
             --notes-from-tag
@@ -130,7 +115,7 @@ jobs:
     name: 'End'
     runs-on: 'ubuntu-latest'
     needs:
-      - build_and_release
+      - release
     steps:
       - id: end
         name: End
