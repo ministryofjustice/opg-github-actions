@@ -72,8 +72,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - setup
-      - tests_go
-      - tests_gha
     steps:
       # checkout self
       - name: "Checkout"
