@@ -7,6 +7,54 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 )
 
+type tSemverSort struct {
+	Data     []*Semver
+	Expected []*Semver
+}
+
+func TestSemverSort(t *testing.T) {
+	// tests that include invalid semvers that wont be returned in the sorting
+	// and duplicates that will be removed
+	var tests = []*tSemverSort{
+		{
+			Data: []*Semver{
+				FromString("9.5.0"),
+				FromString("tag-test-01"),
+				FromString("10.1.0"),
+				FromString("tag-test-02"),
+				FromString("1.0.0-beta.1+bA1"),
+				FromString("1.0.0-beta.0+bA1"),
+				FromString("10.1.0"),
+				FromString("1.0.0-beta.0+bA2"),
+			},
+			Expected: []*Semver{
+				FromString("1.0.0-beta.0+bA1"),
+				FromString("1.0.0-beta.0+bA2"),
+				FromString("1.0.0-beta.1+bA1"),
+				FromString("9.5.0"),
+				FromString("10.1.0"),
+			},
+		},
+	}
+
+	for i, test := range tests {
+		sorted := Sort(test.Data, SORT_ASC)
+
+		if len(sorted) != len(test.Expected) {
+			t.Errorf("semver sort test [%d] - mismatch length", i)
+		} else {
+			for idx, expected := range test.Expected {
+				actual := sorted[idx]
+				if expected.String() != actual.String() {
+					t.Errorf("semver order not as expected in set [%d:%d], expected [%v] actual [%v]", i, idx, expected, actual)
+				}
+
+			}
+		}
+
+	}
+}
+
 type tFromStr struct {
 	Ref      string
 	Expected string
@@ -111,17 +159,17 @@ type tNewSemver struct {
 func TestSemverNew(t *testing.T) {
 	var tests = []*tNewSemver{
 		{
-			Ref:      plumbing.NewReferenceFromStrings("refs/heads/v4", "6ecf0ef2c2dffb796033e5a02219af86ec6584e5"),
+			Ref:      plumbing.NewReferenceFromStrings("refs/heads/v4", "6ecf0ef2c2daaaa96033a5a02219af86ec6584e5"),
 			Expected: &Semver{Valid: false, Original: "v4"},
 			Valid:    false,
 		},
 		{
-			Ref:      plumbing.NewReferenceFromStrings("refs/heads/v4.0.0", "6ecf0ef2c2dffb796033e5a02219af86ec6584e5"),
+			Ref:      plumbing.NewReferenceFromStrings("refs/heads/v4.0.0", "6ecf0ef2c2daaaa96033a5a02219af86ec6584e5"),
 			Expected: &Semver{Valid: true, Prefix: "v", Major: "4", Minor: "0", Patch: "0"},
 			Valid:    true,
 		},
 		{
-			Ref:      plumbing.NewReferenceFromStrings("refs/heads/4.0.0", "6ecf0ef2c2dffb796033e5a02219af86ec6584e5"),
+			Ref:      plumbing.NewReferenceFromStrings("refs/heads/4.0.0", "6ecf0ef2c2daaaa96033a5a02219af86ec6584e5"),
 			Expected: &Semver{Valid: true, Prefix: "", Major: "4", Minor: "0", Patch: "0"},
 			Valid:    true,
 		},
@@ -145,12 +193,12 @@ func TestSemverNew(t *testing.T) {
 	for _, test := range tests {
 		short := test.Ref.Name().Short()
 		actual := New(test.Ref)
-		if test.Valid {
+		if test.Valid && actual != nil {
 			// check values match
 			if !Equal(test.Expected, actual) {
 				t.Errorf("semver equal failure with ref [%s] expected [%+v] actual [%+v]", short, test.Expected, actual)
 			}
-		} else if !test.Valid && actual.Valid {
+		} else if actual != nil && !test.Valid && actual.Valid {
 			t.Errorf("error with ref [%s], expected to be invalid, returned a valid", short)
 		}
 

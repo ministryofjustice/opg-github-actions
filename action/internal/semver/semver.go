@@ -4,9 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"slices"
+	"sort"
 	"strings"
 
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/maruel/natural"
+)
+
+type SortOrder bool
+
+const (
+	SORT_ASC  SortOrder = true
+	SORT_DESC SortOrder = false
 )
 
 // Regex patterns for validation matching
@@ -35,9 +45,14 @@ type Semver struct {
 	BuildMetadata   string              `json:"buildmetadata"`
 }
 
+// String returns the string format of a semver
 func (self *Semver) String() string {
 	var prelease string = ""
 	var buildmeta string = ""
+
+	if self == nil {
+		return ""
+	}
 
 	if self.PreleaseName != "" {
 		prelease += fmt.Sprintf("-%s", self.PreleaseName)
@@ -122,27 +137,66 @@ func convert[T any, R any](source T, destination R) (err error) {
 	return
 }
 
+func Strings(versions []*Semver) (strs []string) {
+	strs = []string{}
+
+	for _, v := range versions {
+		if v != nil {
+			strs = append(strs, v.String())
+		}
+	}
+	return
+}
+
+// Sort orders semvers in order based on their .String() values
+//
+// Removes duplicates and invalid semvers
+func Sort(versions []*Semver, order SortOrder) (sorted []*Semver) {
+	var toSort []string = Strings(versions)
+
+	sorted = []*Semver{}
+	// sort & remove duplicates
+	slices.Sort(toSort)
+	toSort = slices.Compact(toSort)
+	// change sort order to requested
+	if order == SORT_DESC {
+		sort.Sort(sort.Reverse(natural.StringSlice(toSort)))
+	} else {
+		sort.Sort(natural.StringSlice(toSort))
+	}
+
+	// loop over all the sorted version and add the first semver that matches
+	// breaking the inner loop when one is found to avoid duplicates
+	for _, key := range toSort {
+		for _, sem := range versions {
+			if key == sem.String() {
+				sorted = append(sorted, sem)
+				break
+			}
+		}
+	}
+
+	return
+}
+
 // parse takes the semver and runs the regex against its original form to determine
 // the consituient parts
-func parse(s *Semver) {
+func parse(s *Semver) (err error) {
 	var (
 		asMap   map[string]string = map[string]string{}
 		matches []string          = []string{}
 		str     string            = s.Original
 		exp     *regexp.Regexp    = regexp.MustCompile(Regex())
 	)
-	s.Valid = Valid(s.Original)
-	// return if its not valid
-	if !s.Valid {
-		fmt.Printf("[%s] is not valid", s.Original)
-		return
-	}
 
 	matches = exp.FindStringSubmatch(str)
 	for i, name := range exp.SubexpNames() {
 		asMap[name] = matches[i]
 	}
-	convert(asMap, &s)
+
+	if err = convert(asMap, &s); err != nil {
+		return
+	}
 
 	// if prerelease is set, then split the prerelease and build number up
 	if s.PreleaseName != "" && strings.LastIndex(s.PreleaseName, ".") > 0 {
@@ -150,11 +204,6 @@ func parse(s *Semver) {
 		s.PrereleaseBuild = s.PreleaseName[i+1:]
 		s.PreleaseName = s.PreleaseName[:i]
 	}
-}
-
-func FromString(ref string) (s *Semver) {
-	s = &Semver{Original: ref}
-	parse(s)
 	return
 }
 
@@ -163,8 +212,55 @@ func New(ref *plumbing.Reference) (s *Semver) {
 	s = &Semver{
 		GitRef:   ref,
 		Original: ref.Name().Short(),
+		Valid:    true,
 	}
-	parse(s)
 
+	if !Valid(s.Original) {
+		return nil
+	}
+
+	if err := parse(s); err != nil {
+		return nil
+	}
+
+	return
+}
+
+func FromString(ref string) (s *Semver) {
+	s = &Semver{
+		Original: ref,
+		Valid:    true,
+	}
+
+	if !Valid(s.Original) {
+		return nil
+	}
+
+	if err := parse(s); err != nil {
+		return nil
+	}
+
+	return
+}
+
+func FromStrings(refs ...string) (semvers []*Semver) {
+	semvers = []*Semver{}
+
+	for _, ref := range refs {
+		if sv := FromString(ref); sv != nil {
+			semvers = append(semvers, sv)
+		}
+	}
+	return
+}
+
+func FromGitRefs(refs ...*plumbing.Reference) (semvers []*Semver) {
+	semvers = []*Semver{}
+
+	for _, ref := range refs {
+		if sv := New(ref); sv != nil {
+			semvers = append(semvers, sv)
+		}
+	}
 	return
 }
