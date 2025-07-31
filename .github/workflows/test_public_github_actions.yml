@@ -1,33 +1,16 @@
-name: "[Workflow] TEST GITHUB ACTIONS"
+name: "[TEST] Public GitHub Actions"
 
 on:
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
+  workflow_call:
 
 permissions:
   actions: read
 
-
 jobs:
-  test_action_values:
-    name: "TEST GitHub Action ENV"
-    runs-on: ubuntu-latest
-    steps:
-      # checkout self
-      - name: "Checkout"
-        id: checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          fetch-depth: 0
-          fetch-tags: true
-      # run action to test github.actions_x properties
-      - name: "Local"
-        id: "local_action"
-        uses: ./actions/test-gha
 
-  test_branch_name_from_env:
-    name: "TEST Branch Name from env"
+  branch_name_from_env:
+    name: "branch-name (from env)"
     runs-on: ubuntu-latest
     steps:
       # checkout self
@@ -50,8 +33,8 @@ jobs:
           echo "| full_length | ${{ steps.branchname.outputs.full_length }} |"  >> $GITHUB_STEP_SUMMARY
           echo "| safe | ${{ steps.branchname.outputs.safe }} |"  >> $GITHUB_STEP_SUMMARY
 
-  test_branch_name_fixed:
-    name: "TEST Branch Name with fixed input"
+  branch_name_fixed:
+    name: "branch-name (fixed values)"
     runs-on: ubuntu-latest
     steps:
       # checkout self
@@ -76,8 +59,8 @@ jobs:
           echo "| full_length | ${{ steps.branchname.outputs.full_length }} |"  >> $GITHUB_STEP_SUMMARY
           echo "| safe | ${{ steps.branchname.outputs.safe }} |"  >> $GITHUB_STEP_SUMMARY
 
-  test_terraform_version:
-    name: "TEST Terraform Version"
+  terraform_version:
+    name: "terraform-version"
     runs-on: ubuntu-latest
     steps:
       # checkout self
@@ -99,14 +82,59 @@ jobs:
           echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
           echo "| version | ${{ steps.terraformversion.outputs.version }} |"  >> $GITHUB_STEP_SUMMARY
 
+  terraform_workspace_manager:
+    runs-on: 'ubuntu-latest'
+    name: "terraform-workspace-manager"
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.ref }}
+      - id: test1
+        name: "Test registration"
+        uses: ./actions/terraform-workspace-manager
+        with:
+          # sandbox
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_account_id: '995199299616'
+          aws_iam_role: 'gh-reusable-actions-ci'
+          register_workspace: "t${{github.sha}}"
+          # short ttl
+          time_to_protect: 1
+      - id: test2
+        name: "Test listing"
+        uses: ./actions/terraform-workspace-manager
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_account_id: '995199299616'
+          aws_iam_role: 'gh-reusable-actions-ci'
+      - id: test_results
+        name: Test results
+        run: |
+          ws1="t${{github.sha}}"
+          pw1="${{steps.test1.outputs.protected_workspaces}}"
+          pw2="${{steps.test2.outputs.protected_workspaces}}"
+
+          if [[ "${pw1}" != *"${ws1}"* ]]; then
+            echo "workspace not found"
+            exit 1
+          fi
+
+          if [[ "${pw1}" != "${pw2}" ]]; then
+            echo "workspace list has changed"
+            exit 1
+          fi
+
   end:
     name: 'End'
     runs-on: 'ubuntu-latest'
     needs:
-      - test_action_values
-      - test_branch_name_from_env
-      - test_branch_name_fixed
-      - test_terraform_version
+      - branch_name_from_env
+      - branch_name_fixed
+      - terraform_version
+      - terraform_workspace_manager
     steps:
       - name: "End"
         id: end
