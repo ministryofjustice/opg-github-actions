@@ -4,7 +4,7 @@ description: >
   determine values of various github.$x context values when importing from
   external workflows in various ways (semver tag, sha, latest etc).
 
-  Also used to examine the git state on pull requests and similar events
+  Also used to examine the git state on pull requests and similar events.
 
 runs:
   using: "composite"
@@ -17,6 +17,7 @@ runs:
         action_ref: ${{ github.action_ref }}
         action_root_path: "${{ github.action_path }}/../../"
       run: |
+        echo "## Actions: " >> $GITHUB_STEP_SUMMARY
         echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
         echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
         echo "| action_repository | ${{ env.action_repository }} |" >> $GITHUB_STEP_SUMMARY
@@ -32,6 +33,7 @@ runs:
         ref_name: ${{ github.ref_name }}
         ref: ${{ github.ref }}
       run: |
+        echo "## Git: " >> $GITHUB_STEP_SUMMARY
         echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
         echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
         echo "| head_ref | ${{ env.head_ref }} |" >> $GITHUB_STEP_SUMMARY
