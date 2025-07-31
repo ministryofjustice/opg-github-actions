@@ -3,9 +3,11 @@ package semver
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"regexp"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/go-git/go-git/v5/plumbing"
@@ -17,6 +19,15 @@ type SortOrder bool
 const (
 	SORT_ASC  SortOrder = true
 	SORT_DESC SortOrder = false
+)
+
+type Increment int
+
+const (
+	NOINC Increment = -1
+	MAJOR Increment = 1
+	MINOR Increment = 2
+	PATCH Increment = 3
 )
 
 // Regex patterns for validation matching
@@ -34,8 +45,8 @@ const (
 
 type Semver struct {
 	GitRef          *plumbing.Reference `json:"-"` // the git reference this semver relates to if set
-	Original        string              `json:"-"` // original short reference name
-	Valid           bool                `json:"-"`
+	Original        string              `json:"o"` // original short reference name
+	Valid           bool                `json:"v"`
 	Prefix          string              `json:"prefix"`
 	Major           string              `json:"major"`
 	Minor           string              `json:"minor"`
@@ -45,33 +56,79 @@ type Semver struct {
 	BuildMetadata   string              `json:"buildmetadata"`
 }
 
-// String returns the string format of a semver
-func (self *Semver) String() string {
-	var prelease string = ""
-	var buildmeta string = ""
+func (self *Semver) IsPrerelease() bool {
+	return (self.PreleaseName != "")
+}
+func (self *Semver) IsRelease() bool {
+	return (self.PreleaseName == "")
+}
 
-	if self == nil {
+// String returns a json friendly version of self
+func (self *Semver) String() string {
+	bytes, _ := json.MarshalIndent(self, "", "  ")
+	return string(bytes)
+}
+
+// Stringy is used instead of String in places where we want to toggle
+// the inclusion of the semver prefix
+func (self *Semver) Stringy(includePrefix bool) string {
+
+	return format(self, &strOpts{
+		PrereleaseName:  true,
+		PrereleaseBuild: true,
+		BuildMetadata:   true,
+		Prefix:          includePrefix,
+	})
+
+}
+
+type strOpts struct {
+	Prefix          bool
+	PrereleaseName  bool
+	PrereleaseBuild bool
+	BuildMetadata   bool
+}
+
+// format used internally to format the semver string in various ways
+// for partial or complete matching in various filters
+func format(s *Semver, opts *strOpts) (str string) {
+	var (
+		prefix          string = ""
+		version         string = ""
+		prereleaseName  string = ""
+		prereleaseBuild string = ""
+		prerelease      string = ""
+		buildMetadata   string = ""
+	)
+	if s == nil {
 		return ""
 	}
+	version = fmt.Sprintf("%s.%s.%s", s.Major, s.Minor, s.Patch)
 
-	if self.PreleaseName != "" {
-		prelease += fmt.Sprintf("-%s", self.PreleaseName)
+	if opts.Prefix {
+		prefix = s.Prefix
 	}
-	if self.PrereleaseBuild != "" {
-		prelease += fmt.Sprintf(".%s", self.PrereleaseBuild)
+	if opts.PrereleaseName && s.PreleaseName != "" {
+		prereleaseName = fmt.Sprintf("%s", s.PreleaseName)
 	}
-	if self.BuildMetadata != "" {
-		buildmeta = fmt.Sprintf("+%s", self.BuildMetadata)
+	if opts.PrereleaseBuild && s.PrereleaseBuild != "" {
+		prereleaseBuild = fmt.Sprintf(".%s", s.PrereleaseBuild)
+	}
+	if prereleaseName != "" || prereleaseBuild != "" {
+		prerelease = fmt.Sprintf("-%s%s", s.PreleaseName, prereleaseBuild)
+	}
+	if opts.BuildMetadata && s.BuildMetadata != "" {
+		buildMetadata = fmt.Sprintf("+%s", s.BuildMetadata)
 	}
 
-	return fmt.Sprintf("%s%s.%s.%s%s%s",
-		self.Prefix,
-		self.Major,
-		self.Minor,
-		self.Patch,
-		prelease,
-		buildmeta,
+	str = fmt.Sprintf("%s%s%s%s",
+		prefix,
+		version,
+		prerelease,
+		buildMetadata,
 	)
+
+	return
 }
 
 // Equal compares the core values of the Semver structs to check if they
@@ -137,12 +194,11 @@ func convert[T any, R any](source T, destination R) (err error) {
 	return
 }
 
-func Strings(versions []*Semver) (strs []string) {
+func Strings(versions []*Semver, prefix bool) (strs []string) {
 	strs = []string{}
-
 	for _, v := range versions {
 		if v != nil {
-			strs = append(strs, v.String())
+			strs = append(strs, v.Stringy(prefix))
 		}
 	}
 	return
@@ -151,8 +207,8 @@ func Strings(versions []*Semver) (strs []string) {
 // Sort orders semvers in order based on their .String() values
 //
 // Removes duplicates and invalid semvers
-func Sort(versions []*Semver, order SortOrder) (sorted []*Semver) {
-	var toSort []string = Strings(versions)
+func Sort(versions []*Semver, order SortOrder, prefixes bool) (sorted []*Semver) {
+	var toSort []string = Strings(versions, prefixes)
 
 	sorted = []*Semver{}
 	// sort & remove duplicates
@@ -169,7 +225,7 @@ func Sort(versions []*Semver, order SortOrder) (sorted []*Semver) {
 	// breaking the inner loop when one is found to avoid duplicates
 	for _, key := range toSort {
 		for _, sem := range versions {
-			if key == sem.String() {
+			if key == sem.Stringy(prefixes) {
 				sorted = append(sorted, sem)
 				break
 			}
@@ -207,14 +263,19 @@ func parse(s *Semver) (err error) {
 	return
 }
 
+// New uses the git tag / reference and generates a semver struct
+// using the ref.Name.Short() (refs/tags/v4.1.1 => v4.1.1) as the
+// starting point and the parses out the segments (major, minor,
+// patch etc)
+//
+// If the ref name is invalid or the tag does not parse correctly
+// then nil is returned
 func New(ref *plumbing.Reference) (s *Semver) {
-
 	s = &Semver{
 		GitRef:   ref,
 		Original: ref.Name().Short(),
 		Valid:    true,
 	}
-
 	if !Valid(s.Original) {
 		return nil
 	}
@@ -226,6 +287,12 @@ func New(ref *plumbing.Reference) (s *Semver) {
 	return
 }
 
+// FromString uses the value passed as the original value
+// which is then split into segments (major, minor, patch
+// etc)
+//
+// If the ref name is invalid or the tag does not parse correctly
+// then nil is returned
 func FromString(ref string) (s *Semver) {
 	s = &Semver{
 		Original: ref,
@@ -243,6 +310,12 @@ func FromString(ref string) (s *Semver) {
 	return
 }
 
+// FromStrings uses the values passed as the original values
+// which is then split into segments (major, minor, patch
+// etc)
+//
+// If the name is invalid or does not parse correctly
+// then it is skipped and not returned
 func FromStrings(refs ...string) (semvers []*Semver) {
 	semvers = []*Semver{}
 
@@ -254,6 +327,13 @@ func FromStrings(refs ...string) (semvers []*Semver) {
 	return
 }
 
+// FromGitRefs uses the git tags / references and generates a semver
+// for each using the ref.Name.Short() (refs/tags/v4.1.1 => v4.1.1) as
+// the starting point and the parses out the segments (major, minor,
+// patch etc)
+//
+// If the ref name is invalid or the tag does not parse correctly
+// then its skipped
 func FromGitRefs(refs ...*plumbing.Reference) (semvers []*Semver) {
 	semvers = []*Semver{}
 
@@ -262,5 +342,119 @@ func FromGitRefs(refs ...*plumbing.Reference) (semvers []*Semver) {
 			semvers = append(semvers, sv)
 		}
 	}
+	return
+}
+
+// GetPrereleases filters down the list of semvers to only prereleases
+func GetPrereleases(existing []*Semver) (prereleases []*Semver) {
+	prereleases = []*Semver{}
+
+	for _, exists := range existing {
+		if exists != nil && exists.IsPrerelease() {
+			prereleases = append(prereleases, exists)
+		}
+	}
+
+	return
+}
+
+// GetReleases filters down the list of semvers to only releases
+func GetReleases(existing []*Semver) (releases []*Semver) {
+	releases = []*Semver{}
+
+	for _, exists := range existing {
+		if exists != nil && exists.IsRelease() {
+			releases = append(releases, exists)
+		}
+	}
+
+	return
+}
+
+// inc is internal function that handles incrementing a string by 1 and
+// returning string value (used to bump along semver segments)
+func inc(s string) (i string) {
+	n := atoi(s) + 1
+	i = strconv.Itoa(n)
+
+	return
+}
+
+func atoi(s string) (i int) {
+	i = 0
+	if n, err := strconv.Atoi(s); err == nil {
+		i = n
+	}
+	return
+}
+
+func Release(logger *slog.Logger, existing []*Semver, bump Increment) (next *Semver) {
+	var (
+		last     *Semver
+		releases []*Semver
+	)
+	// get releases only and sort them descending order
+	releases = Sort(GetReleases(existing), SORT_DESC, false)
+	// If there are no releases, then use 0 as base
+	// Otherwise, use the last release
+	if len(releases) == 0 {
+		last = FromString("0.0.0")
+	} else {
+		last = releases[0]
+	}
+
+	next = last
+	// if we are bumping just patch, update and return
+	// if bump is minor or major then patch is reset
+	// if bump is major, then reset patch & minor
+	if bump == PATCH {
+		next.Patch = inc(next.Patch)
+	} else if bump == MINOR {
+		next.Patch = "0"
+		next.Minor = inc(next.Minor)
+	} else if bump == MAJOR {
+		next.Patch = "0"
+		next.Minor = "0"
+		next.Major = inc(next.Major)
+	}
+
+	return
+}
+
+func Prerelease(logger *slog.Logger, existing []*Semver, bump Increment, suffix string) (next *Semver) {
+	var (
+		partial string
+		build   int      = 0
+		opts    *strOpts = &strOpts{
+			PrereleaseName:  true,
+			Prefix:          false,
+			PrereleaseBuild: false,
+			BuildMetadata:   false,
+		}
+	)
+	// get the last release by passing along -1, so an increment is never triggered
+	next = Release(logger, existing, bump)
+	// now setup the prefixes for this being a prerelease
+	next.PreleaseName = suffix
+	next.PrereleaseBuild = "0"
+	// grab most of the semver signature, ignore the build number & build metadata
+	partial = format(next, opts)
+	// now look for any prereleases that have the same partial signature
+	// and if we find them, we use the latest values and increment the build number
+	pres := GetPrereleases(existing)
+	for _, pre := range pres {
+		// grab most of this semver signature, ignore the build number & build metadata
+		compare := format(pre, opts)
+		if compare == partial {
+			// if the build number is higher than one we've seen before, use this prerelease as a bench mark
+			// and track the build number of compare
+			if bn := atoi(pre.PrereleaseBuild); bn >= build {
+				next = pre
+				build = bn
+			}
+		}
+
+	}
+	next.PrereleaseBuild = inc(next.PrereleaseBuild)
 	return
 }

@@ -2,10 +2,189 @@ package semver
 
 import (
 	"fmt"
+	"opg-github-actions/action/internal/logger"
 	"testing"
 
 	"github.com/go-git/go-git/v5/plumbing"
 )
+
+type tSemverNextPre struct {
+	Versions []*Semver
+	Expected *Semver
+	Suffix   string
+	Bump     Increment
+}
+
+func TestSemverPrerelease(t *testing.T) {
+	var lg = logger.New("ERROR", "TEXT")
+	var tests = []*tSemverNextPre{
+		{
+			Bump:   MAJOR,
+			Suffix: "beta",
+			Versions: []*Semver{
+				FromString("not-a-semver"),
+				FromString("0.1.0"),
+				FromString("1.0.0-beta.0+b1"),
+				FromString("1.0.0-beta.1"),
+				FromString("1.0.0-beta.2"),
+				FromString("1.0.0-beta.10"),
+				FromString("1.0.0-beta.101"),
+				FromString("1.0.0-beta.0"),
+			},
+			Expected: FromString("1.0.0-beta.102"),
+		},
+		{
+			Bump:   MINOR,
+			Suffix: "beta",
+			Versions: []*Semver{
+				FromString("1.0.0"),
+				FromString("10.0.0"),
+				FromString("10.0.0-alpha.0"),
+				FromString("not-a-semver"),
+				FromString("1.0.0-beta.0+b1"),
+				FromString("1.0.0-beta.0"),
+			},
+			Expected: FromString("10.1.0-beta.1"),
+		},
+		{
+			Bump:   PATCH,
+			Suffix: "---RC-SNAPSHOT.12.9.1--",
+			Versions: []*Semver{
+				FromString("1.2.2"),
+				FromString("not-a-semver"),
+				FromString("1.0.0-beta.0+b1"),
+				FromString("1.2.3----RC-SNAPSHOT.12.9.1--.9+788"),
+			},
+			Expected: FromString("1.2.3----RC-SNAPSHOT.12.9.1--.10+788"),
+		},
+	}
+
+	for _, test := range tests {
+		actual := Prerelease(lg, test.Versions, test.Bump, test.Suffix)
+		if actual.Stringy(true) != test.Expected.Stringy(true) {
+			t.Errorf("error with next prerelease - expected [%s] actual [%s]", test.Expected, actual)
+		}
+	}
+}
+
+type tSemverNext struct {
+	Versions []*Semver
+	Bump     Increment
+	Expected *Semver
+}
+
+func TestSemverNextRelease(t *testing.T) {
+	var lg = logger.New("ERROR", "TEXT")
+	var tests = []*tSemverNext{
+		{
+			Bump: MAJOR,
+			Versions: []*Semver{
+				FromString("v9.5.0"),
+				FromString("tag-test-01"),
+				FromString("v10.1.0"),
+				FromString("tag-test-02"),
+				FromString("v1.0.0-beta.1+bA1"),
+				FromString("v1.0.0-beta.0+bA1"),
+				FromString("v1.0.0"),
+				FromString("v10.1.0"),
+				FromString("v1.0.0-beta.0+bA2"),
+			},
+			Expected: FromString("v11.0.0"),
+		},
+		{
+			Bump: MAJOR,
+			Versions: []*Semver{
+				FromString("v9.5.0"),
+				FromString("tag-test-01"),
+				FromString("10.1.0"),
+				FromString("tag-test-02"),
+				FromString("1.0.0-beta.1+bA1"),
+				FromString("1.0.0-beta.0+bA1"),
+				FromString("1.0.0"),
+				FromString("10.1.0"),
+				FromString("1.0.0-beta.0+bA2"),
+			},
+			Expected: FromString("11.0.0"),
+		},
+		{
+			Bump: MINOR,
+			Versions: []*Semver{
+				FromString("v9.5.0"),
+				FromString("tag-test-01"),
+				FromString("10.1.0"),
+				FromString("tag-test-02"),
+				FromString("1.0.0-beta.1+bA1"),
+				FromString("1.0.0-beta.0+bA1"),
+				FromString("1.0.0"),
+				FromString("10.1.0"),
+				FromString("1.0.0-beta.0+bA2"),
+			},
+			Expected: FromString("10.2.0"),
+		},
+		{
+			Bump: PATCH,
+			Versions: []*Semver{
+				FromString("v9.5.0"),
+				FromString("tag-test-01"),
+				FromString("10.1.0"),
+				FromString("tag-test-02"),
+				FromString("1.0.0-beta.1+bA1"),
+				FromString("1.0.0-beta.0+bA1"),
+				FromString("1.0.0"),
+				FromString("10.1.0"),
+				FromString("1.0.0-beta.0+bA2"),
+			},
+			Expected: FromString("10.1.1"),
+		},
+		{
+			Bump:     PATCH,
+			Versions: []*Semver{},
+			Expected: FromString("0.0.1"),
+		},
+		{
+			Bump:     MINOR,
+			Versions: []*Semver{},
+			Expected: FromString("0.1.0"),
+		},
+		{
+			Bump:     MAJOR,
+			Versions: []*Semver{},
+			Expected: FromString("1.0.0"),
+		},
+		{
+			Bump: MAJOR,
+			Versions: []*Semver{
+				FromString("1.0.0-beta.0+b1"),
+				FromString("1.0.0-beta.0"),
+			},
+			Expected: FromString("1.0.0"),
+		},
+		{
+			Bump: MINOR,
+			Versions: []*Semver{
+				FromString("1.0.0-beta.0+b1"),
+				FromString("1.0.0-beta.0"),
+			},
+			Expected: FromString("0.1.0"),
+		},
+		{
+			Bump: PATCH,
+			Versions: []*Semver{
+				FromString("1.0.0-beta.0+b1"),
+				FromString("1.0.0-beta.0"),
+			},
+			Expected: FromString("0.0.1"),
+		},
+	}
+
+	for _, test := range tests {
+		actual := Release(lg, test.Versions, test.Bump)
+		if actual.Stringy(true) != test.Expected.Stringy(true) {
+			t.Errorf("error with next release - expected [%s] actual [%s]", test.Expected, actual)
+		}
+	}
+
+}
 
 type tSemverSort struct {
 	Data     []*Semver
@@ -18,6 +197,7 @@ func TestSemverSort(t *testing.T) {
 	var tests = []*tSemverSort{
 		{
 			Data: []*Semver{
+				FromString("v100.1.1"),
 				FromString("9.5.0"),
 				FromString("tag-test-01"),
 				FromString("10.1.0"),
@@ -26,6 +206,7 @@ func TestSemverSort(t *testing.T) {
 				FromString("1.0.0-beta.0+bA1"),
 				FromString("10.1.0"),
 				FromString("1.0.0-beta.0+bA2"),
+				FromString("100.1.0"),
 			},
 			Expected: []*Semver{
 				FromString("1.0.0-beta.0+bA1"),
@@ -33,19 +214,21 @@ func TestSemverSort(t *testing.T) {
 				FromString("1.0.0-beta.1+bA1"),
 				FromString("9.5.0"),
 				FromString("10.1.0"),
+				FromString("100.1.0"),
+				FromString("v100.1.1"),
 			},
 		},
 	}
 
 	for i, test := range tests {
-		sorted := Sort(test.Data, SORT_ASC)
+		sorted := Sort(test.Data, SORT_ASC, true)
 
 		if len(sorted) != len(test.Expected) {
 			t.Errorf("semver sort test [%d] - mismatch length", i)
 		} else {
 			for idx, expected := range test.Expected {
 				actual := sorted[idx]
-				if expected.String() != actual.String() {
+				if expected.Stringy(true) != actual.Stringy(true) {
 					t.Errorf("semver order not as expected in set [%d:%d], expected [%v] actual [%v]", i, idx, expected, actual)
 				}
 
@@ -93,8 +276,8 @@ func TestSemverFromStringSuccess(t *testing.T) {
 
 	for _, test := range tests {
 		actual := FromString(test.Ref)
-		if actual.String() != test.Expected {
-			t.Errorf("error: expected [%s] to be [%s] actual [%s]", test.Ref, test.Expected, actual.String())
+		if actual.Stringy(true) != test.Expected {
+			t.Errorf("error: expected [%s] to be [%s] actual [%s]", test.Ref, test.Expected, actual.Stringy(true))
 			fmt.Printf("%+v\n", actual)
 		}
 	}
