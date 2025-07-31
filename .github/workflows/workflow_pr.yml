@@ -19,7 +19,7 @@ env:
 
 # jobs
 jobs:
-  # run tests for hte public github actions
+  # run tests for the public github actions
   tests_gha:
     name: "Test public actions"
     uses: './.github/workflows/test_public_github_actions.yml'
