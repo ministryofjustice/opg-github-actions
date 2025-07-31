@@ -12,8 +12,8 @@ permissions:
 
 jobs:
   # testing what github.actions_x properties are
-  test_action_values:
-    name: "TEST GitHub Action ENV"
+  test_env:
+    name: "TEST ENV"
     runs-on: ubuntu-latest
     steps:
       # checkout self
@@ -23,17 +23,17 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-      # run action to test github.actions_x properties
+      # run action to test github properties
       - name: "Local"
         id: "local_action"
-        uses: ./actions/test-gha
+        uses: ./actions/test-env
 
   # final step
   end:
     name: 'End'
     runs-on: 'ubuntu-latest'
     needs:
-      - test_action_values
+      - test_env
     steps:
       - id: end
         name: End
