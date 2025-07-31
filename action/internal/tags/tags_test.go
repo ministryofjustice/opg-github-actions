@@ -8,9 +8,45 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
-var gauth = &http.BasicAuth{
-	Username: "",
-	Password: os.Getenv("GITHUB_TOKEN"),
+type tTagSorted struct {
+	Refs     []*plumbing.Reference
+	Expected []*plumbing.Reference
+}
+
+func TestTagsSort(t *testing.T) {
+	var tests = []*tTagSorted{
+		{
+			Refs: []*plumbing.Reference{
+				plumbing.NewReferenceFromStrings("9.5.0", "6ecf0ef2c2dffaa96033e5a02219af86ec6584e5"),
+				plumbing.NewReferenceFromStrings("tag-test-01", "6ecf0ef2c2dffaa96033e5a02219af86ec6584e5"),
+				plumbing.NewReferenceFromStrings("10.1.0", "6ecf0ef2c2dffaa96033e5a02219af86ec6584e5"),
+				plumbing.NewReferenceFromStrings("tag-test-02", "6ecf0ef2c2dffaa96033e5a02219af86ec6584e5"),
+				plumbing.NewReferenceFromStrings("1.0.0-beta.1+bA1", "6ecf0ef2c2dffaa96033e5a02219af86ec6584e5"),
+				plumbing.NewReferenceFromStrings("1.0.0-beta.0+bA1", "6ecf0ef2c2dffaa96033e5a02219af86ec6584e5"),
+				plumbing.NewReferenceFromStrings("1.0.0-beta.0+bA2", "6ecf0ef2c2dffaa96033e5a02219af86ec6584e5"),
+			},
+			Expected: []*plumbing.Reference{
+				plumbing.NewReferenceFromStrings("1.0.0-beta.0+bA1", "6ecf0ef2c2dffaa96033e5a02219af86ec6584e5"),
+				plumbing.NewReferenceFromStrings("1.0.0-beta.0+bA2", "6ecf0ef2c2dffaa96033e5a02219af86ec6584e5"),
+				plumbing.NewReferenceFromStrings("1.0.0-beta.1+bA1", "6ecf0ef2c2dffaa96033e5a02219af86ec6584e5"),
+				plumbing.NewReferenceFromStrings("9.5.0", "6ecf0ef2c2dffaa96033e5a02219af86ec6584e5"),
+				plumbing.NewReferenceFromStrings("10.1.0", "6ecf0ef2c2dffaa96033e5a02219af86ec6584e5"),
+				plumbing.NewReferenceFromStrings("tag-test-01", "6ecf0ef2c2dffaa96033e5a02219af86ec6584e5"),
+				plumbing.NewReferenceFromStrings("tag-test-02", "6ecf0ef2c2dffaa96033e5a02219af86ec6584e5"),
+			},
+		},
+	}
+
+	for i, test := range tests {
+		sorted := Sort(test.Refs, SORT_ASC)
+
+		for idx, actual := range sorted {
+			if actual.Name().Short() != test.Expected[idx].Name().Short() {
+				t.Errorf("order not as expected in set [%d:%d], expected [%v] actual [%v]", i, idx, test.Expected[idx], actual)
+			}
+		}
+
+	}
 }
 
 type tTagStrings struct {
@@ -25,12 +61,12 @@ func TestTagsStrings(t *testing.T) {
 		{
 			Error: nil,
 			Refs: []*plumbing.Reference{
-				plumbing.NewReferenceFromStrings("refs/heads/v4", "6ecf0ef2c2dffb796033e5a02219af86ec6584e5"),
-				plumbing.NewReferenceFromStrings("refs/tags/v1.1.0-pre.0", "1ecf0ef2c2dffb79603ae5a02219af86ec6484e4"),
+				plumbing.NewReferenceFromStrings("refs/heads/v4", "6ecf0ef2c2daaaa96033a5a02219af86ec6584e5"),
+				plumbing.NewReferenceFromStrings("refs/tags/v1.1.0-pre.0", "1ecf0eaaac2dffb79603ae5a02219af86ec684e4"),
 			},
 			Expected: []string{
-				"refs/heads/v4 6ecf0ef2c2dffb796033e5a02219af86ec6584e5",
-				"refs/tags/v1.1.0-pre.0 1ecf0ef2c2dffb79603ae5a02219af86ec6484e4",
+				"refs/heads/v4 6ecf0ef2c2daaaa96033a5a02219af86ec6584e5",
+				"refs/tags/v1.1.0-pre.0 1ecf0eaaac2dffb79603ae5a02219af86ec684e4",
 			},
 		},
 	}
@@ -61,7 +97,7 @@ func TestTagsRefs(t *testing.T) {
 		{
 			Error: nil,
 			Refs: []*plumbing.Reference{
-				plumbing.NewReferenceFromStrings("refs/heads/v4", "6ecf0ef2c2dffb796033e5a02219af86ec6584e5"),
+				plumbing.NewReferenceFromStrings("refs/heads/v4", "6ecf0ef2c2daaaa96033a5a02219af86ec6584e5"),
 				plumbing.NewReferenceFromStrings("refs/tags/v1.1.0-pre.0", "1ecf0ef2c2dffb79603ae5a02219af86ec6484e4"),
 			},
 			Expected: []string{
@@ -97,7 +133,7 @@ func TestTagsShortRefs(t *testing.T) {
 		{
 			Error: nil,
 			Refs: []*plumbing.Reference{
-				plumbing.NewReferenceFromStrings("refs/heads/v4", "6ecf0ef2c2dffb796033e5a02219af86ec6584e5"),
+				plumbing.NewReferenceFromStrings("refs/heads/v4", "6ecf0ef2c2daaaa96033a5a02219af86ec6584e5"),
 				plumbing.NewReferenceFromStrings("refs/tags/v1.1.0-pre.0", "1ecf0ef2c2dffb79603ae5a02219af86ec6484e4"),
 			},
 			Expected: []string{
@@ -125,6 +161,11 @@ func TestTagsShortRefs(t *testing.T) {
 
 	}
 
+}
+
+var gauth = &http.BasicAuth{
+	Username: "",
+	Password: os.Getenv("GITHUB_TOKEN"),
 }
 
 // func TestTagsAllWithAShallowRepo(t *testing.T) {

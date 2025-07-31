@@ -2,14 +2,25 @@ package tags
 
 import (
 	"fmt"
+	"slices"
+	"sort"
+	"strings"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/storer"
+	"github.com/maruel/natural"
 )
 
 const (
 	ErrLikelyShallowRepository string = "No tags or other branches found; repository is probably a shallow clone."
+)
+
+type SortOrder bool
+
+const (
+	SORT_ASC  SortOrder = true
+	SORT_DESC SortOrder = false
 )
 
 // branchCount counts all branches for the repo
@@ -128,5 +139,27 @@ func ShortRefs(tags []*plumbing.Reference, err error) (shortRefs []string) {
 		shortRefs = append(shortRefs, name)
 	}
 
+	return
+}
+
+// Sort will take set of tags references, convert to strings,
+// use natural sorting to order them and then convert back to references
+func Sort(tags []*plumbing.Reference, order SortOrder) (sorted []*plumbing.Reference) {
+	sorted = []*plumbing.Reference{}
+
+	toSort := Strings(tags, nil)
+	if order == SORT_DESC {
+		sort.Sort(sort.Reverse(natural.StringSlice(toSort)))
+	} else {
+		sort.Sort(natural.StringSlice(toSort))
+	}
+	// remove dups
+	toSort = slices.Compact(toSort)
+
+	for _, str := range toSort {
+		info := strings.Split(str, " ")
+		ref := plumbing.NewReferenceFromStrings(info[0], info[1])
+		sorted = append(sorted, ref)
+	}
 	return
 }
