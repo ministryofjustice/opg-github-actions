@@ -91,8 +91,8 @@ jobs:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
       - id: test1
-        name: "1. Test registration"
-        uses: 'actions/terraform-workspace-manager'
+        name: "Test registration"
+        uses: ./actions/terraform-workspace-manager
         with:
           # sandbox
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -103,8 +103,8 @@ jobs:
           # short ttl
           time_to_protect: 1
       - id: test2
-        name: "2. Test just listing"
-        uses: 'actions/terraform-workspace-manager'
+        name: "Test listing"
+        uses: ./actions/terraform-workspace-manager
         with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
