@@ -131,7 +131,6 @@ jobs:
     name: 'End'
     runs-on: 'ubuntu-latest'
     needs:
-      - test_action_values
       - test_branch_name_from_env
       - test_branch_name_fixed
       - test_terraform_version
