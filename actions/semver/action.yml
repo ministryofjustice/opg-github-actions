@@ -59,7 +59,7 @@ runs:
       env:
         binary: "${{ github.action_path }}/builds/semver"
         # location of github repo
-        directory: ${{ github.workspace}}
+        directory: ${{ github.workspace }}
         # branch name to use - order here matters ... user input takes precendence, the pr, then push
         branch: ${{ inputs.branch_name != '' && inputs.branch_name || github.head_ref != '' && github.head_ref || github.ref_name }}
         # the default branch for this repo
