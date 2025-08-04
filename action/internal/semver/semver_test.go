@@ -126,6 +126,7 @@ func TestSemverNextRelease(t *testing.T) {
 			Versions: []*Semver{
 				FromString("v9.5.0"),
 				FromString("tag-test-01"),
+				FromString("tag.test-03"),
 				FromString("10.1.0"),
 				FromString("tag-test-02"),
 				FromString("1.0.0-beta.1+bA1"),
@@ -342,32 +343,32 @@ type tNewSemver struct {
 func TestSemverNew(t *testing.T) {
 	var tests = []*tNewSemver{
 		{
-			Ref:      plumbing.NewReferenceFromStrings("refs/heads/v4", "6ecf0ef2c2daaaa96033a5a02219af86ec6584e5"),
+			Ref:      plumbing.NewReferenceFromStrings("refs/heads/v4", "6ecf0af"),
 			Expected: &Semver{Valid: false, Original: "v4"},
 			Valid:    false,
 		},
 		{
-			Ref:      plumbing.NewReferenceFromStrings("refs/heads/v4.0.0", "6ecf0ef2c2daaaa96033a5a02219af86ec6584e5"),
+			Ref:      plumbing.NewReferenceFromStrings("refs/heads/v4.0.0", "6ecf0af"),
 			Expected: &Semver{Valid: true, Prefix: "v", Major: "4", Minor: "0", Patch: "0"},
 			Valid:    true,
 		},
 		{
-			Ref:      plumbing.NewReferenceFromStrings("refs/heads/4.0.0", "6ecf0ef2c2daaaa96033a5a02219af86ec6584e5"),
+			Ref:      plumbing.NewReferenceFromStrings("refs/heads/4.0.0", "6ecf0af"),
 			Expected: &Semver{Valid: true, Prefix: "", Major: "4", Minor: "0", Patch: "0"},
 			Valid:    true,
 		},
 		{
-			Ref:      plumbing.NewReferenceFromStrings("refs/heads/s4.1.1", "6ecf0ef2c2dffb796033e5b02219af86ec6584e5"),
+			Ref:      plumbing.NewReferenceFromStrings("refs/heads/s4.1.1", "6ecf0ab"),
 			Expected: &Semver{Valid: true, Prefix: "s", Major: "4", Minor: "1", Patch: "1"},
 			Valid:    true,
 		},
 		{
-			Ref:      plumbing.NewReferenceFromStrings("refs/heads/4.1.1-beta.0+b1", "6ecf0ef2c2dffb796033e5b02219af86ec6584e5"),
+			Ref:      plumbing.NewReferenceFromStrings("refs/heads/4.1.1-beta.0+b1", "6ecf0ab"),
 			Expected: &Semver{Valid: true, Prefix: "", Major: "4", Minor: "1", Patch: "1", PreleaseName: "beta", PrereleaseBuild: "0", BuildMetadata: "b1"},
 			Valid:    true,
 		},
 		{
-			Ref:      plumbing.NewReferenceFromStrings("refs/heads/1.0.0-alpha.beta.1+b1", "6ecf0ef2c2dffb796033e5b02219af86ec6584e5"),
+			Ref:      plumbing.NewReferenceFromStrings("refs/heads/1.0.0-alpha.beta.1+b1", "6ecf0ab"),
 			Expected: &Semver{Valid: true, Prefix: "", Major: "1", Minor: "0", Patch: "0", PreleaseName: "alpha.beta", PrereleaseBuild: "1", BuildMetadata: "b1"},
 			Valid:    true,
 		},
@@ -414,6 +415,14 @@ func TestSemverValid(t *testing.T) {
 		},
 		{
 			Value:    "test-not-semver",
+			Expected: false,
+		},
+		{
+			Value:    "v1.not-semver",
+			Expected: false,
+		},
+		{
+			Value:    "v1.not.semver",
 			Expected: false,
 		},
 		{

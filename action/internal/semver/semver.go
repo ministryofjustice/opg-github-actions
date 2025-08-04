@@ -21,13 +21,13 @@ const (
 	SORT_DESC SortOrder = false
 )
 
-type Increment int
+type Increment string
 
 const (
-	NOINC Increment = -1
-	MAJOR Increment = 1
-	MINOR Increment = 2
-	PATCH Increment = 3
+	NONE  Increment = "none"
+	MAJOR Increment = "major"
+	MINOR Increment = "minor"
+	PATCH Increment = "patch"
 )
 
 // Regex patterns for validation matching
@@ -44,10 +44,10 @@ const (
 )
 
 type Semver struct {
-	GitRef          *plumbing.Reference `json:"-"` // the git reference this semver relates to if set
-	Original        string              `json:"o"` // original short reference name
-	Valid           bool                `json:"v"`
-	Prefix          string              `json:"prefix"`
+	GitRef          *plumbing.Reference `json:"-"`      // the git reference this semver relates to if set
+	Original        string              `json:"o"`      // original short reference name
+	Valid           bool                `json:"v"`      // if the semver is valid or not
+	Prefix          string              `json:"prefix"` // prefix part of the semver (typically `v`)
 	Major           string              `json:"major"`
 	Minor           string              `json:"minor"`
 	Patch           string              `json:"patch"`
@@ -65,8 +65,7 @@ func (self *Semver) IsRelease() bool {
 
 // String returns a json friendly version of self
 func (self *Semver) String() string {
-	bytes, _ := json.MarshalIndent(self, "", "  ")
-	return string(bytes)
+	return self.Stringy(true)
 }
 
 // Stringy is used instead of String in places where we want to toggle
@@ -263,30 +262,6 @@ func parse(s *Semver) (err error) {
 	return
 }
 
-// New uses the git tag / reference and generates a semver struct
-// using the ref.Name.Short() (refs/tags/v4.1.1 => v4.1.1) as the
-// starting point and the parses out the segments (major, minor,
-// patch etc)
-//
-// If the ref name is invalid or the tag does not parse correctly
-// then nil is returned
-func New(ref *plumbing.Reference) (s *Semver) {
-	s = &Semver{
-		GitRef:   ref,
-		Original: ref.Name().Short(),
-		Valid:    true,
-	}
-	if !Valid(s.Original) {
-		return nil
-	}
-
-	if err := parse(s); err != nil {
-		return nil
-	}
-
-	return
-}
-
 // FromString uses the value passed as the original value
 // which is then split into segments (major, minor, patch
 // etc)
@@ -316,7 +291,7 @@ func FromString(ref string) (s *Semver) {
 //
 // If the name is invalid or does not parse correctly
 // then it is skipped and not returned
-func FromStrings(refs ...string) (semvers []*Semver) {
+func FromStrings(refs ...string) (semvers []*Semver, err error) {
 	semvers = []*Semver{}
 
 	for _, ref := range refs {
@@ -334,7 +309,9 @@ func FromStrings(refs ...string) (semvers []*Semver) {
 //
 // If the ref name is invalid or the tag does not parse correctly
 // then its skipped
-func FromGitRefs(refs ...*plumbing.Reference) (semvers []*Semver) {
+//
+// A `Must` style pattern to chain with `tags.All(dir)`
+func FromGitRefs(refs []*plumbing.Reference) (semvers []*Semver, err error) {
 	semvers = []*Semver{}
 
 	for _, ref := range refs {
@@ -388,6 +365,13 @@ func atoi(s string) (i int) {
 	return
 }
 
+// Release runs over the existing Semvers, finds that largest (naturally sorted) version
+// and increments that value by bump.
+//
+// If `bump` is not one of `MAJOR`, `MINOR`, `PATCH` then the semver is not updated.
+// By using `NONE` the last release version is returned instead.
+//
+// If no releases are found, `0.0.0` is used instead.
 func Release(logger *slog.Logger, existing []*Semver, bump Increment) (next *Semver) {
 	var (
 		last     *Semver
@@ -421,6 +405,13 @@ func Release(logger *slog.Logger, existing []*Semver, bump Increment) (next *Sem
 	return
 }
 
+// Prerelease looks at all the existing semvers, finds that last release and uses that with the
+// suffix value passed to generate a prerealease version with a build counter (v1.0.1-suffix.1)
+//
+// It finds the last release by calling Release and using that as the base line.
+//
+// If gets all prereleases from the existing set and matches those with the same
+// `MAJOR.MINOR.PATCH-suffix.buildNumber` pattern, then increments the buildNumber
 func Prerelease(logger *slog.Logger, existing []*Semver, bump Increment, suffix string) (next *Semver) {
 	var (
 		partial string
@@ -456,5 +447,29 @@ func Prerelease(logger *slog.Logger, existing []*Semver, bump Increment, suffix 
 
 	}
 	next.PrereleaseBuild = inc(next.PrereleaseBuild)
+	return
+}
+
+// New uses the git tag / reference and generates a semver struct
+// using the ref.Name.Short() (refs/tags/v4.1.1 => v4.1.1) as the
+// starting point and the parses out the segments (major, minor,
+// patch etc)
+//
+// If the ref name is invalid or the tag does not parse correctly
+// then nil is returned
+func New(ref *plumbing.Reference) (s *Semver) {
+	s = &Semver{
+		GitRef:   ref,
+		Original: ref.Name().Short(),
+		Valid:    true,
+	}
+	if !Valid(s.Original) {
+		return nil
+	}
+
+	if err := parse(s); err != nil {
+		return nil
+	}
+
 	return
 }
