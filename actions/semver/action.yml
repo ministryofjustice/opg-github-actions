@@ -3,6 +3,9 @@ description: >
   Generate (or return) a semantic version tag to use for images / releases and so on.
 
 inputs:
+  test:
+    description: "When true, the tag will not be created"
+    default: "false"
 
   prerelease:
     description: "If set, flags this as being a pre-release."
@@ -71,11 +74,15 @@ runs:
         prerelease_suffix_length: ${{ inputs.prelease_suffix_length }}
         # bump by
         default_bump: ${{ inputs.default_bump }}
+        # test mode
+        test_mode: ${{ inputs.test == 'true' && '--test' || '' }}
       run: |
+        ls -lat ${{ env.directory }}
+
         echo "Running semver command ... "
         ${{ env.binary }} \
           --directory=${{ env.directory }} \
           --branch=${{ env.branch}} \
           --default-branch=${{ env.default_branch }} \
           --bump=${{ env.default_bump}} \
-          --prerelease-suffix-length=${{ env.prerelease_suffix_length }} ${{ env.prerelease }}
+          --prerelease-suffix-length=${{ env.prerelease_suffix_length }} ${{ env.prerelease }} ${{ env.test_mode }}

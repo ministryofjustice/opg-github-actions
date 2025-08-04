@@ -24,6 +24,7 @@ type Options struct {
 	DefaultBranch          string // default branch name - generally main, used to compare commits against
 	BranchName             string // branch name is used as the prerelease suffix
 	DefaultBump            string // what to increment the semver by (major, minor, patch)
+	TestMode               bool
 }
 
 var runOptions *Options = &Options{
@@ -32,6 +33,7 @@ var runOptions *Options = &Options{
 	PrereleaseSuffixLength: 12,
 	BranchName:             "",
 	DefaultBump:            string(semver.PATCH),
+	TestMode:               false,
 }
 
 func Run(lg *slog.Logger, options *Options) (result map[string]string, err error) {
@@ -49,7 +51,7 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	}
 
 	if repository, err = repo.FromDir(options.RepositoryDirectory); err != nil {
-		lg.Error("error creating repository from directory", "err", err.Error())
+		lg.Error("error creating repository from directory", "err", err.Error(), "dir", options.RepositoryDirectory)
 		return
 	}
 
@@ -99,6 +101,8 @@ func init() {
 
 	// Semver increments
 	flag.StringVar(&runOptions.DefaultBump, "bump", runOptions.DefaultBump, "The default value to increment semver by if no comment if found. (default: patch)")
+	// test mode - disables creating tags
+	flag.BoolVar(&runOptions.TestMode, "test", runOptions.TestMode, "Set to true to disable creating tag.")
 }
 
 func main() {
