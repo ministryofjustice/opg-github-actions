@@ -1,11 +1,15 @@
 package tags
 
 import (
-	"os"
+	"encoding/json"
+	"fmt"
+	"math/rand"
+	"strconv"
 	"testing"
 
+	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 type tTagSorted struct {
@@ -163,9 +167,98 @@ func TestTagsShortRefs(t *testing.T) {
 
 }
 
-var gauth = &http.BasicAuth{
-	Username: "",
-	Password: os.Getenv("GITHUB_TOKEN"),
+func TestTagCreationSimple(t *testing.T) {
+	var (
+		dir     = t.TempDir()
+		tagName = "test-tag"
+	)
+
+	repo, head := randomRepository(dir)
+	tags1, _ := All(repo)
+
+	Create(repo, tagName, head.Hash())
+
+	tags2, _ := All(repo)
+
+	if len(tags1)+1 != len(tags2) {
+		t.Errorf("tag count not as expected")
+	}
+
+	found := false
+	for _, tg := range tags2 {
+		var nm = tg.Name().Short()
+		if nm == tagName {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("did not find newly created tag")
+	}
+
+}
+
+// randomRepository make a repo with a mix of commits and various tags
+func randomRepository(dir string) (r *git.Repository, defaultBranch *plumbing.Reference) {
+	var (
+		commitsN = rand.Intn(50) + 10 // somewhere between 10-50 commits
+		preTags  = rand.Intn(15) + 5  // 5-15 tags
+		relTags  = rand.Intn(10) + 2  // 2-10 tags
+		hashes   = []plumbing.Hash{}
+	)
+	// create the repository locally
+	r, _ = git.PlainInit(dir, false)
+	w, _ := r.Worktree()
+
+	// create some commits on the base
+	for i := 0; i < commitsN; i++ {
+		msg := fmt.Sprintf("commit %d", i)
+		hash, e := w.Commit(msg, &git.CommitOptions{
+			AllowEmptyCommits: true,
+			Author:            &object.Signature{Name: "go test", Email: "test@example.com"},
+		})
+		if e == nil {
+			hashes = append(hashes, hash)
+		}
+	}
+	// make some random tags with v1.0.x-thing format
+	for i := 0; i < preTags; i++ {
+		var randI = rand.Intn(len(hashes))
+		var hash = hashes[randI]
+		var tag = "v1.0." + strconv.Itoa(i+1) + "-thing"
+		var rev = plumbing.Revision(hash.String())
+
+		revHash, _ := r.ResolveRevision(rev)
+		r.CreateTag(tag, *revHash, nil)
+	}
+
+	// make some random tags with v1.0.x-thing format
+	for i := 0; i < relTags; i++ {
+		var randI = rand.Intn(len(hashes))
+		var hash = hashes[randI]
+		var tag = "v1.0." + strconv.Itoa(i+1)
+		var rev = plumbing.Revision(hash.String())
+
+		revHash, _ := r.ResolveRevision(rev)
+		r.CreateTag(tag, *revHash, nil)
+	}
+
+	defaultBranch, _ = r.Head()
+	// checkout to default branch
+	w.Checkout(&git.CheckoutOptions{
+		Create: false,
+		Force:  true,
+		Branch: defaultBranch.Name(),
+	})
+
+	return
+}
+
+// Debug is a helper function that runs printf against a json
+// string version of the item passed.
+// Used for testing only.
+func debug[T any](item T) {
+	bytes, _ := json.MarshalIndent(item, "", "  ")
+	fmt.Printf("%+v\n", string(bytes))
 }
 
 // func TestTagsAllWithAShallowRepo(t *testing.T) {

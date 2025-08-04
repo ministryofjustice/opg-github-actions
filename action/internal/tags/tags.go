@@ -7,8 +7,10 @@ import (
 	"strings"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/storer"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/maruel/natural"
 )
 
@@ -161,5 +163,20 @@ func Sort(tags []*plumbing.Reference, order SortOrder) (sorted []*plumbing.Refer
 		ref := plumbing.NewReferenceFromStrings(info[0], info[1])
 		sorted = append(sorted, ref)
 	}
+	return
+}
+
+func Create(repository *git.Repository, tagName string, ref plumbing.Hash) (*plumbing.Reference, error) {
+	return repository.CreateTag(tagName, ref, nil)
+}
+
+func Push(repository *git.Repository, auth *http.BasicAuth) (err error) {
+	err = repository.Push(
+		&git.PushOptions{
+			RemoteName: "origin",
+			RefSpecs:   []config.RefSpec{config.RefSpec("refs/tags/*:refs/tags/*")},
+			Auth:       auth,
+		},
+	)
 	return
 }
