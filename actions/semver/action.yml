@@ -74,15 +74,29 @@ runs:
         prerelease_suffix_length: ${{ inputs.prelease_suffix_length }}
         # bump by
         default_bump: ${{ inputs.default_bump }}
+        # prefix
+        with_prefix: ${{ inputs.with_prefix == 'true' && '--with-prefix' || '' }}
         # test mode
         test_mode: ${{ inputs.test == 'true' && '--test' || '' }}
       run: |
-        ls -lat ${{ env.directory }}
-
         echo "Running semver command ... "
+
+        echo "## Env " >> $GITHUB_STEP_SUMMARY
+        echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
+        echo "| binary | ${{ env.binary }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| directory | ${{ env.directory }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| branch | ${{ env.branch }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| default_branch | ${{ env.default_branch }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| prerelease | ${{ env.prerelease }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| prerelease_suffix_length | ${{ env.prerelease_suffix_length }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| default_bump | ${{ env.default_bump }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| with_prefix | ${{ env.with_prefix }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| test_mode | ${{ env.test_mode }} |" >> $GITHUB_STEP_SUMMARY
+
         ${{ env.binary }} \
           --directory=${{ env.directory }} \
           --branch=${{ env.branch}} \
           --default-branch=${{ env.default_branch }} \
           --bump=${{ env.default_bump}} \
-          --prerelease-suffix-length=${{ env.prerelease_suffix_length }} ${{ env.prerelease }} ${{ env.test_mode }}
+          --prerelease-suffix-length=${{ env.prerelease_suffix_length }} ${{ env.prerelease }} ${{ env.with_prefix }} ${{ env.test_mode }}

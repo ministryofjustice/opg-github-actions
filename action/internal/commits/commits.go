@@ -1,6 +1,8 @@
 package commits
 
 import (
+	"strings"
+
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -16,6 +18,32 @@ func logHashes(repository *git.Repository, commit *object.Commit) (log map[strin
 		return nil
 	})
 
+	return
+}
+
+// FindReference looks for a commit that matches the reference hash passed as string
+func FindReference(r *git.Repository, sha string) (ref *plumbing.Reference, err error) {
+	refName := sha
+	// if the string doesnt start with "refs/", presume its a short form and look for a match
+	// comparing the last segment of the full reference
+	// This helps when the repo might be shallow and not be fully mapped
+	if !strings.Contains(refName, "refs/") {
+		refs, _ := r.References()
+		refs.ForEach(func(ref *plumbing.Reference) error {
+			name := ref.Name().String()
+			end := strings.HasSuffix(name, "/"+sha)
+			if end {
+				refName = name
+			}
+			return nil
+		})
+	}
+	rev := plumbing.Revision(refName)
+	hash, err := r.ResolveRevision(rev)
+	if err != nil {
+		return
+	}
+	ref = plumbing.NewReferenceFromStrings(sha, hash.String())
 	return
 }
 
