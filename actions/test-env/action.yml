@@ -4,7 +4,7 @@ description: >
   determine values of various github.$x context values when importing from
   external workflows in various ways (semver tag, sha, latest etc).
 
-  Also used to examine the git state on pull requests and similar events.
+  Also used to examine the git state on pull requests and similar events..
 
 runs:
   using: "composite"
