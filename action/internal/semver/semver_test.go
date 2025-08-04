@@ -8,6 +8,63 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 )
 
+type tBump struct {
+	Content  []string
+	Default  Increment
+	Expected Increment
+}
+
+func TestSemverBumpCount(t *testing.T) {
+	var tests = []*tBump{
+		{
+			Default:  PATCH,
+			Expected: MINOR,
+			Content: []string{
+				"captain, my commit mesage has nothing in",
+				"just a #minor",
+				"what a lovely #patch",
+			},
+		},
+		{
+			Default:  MAJOR,
+			Expected: MINOR,
+			Content: []string{
+				"major, my commit mesage has nothing in",
+				"just a #minor",
+				"what a lovely #patch",
+			},
+		},
+		{
+			Default:  MINOR,
+			Expected: MAJOR,
+			Content: []string{
+				"my commit mesage has nothing in",
+				"just a #minor",
+				"what a lovely #patch",
+				"breaking something with a #major",
+			},
+		},
+		{
+			Default:  PATCH,
+			Expected: MAJOR,
+			Content: []string{
+				"major minor patch other",
+				"breaking something with a #major",
+				"a long bit of content that has many words and letters and all of those fun things without actually saying anything useful. #test",
+			},
+		},
+	}
+
+	for i, test := range tests {
+		actual := GetBump(test.Content, test.Default)
+
+		if actual != test.Expected {
+			t.Errorf("[%d] bump did not match, expected [%s] actual [%s]", i, test.Expected, actual)
+		}
+	}
+
+}
+
 type tSemverNextPre struct {
 	Versions []*Semver
 	Expected *Semver

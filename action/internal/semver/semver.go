@@ -23,6 +23,10 @@ const (
 
 type Increment string
 
+func (self Increment) Stringy() string {
+	return fmt.Sprintf("#%s", strings.ToLower(string(self)))
+}
+
 const (
 	NONE  Increment = "none"
 	MAJOR Increment = "major"
@@ -447,6 +451,34 @@ func Prerelease(logger *slog.Logger, existing []*Semver, bump Increment, suffix 
 
 	}
 	next.PrereleaseBuild = inc(next.PrereleaseBuild)
+	return
+}
+
+// GetBump scans the strings (commit messages) and looks for triggers that
+// would increment the semver (#major|#minor|#patch) and returns a counter for each type
+//
+// If no triggers are found then the counter that matches 'fallback' param will be
+// incremented instead.
+func GetBump(commitMessages []string, defaultBump Increment) (bump Increment) {
+
+	bump = ""
+
+	for _, content := range commitMessages {
+		// if we find any major, then return
+		// if the bump isnt a major, and we find a minor, then set to minor
+		// if the bump isnt major or minor and we find patch, set to patch
+		if strings.Contains(content, MAJOR.Stringy()) {
+			bump = MAJOR
+			return
+		} else if bump != MAJOR && strings.Contains(content, MINOR.Stringy()) {
+			bump = MINOR
+		} else if bump != MAJOR && bump != MINOR && strings.Contains(content, PATCH.Stringy()) {
+			bump = PATCH
+		}
+	}
+	if bump == "" {
+		bump = defaultBump
+	}
 	return
 }
 

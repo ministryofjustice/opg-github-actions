@@ -50,6 +50,7 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		use           *semver.Semver
 		defaultBranch *plumbing.Reference
 		refBranch     *plumbing.Reference
+		createdTag    *plumbing.Reference
 		newCommits    []*object.Commit
 		bump          semver.Increment = semver.Increment(options.DefaultBump)
 	)
@@ -92,7 +93,7 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		return
 	}
 
-	debug(len(newCommits))
+	lg.Debug("found commits", "len", len(newCommits))
 
 	if options.Prerelease {
 		// run safe on the branch name for prerelease usage
@@ -111,10 +112,14 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 
 	// TODO: CREATE TAG
 	if !options.TestMode {
-		tag, err := tags.Create(repository, use.String(), refBranch.Hash())
+		createdTag, err = tags.Create(repository, use.String(), refBranch.Hash())
+		if err != nil {
+			return
+		}
 	}
 
 	debug(use.String())
+	debug(createdTag)
 
 	return
 }
