@@ -74,6 +74,8 @@ runs:
         prerelease_suffix_length: ${{ inputs.prelease_suffix_length }}
         # bump by
         default_bump: ${{ inputs.default_bump }}
+        # extra text from a pr
+        extras: '${{ github.event.pull_request.title }}${{ github.event.pull_request.body }}'
         # prefix
         with_prefix: ${{ inputs.with_prefix == 'true' && '--with-prefix' || '' }}
         # test mode
@@ -99,4 +101,5 @@ runs:
           --branch=${{ env.branch}} \
           --default-branch=${{ env.default_branch }} \
           --bump=${{ env.default_bump}} \
+          --extra-content="${{ env.extras }}" \
           --prerelease-suffix-length=${{ env.prerelease_suffix_length }} ${{ env.prerelease }} ${{ env.with_prefix }} ${{ env.test_mode }}

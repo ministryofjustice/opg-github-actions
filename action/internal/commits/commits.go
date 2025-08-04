@@ -22,8 +22,8 @@ func logHashes(repository *git.Repository, commit *object.Commit) (log map[strin
 }
 
 // FindReference looks for a commit that matches the reference hash passed as string
-func FindReference(r *git.Repository, sha string) (ref *plumbing.Reference, err error) {
-	refName := sha
+func FindReference(r *git.Repository, reference string) (ref *plumbing.Reference, err error) {
+	refName := reference
 	// if the string doesnt start with "refs/", presume its a short form and look for a match
 	// comparing the last segment of the full reference
 	// This helps when the repo might be shallow and not be fully mapped
@@ -31,7 +31,7 @@ func FindReference(r *git.Repository, sha string) (ref *plumbing.Reference, err 
 		refs, _ := r.References()
 		refs.ForEach(func(ref *plumbing.Reference) error {
 			name := ref.Name().String()
-			end := strings.HasSuffix(name, "/"+sha)
+			end := strings.HasSuffix(name, "/"+reference)
 			if end {
 				refName = name
 			}
@@ -43,7 +43,7 @@ func FindReference(r *git.Repository, sha string) (ref *plumbing.Reference, err 
 	if err != nil {
 		return
 	}
-	ref = plumbing.NewReferenceFromStrings(sha, hash.String())
+	ref = plumbing.NewReferenceFromStrings(reference, hash.String())
 	return
 }
 

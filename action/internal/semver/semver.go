@@ -460,7 +460,6 @@ func Prerelease(logger *slog.Logger, existing []*Semver, bump Increment, suffix 
 // If no triggers are found then the counter that matches 'fallback' param will be
 // incremented instead.
 func GetBump(commitMessages []string, defaultBump Increment) (bump Increment) {
-
 	bump = ""
 
 	for _, content := range commitMessages {

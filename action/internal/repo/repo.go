@@ -43,7 +43,7 @@ func FromDir(localDirectory string) (repo *git.Repository, err error) {
 // the `auth` param presumes a basic auth like:
 //
 //	&http.BasicAuth{
-//		Username: "my-usename",
+//		Username: "username",
 //		Password: os.Getenv("GITHUB_TOKEN"),
 //	}
 func Clone(localDirectory string, remoteUrl string, auth *http.BasicAuth, opts *git.CloneOptions) (r *git.Repository, err error) {
