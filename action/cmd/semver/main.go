@@ -27,6 +27,7 @@ type Options struct {
 	DefaultBranch          string // default branch name - generally main, used to compare commits against
 	BranchName             string // branch name is used as the prerelease suffix
 	DefaultBump            string // what to increment the semver by (major, minor, patch)
+	ExtraContent           string // content from pull request title / body where their might be extra #major content
 	WithPrefix             bool
 	TestMode               bool
 }
@@ -38,63 +39,30 @@ var runOptions *Options = &Options{
 	BranchName:             "",
 	DefaultBranch:          "main",
 	DefaultBump:            string(semver.PATCH),
+	ExtraContent:           "",
 	WithPrefix:             true,
 	TestMode:               true,
 }
 
-func Run(lg *slog.Logger, options *Options) (result map[string]string, err error) {
-	var (
-		repository    *git.Repository
-		gittags       []*plumbing.Reference
-		semvers       []*semver.Semver
-		use           *semver.Semver
-		defaultBranch *plumbing.Reference
-		refBranch     *plumbing.Reference
-		createdTag    *plumbing.Reference
-		newCommits    []*object.Commit
-		bump          semver.Increment = semver.Increment(options.DefaultBump)
-	)
-	result = map[string]string{}
+func getExistingSemvers(lg *slog.Logger, repository *git.Repository) (semvers []*semver.Semver, err error) {
 
-	if options.Prerelease && options.BranchName == "" {
-		err = fmt.Errorf(ErrNoBranchName)
-		return
-	}
-
-	if repository, err = repo.FromDir(options.RepositoryDirectory); err != nil {
-		lg.Error("error creating repository from directory", "err", err.Error(), "dir", options.RepositoryDirectory)
-		return
-	}
-
+	var gittags []*plumbing.Reference // all tags in the repo
+	// get the tags
 	if gittags, err = tags.All(repository); err != nil {
 		lg.Error("error getting tags from repository", "err", err.Error())
 		return
 	}
-
+	// get the semvers from the tags
 	if semvers, err = semver.FromGitRefs(gittags); err != nil {
 		lg.Error("error getting semvers from tags", "err", err.Error())
 		return
 	}
+	return
+}
 
-	// TODO: find #bump within commits
-	// 		- get commits between main & current git pointer
-	if defaultBranch, err = commits.FindReference(repository, options.DefaultBranch); err != nil {
-		lg.Error("error getting git reference for default branch", "err", err.Error(), "default_branch", options.DefaultBranch)
-		return
-	}
-
-	if refBranch, err = commits.FindReference(repository, options.BranchName); err != nil {
-		lg.Error("error getting git reference for branch", "err", err.Error(), "branch", options.BranchName)
-		return
-	}
-
-	if newCommits, err = commits.DiffBetween(repository, defaultBranch.Hash(), refBranch.Hash()); err != nil {
-		lg.Error("error commits between references", "err", err.Error(), "base", defaultBranch.Hash().String(), "head", refBranch.Hash().String())
-		return
-	}
-
-	lg.Debug("found commits", "len", len(newCommits))
-
+func getSemverToUse(lg *slog.Logger, semvers []*semver.Semver, bump semver.Increment, options *Options) (use *semver.Semver) {
+	use = &semver.Semver{}
+	// decide if we do prerelease or not based on input
 	if options.Prerelease {
 		// run safe on the branch name for prerelease usage
 		suffix, _ := strs.Safe(options.BranchName, options.PrereleaseSuffixLength)
@@ -110,16 +78,73 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		use.Prefix = ""
 	}
 
+	return
+}
+
+func Run(lg *slog.Logger, options *Options) (result map[string]string, err error) {
+	var (
+		repository    *git.Repository                                             // the object for this repo
+		semvers       []*semver.Semver                                            // all valid semver tags in the repo
+		use           *semver.Semver                                              // the semver to use for the prerelease / release
+		defaultBranch *plumbing.Reference                                         // git ref for the default branch
+		currentCommit *plumbing.Reference                                         // git sha / ref for where the git repo currently is
+		createdTag    *plumbing.Reference                                         // the new semver tag thats been created
+		newCommits    []*object.Commit                                            // all commits that exist in the ref
+		bump          semver.Increment    = semver.Increment(options.DefaultBump) // default increment
+	)
+	result = map[string]string{}
+
+	if options.Prerelease && options.BranchName == "" {
+		err = fmt.Errorf(ErrNoBranchName)
+		return
+	}
+	// generate a repo
+	if repository, err = repo.FromDir(options.RepositoryDirectory); err != nil {
+		lg.Error("error creating repository from directory", "err", err.Error(), "dir", options.RepositoryDirectory)
+		return
+	}
+
+	// get the semvers from the tags
+	semvers, err = getExistingSemvers(lg, repository)
+	if err != nil {
+		return
+	}
+	// get the default branch info
+	if defaultBranch, err = commits.FindReference(repository, options.DefaultBranch); err != nil {
+		lg.Error("error getting git reference for default branch", "err", err.Error(), "default_branch", options.DefaultBranch)
+		return
+	}
+	// get info on the current commit
+	if currentCommit, err = commits.FindReference(repository, options.BranchName); err != nil {
+		lg.Error("error getting git reference for branch", "err", err.Error(), "branch", options.BranchName)
+		return
+	}
+	// find new commits that are in the current tree, but not
+	if newCommits, err = commits.DiffBetween(repository, defaultBranch.Hash(), currentCommit.Hash()); err != nil {
+		lg.Error("error commits between references", "err", err.Error(), "base", defaultBranch.Hash().String(), "head", currentCommit.Hash().String())
+		return
+	}
+	// TODO: find any #bump within commits
+	lg.Debug("found commits", "len", len(newCommits))
+
+	use = getSemverToUse(lg, semvers, bump, options)
+	// set the git ref to the current place
+	use.GitRef = currentCommit
+
 	// TODO: CREATE TAG
 	if !options.TestMode {
-		createdTag, err = tags.Create(repository, use.String(), refBranch.Hash())
+		createdTag, err = tags.Create(repository, use.String(), currentCommit.Hash())
 		if err != nil {
 			return
 		}
 	}
 
-	debug(use.String())
-	debug(createdTag)
+	result = map[string]string{
+		"tag":     use.String(),
+		"hash":    use.GitRef.Hash().String(),
+		"test":    fmt.Sprintf("%t", options.TestMode),
+		"created": fmt.Sprintf("%t", (createdTag != nil)),
+	}
 
 	return
 }
@@ -147,6 +172,8 @@ func init() {
 	flag.BoolVar(&runOptions.WithPrefix, "with-prefix", runOptions.WithPrefix, "Should we use a prefix. (default: true - will use v)")
 	// test mode - disables creating tags
 	flag.BoolVar(&runOptions.TestMode, "test", runOptions.TestMode, "Set to true to disable creating tag.")
+	//
+	flag.StringVar(&runOptions.ExtraContent, "extra-content", runOptions.ExtraContent, "Additional content that might also contain # references")
 }
 
 func main() {
