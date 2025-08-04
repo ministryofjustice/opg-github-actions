@@ -70,12 +70,12 @@ runs:
         # max length to use for a prerelease suffix
         prerelease_suffix_length: ${{ inputs.prelease_suffix_length }}
         # bump by
-        bump: ${{ inputs.default_bump }}
+        default_bump: ${{ inputs.default_bump }}
       run: |
         echo "Running semver command ... "
         ${{ env.binary }} \
-          directory=${{ env.directory }} \
-          branch=${{ env.branch}} \
-          default-branch=${{ env.default_branch }} \
-          bump=${{ env.default_bump}} \
-          ${{ env.prerelease }} --prerelease-suffix-length=${{ env.prerelease_suffix_length }}
+          --directory=${{ env.directory }} \
+          --branch=${{ env.branch}} \
+          --default-branch=${{ env.default_branch }} \
+          --bump=${{ env.default_bump}} \
+          --prerelease-suffix-length=${{ env.prerelease_suffix_length }} ${{ env.prerelease }}
