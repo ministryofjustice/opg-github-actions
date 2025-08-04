@@ -40,6 +40,7 @@ runs:
     - name: "Build binary"
       id: builder
       shell: bash
+      working-directory: ${{ github.action_path }}
       env:
         source: "${{ github.action_path }}/../../action/cmd/semver"
         build_directory: "${{ github.action_path }}/builds"
