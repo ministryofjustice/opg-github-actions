@@ -65,12 +65,12 @@ func TestTagsStrings(t *testing.T) {
 		{
 			Error: nil,
 			Refs: []*plumbing.Reference{
-				plumbing.NewReferenceFromStrings("refs/heads/v4", "6ecf0ef2c2daaaa96033a5a02219af86ec6584e5"),
-				plumbing.NewReferenceFromStrings("refs/tags/v1.1.0-pre.0", "1ecf0eaaac2dffb79603ae5a02219af86ec684e4"),
+				plumbing.NewReferenceFromStrings("refs/heads/v4", "6ecf0ef2c2e"),
+				plumbing.NewReferenceFromStrings("refs/tags/v1.1.0-pre.0", "79603ae5a02219af86ec684e4"),
 			},
 			Expected: []string{
-				"refs/heads/v4 6ecf0ef2c2daaaa96033a5a02219af86ec6584e5",
-				"refs/tags/v1.1.0-pre.0 1ecf0eaaac2dffb79603ae5a02219af86ec684e4",
+				"refs/heads/v4 6ecf0ef2c2e",
+				"refs/tags/v1.1.0-pre.0 79603ae5a02219af86ec684e4",
 			},
 		},
 	}

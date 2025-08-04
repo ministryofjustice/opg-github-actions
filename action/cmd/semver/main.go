@@ -18,10 +18,12 @@ import (
 const ErrNoBranchName string = "branch-name is required, but not found."
 
 type Options struct {
-	RepositoryDirectory    string
-	Prerelease             bool
-	PrereleaseSuffixLength int
-	BranchName             string
+	RepositoryDirectory    string // Directory where the dit repo is
+	Prerelease             bool   // if this is a prerelease of a full release
+	PrereleaseSuffixLength int    // length of the prerelease suffix
+	DefaultBranch          string // default branch name - generally main, used to compare commits against
+	BranchName             string // branch name is used as the prerelease suffix
+	DefaultBump            string // what to increment the semver by (major, minor, patch)
 }
 
 var runOptions *Options = &Options{
@@ -29,39 +31,7 @@ var runOptions *Options = &Options{
 	Prerelease:             false,
 	PrereleaseSuffixLength: 12,
 	BranchName:             "",
-}
-
-// Debug is a helper function that runs printf against a json
-// string version of the item passed.
-// Used for testing only.
-func debug[T any](item T) {
-	bytes, _ := json.MarshalIndent(item, "", "  ")
-	fmt.Printf("%+v\n", string(bytes))
-}
-
-// init does the setup of args
-func init() {
-	flag.StringVar(&runOptions.RepositoryDirectory, "directory", runOptions.RepositoryDirectory, "The directory path of the git repository.")
-
-	// prerelease related options
-	flag.StringVar(&runOptions.BranchName, "branch", runOptions.BranchName, "The current branch name to use for prerelease suffixes")
-	flag.BoolVar(&runOptions.Prerelease, "prerelease", runOptions.Prerelease, "Set to true to generate a prerelease version.")
-	flag.IntVar(&runOptions.PrereleaseSuffixLength, "prerelease-suffix-length", runOptions.PrereleaseSuffixLength, "Set the max length to use for tag suffixes")
-}
-
-func main() {
-	var lg *slog.Logger = logger.New("INFO", "TEXT")
-	// process the arguments and fetch the fallback value from environment values
-	flag.Parse()
-
-	// run the command
-	res, err := Run(lg, runOptions)
-	if err != nil {
-		lg.Error(err.Error())
-		os.Exit(1)
-	}
-	logger.Result(lg, res)
-
+	DefaultBump:            string(semver.PATCH),
 }
 
 func Run(lg *slog.Logger, options *Options) (result map[string]string, err error) {
@@ -94,12 +64,54 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	}
 
 	if options.Prerelease {
-		use = semver.Prerelease(lg, semvers, semver.PATCH, options.BranchName)
+		use = semver.Prerelease(lg,
+			semvers,
+			semver.Increment(options.DefaultBump),
+			options.BranchName)
 	} else {
-		use = semver.Release(lg, semvers, semver.PATCH)
+		use = semver.Release(lg,
+			semvers,
+			semver.Increment(options.DefaultBump))
 	}
 
 	debug(use.String())
 
 	return
+}
+
+// Debug is a helper function that runs printf against a json
+// string version of the item passed.
+// Used for testing only.
+func debug[T any](item T) {
+	bytes, _ := json.MarshalIndent(item, "", "  ")
+	fmt.Printf("%+v\n", string(bytes))
+}
+
+// init does the setup of args
+func init() {
+	flag.StringVar(&runOptions.RepositoryDirectory, "directory", runOptions.RepositoryDirectory, "The directory path of the git repository.")
+
+	flag.StringVar(&runOptions.BranchName, "branch", runOptions.BranchName, "The current branch name to use for prerelease suffixes")
+	flag.StringVar(&runOptions.DefaultBranch, "default-branch", runOptions.DefaultBranch, "The default branch name for this repo - used for commit comparisons")
+	// prerelease related options
+	flag.BoolVar(&runOptions.Prerelease, "prerelease", runOptions.Prerelease, "Set to true to generate a prerelease version.")
+	flag.IntVar(&runOptions.PrereleaseSuffixLength, "prerelease-suffix-length", runOptions.PrereleaseSuffixLength, "Set the max length to use for tag suffixes")
+
+	// Semver increments
+	flag.StringVar(&runOptions.DefaultBump, "bump", runOptions.DefaultBump, "The default value to increment semver by if no comment if found. (default: patch)")
+}
+
+func main() {
+	var lg *slog.Logger = logger.New("INFO", "TEXT")
+	// process the arguments and fetch the fallback value from environment values
+	flag.Parse()
+
+	// run the command
+	res, err := Run(lg, runOptions)
+	if err != nil {
+		lg.Error(err.Error())
+		os.Exit(1)
+	}
+	logger.Result(lg, res)
+
 }
