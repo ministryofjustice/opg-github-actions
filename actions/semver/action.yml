@@ -34,7 +34,7 @@ outputs:
 
   hash:
     description: "Git sha / reference where the tag was created / found."
-    value: ${{ steps.cmd.outputs.hash} }
+    value: ${{ steps.cmd.outputs.hash }}
 
   created:
     description: "Boolean to say if the tag was created or not."
