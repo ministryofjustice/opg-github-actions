@@ -16,6 +16,7 @@ import (
 type tSemTestCommit struct {
 	Message      string
 	Branch       string
+	Tag          string
 	ChildCommits []string
 }
 
@@ -33,6 +34,96 @@ func TestMain(t *testing.T) {
 
 	var lg = logger.New("ERROR", "TEXT")
 	var tests = []*tSemTest{
+		// test a prerelease tag that clashes with a similar branch and
+		// tag that triggers a patch
+		{
+			ExpectedTag:   "v1.0.1-renovatefeat.2",
+			ExpectedBump:  string(semver.PATCH),
+			ShouldError:   false,
+			CreateRelease: true,
+			Input: &Options{
+				Prerelease: true,
+				BranchName: "renovate-feature-b",
+			},
+			Commits: []*tSemTestCommit{
+				{
+					Message: "different, but similar commit that should trigger patch only",
+					Branch:  "renovate-feature-a",
+					Tag:     "v1.0.1-renovatefeat.1",
+				},
+				{
+					Message: "single commit thats not even a patch but using defaults",
+					Branch:  "renovate-feature-b",
+				},
+			},
+		},
+		// test a prerelease tag that clashes with a similar branch and
+		// tag that triggers a minor
+		{
+			ExpectedTag:   "v1.1.0-renovatefeat.2",
+			ExpectedBump:  string(semver.MINOR),
+			ShouldError:   false,
+			CreateRelease: true,
+			Input: &Options{
+				Prerelease: true,
+				BranchName: "renovate-feature-b",
+			},
+			Commits: []*tSemTestCommit{
+				{
+					Message: "different, but similar commit thats #minor",
+					Branch:  "renovate-feature-a",
+					Tag:     "v1.1.0-renovatefeat.1",
+				},
+				{
+					Message: "single commit thats #minor",
+					Branch:  "renovate-feature-b",
+				},
+			},
+		},
+		// test a prerelease tag that clashes with a similar branch and
+		// tag that triggers a major
+		{
+			ExpectedTag:   "v2.0.0-renovatefeat.2",
+			ExpectedBump:  string(semver.MAJOR),
+			ShouldError:   false,
+			CreateRelease: true,
+			Input: &Options{
+				Prerelease:  true,
+				BranchName:  "renovate-feature-b",
+				DefaultBump: string(semver.PATCH),
+			},
+			Commits: []*tSemTestCommit{
+				{
+					Message: "different, but similar commit thats #major",
+					Branch:  "renovate-feature-a",
+					Tag:     "v2.0.0-renovatefeat.1",
+				},
+				{
+					Message: "single commit thats #major",
+					Branch:  "renovate-feature-b",
+				},
+			},
+		},
+		// test a release tag when there are no prior releases
+		// based on commit message and disable prefix
+		{
+			ExpectedTag:   "1.0.0",
+			ExpectedBump:  string(semver.MAJOR),
+			ShouldError:   false,
+			CreateRelease: false,
+			Input: &Options{
+				Prerelease:    false,
+				BranchName:    "foobar",
+				DefaultBump:   string(semver.PATCH),
+				WithoutPrefix: true,
+			},
+			Commits: []*tSemTestCommit{
+				{
+					Message: "single commit thats #major",
+					Branch:  "foobar",
+				},
+			},
+		},
 		// test a release tag when there are no prior releases
 		// based on commit message
 		{
@@ -188,7 +279,7 @@ func TestMain(t *testing.T) {
 		r, defBranch := randomRepository(dir, test.CreateRelease)
 		w, _ := r.Worktree()
 
-		err := testSetup(test, w, defBranch)
+		err := testSetup(test, r, w, defBranch)
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
@@ -214,18 +305,25 @@ func TestMain(t *testing.T) {
 			t.Errorf("[%d] expected bump [%s] actual [%s]", i, test.ExpectedBump, res["bump"])
 			debug(res)
 		}
+		// debug(res)
 
 	}
 
-	t.FailNow()
+	// t.FailNow()
 
 }
 
-func testSetup(test *tSemTest, w *git.Worktree, defBranch *plumbing.Reference) (err error) {
+func debug[T any](item T) {
+	bytes, _ := json.MarshalIndent(item, "", "  ")
+	fmt.Printf("%+v\n", string(bytes))
+}
+
+func testSetup(test *tSemTest, r *git.Repository, w *git.Worktree, defBranch *plumbing.Reference) (err error) {
 	var author = &object.Signature{Name: "go test", Email: "test@example.com"}
 	// now create the test commits
 	for _, commit := range test.Commits {
 		var err error
+		var hash plumbing.Hash
 		var branch = defBranch.Name()
 		// if theres a branch name, use that instead of default
 		if commit.Branch != "" {
@@ -237,10 +335,17 @@ func testSetup(test *tSemTest, w *git.Worktree, defBranch *plumbing.Reference) (
 			return fmt.Errorf("checkout unexpected error [%s]: %s", branch, err.Error())
 		}
 		// create the commit
-		_, err = w.Commit(commit.Message, &git.CommitOptions{AllowEmptyCommits: true, Author: author})
+		hash, err = w.Commit(commit.Message, &git.CommitOptions{AllowEmptyCommits: true, Author: author})
 		if err != nil {
 			return fmt.Errorf("commit unexpected error: %s", err.Error())
 		}
+		// create a tag at this commit if configured
+		if commit.Tag != "" {
+			rev := plumbing.Revision(hash.String())
+			sha, _ := r.ResolveRevision(rev)
+			r.CreateTag(commit.Tag, *sha, nil)
+		}
+
 		// now create any child commits on this branch
 		for _, child := range commit.ChildCommits {
 			_, err = w.Commit(child, &git.CommitOptions{AllowEmptyCommits: true, Author: author})
@@ -250,11 +355,6 @@ func testSetup(test *tSemTest, w *git.Worktree, defBranch *plumbing.Reference) (
 		}
 	}
 	return
-}
-
-func debug[T any](item T) {
-	bytes, _ := json.MarshalIndent(item, "", "  ")
-	fmt.Printf("%+v\n", string(bytes))
 }
 
 // randomRepository makes a repo with a mix of and a v1 release is asked
