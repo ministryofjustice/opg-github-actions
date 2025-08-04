@@ -97,7 +97,7 @@ runs:
         # extra text from a pr
         extras: '${{ github.event.pull_request.title }}${{ github.event.pull_request.body }}'
         # prefix
-        with_prefix: ${{ inputs.with_prefix == 'true' && '--with-prefix' || '' }}
+        without_prefix: ${{ inputs.with_prefix == 'true' && '' || '--without-prefix' }}
         # test mode
         test_mode: ${{ inputs.test == 'true' && '--test' || '' }}
       run: |
@@ -109,7 +109,7 @@ runs:
           --default-branch=${{ env.default_branch }} \
           --bump=${{ env.default_bump}} \
           --extra-content="${{ env.extras }}" \
-          --prerelease-suffix-length=${{ env.prerelease_suffix_length }} ${{ env.prerelease }} ${{ env.with_prefix }} ${{ env.test_mode }}
+          --prerelease-suffix-length=${{ env.prerelease_suffix_length }} ${{ env.prerelease }} ${{ env.without_prefix }} ${{ env.test_mode }}
 
     - name: "Summary"
       id: summary
@@ -121,7 +121,7 @@ runs:
         prerelease: ${{ inputs.prerelease }}
         prerelease_suffix_length: ${{ inputs.prelease_suffix_length }}
         default_bump: ${{ inputs.default_bump }}
-        with_prefix: ${{ inputs.with_prefix }}
+        without_prefix: ${{ inputs.with_prefix == 'true' && 'false' || 'true' }}
         test_mode: ${{ inputs.test }}
         # outputs of the command
         tag: ${{ steps.cmd.outputs.tag }}
@@ -139,7 +139,7 @@ runs:
         echo "| prerelease | ${{ env.prerelease }} |" >> $GITHUB_STEP_SUMMARY
         echo "| prerelease_suffix_length | ${{ env.prerelease_suffix_length }} |" >> $GITHUB_STEP_SUMMARY
         echo "| default_bump | ${{ env.default_bump }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| with_prefix | ${{ env.with_prefix }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| without_prefix | ${{ env.without_prefix }} |" >> $GITHUB_STEP_SUMMARY
         echo "| test_mode | ${{ env.test_mode }} |" >> $GITHUB_STEP_SUMMARY
         echo "### Result " >> $GITHUB_STEP_SUMMARY
         echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY

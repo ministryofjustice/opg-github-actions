@@ -29,10 +29,10 @@ func (self Increment) Stringy() string {
 }
 
 const (
-	NONE  Increment = "none"
-	MAJOR Increment = "major"
-	MINOR Increment = "minor"
-	PATCH Increment = "patch"
+	NO_BUMP Increment = "none"
+	MAJOR   Increment = "major"
+	MINOR   Increment = "minor"
+	PATCH   Increment = "patch"
 )
 
 // Regex patterns for validation matching

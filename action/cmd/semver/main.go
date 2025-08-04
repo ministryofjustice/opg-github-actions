@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -28,20 +27,50 @@ type Options struct {
 	BranchName             string // branch name is used as the prerelease suffix
 	DefaultBump            string // what to increment the semver by (major, minor, patch)
 	ExtraContent           string // content from pull request title / body where their might be extra #major content
-	WithPrefix             bool
+	WithoutPrefix          bool
 	TestMode               bool
 }
 
-var runOptions *Options = &Options{
-	RepositoryDirectory:    "",
-	Prerelease:             false,
-	PrereleaseSuffixLength: 12,
-	BranchName:             "",
-	DefaultBranch:          "main",
-	DefaultBump:            string(semver.PATCH),
-	ExtraContent:           "",
-	WithPrefix:             true,
-	TestMode:               true,
+var runOptions *Options = newRunOptions(nil)
+
+func newRunOptions(in *Options) (opts *Options) {
+	opts = &Options{
+		RepositoryDirectory:    "",
+		Prerelease:             false,
+		PrereleaseSuffixLength: 12,
+		BranchName:             "",
+		DefaultBranch:          "main",
+		DefaultBump:            string(semver.PATCH),
+		ExtraContent:           "",
+		WithoutPrefix:          false,
+		TestMode:               true,
+	}
+	if in != nil {
+		if in.RepositoryDirectory != "" {
+			opts.RepositoryDirectory = in.RepositoryDirectory
+		}
+
+		if in.PrereleaseSuffixLength > 0 {
+			opts.PrereleaseSuffixLength = in.PrereleaseSuffixLength
+		}
+		if in.BranchName != "" {
+			opts.BranchName = in.BranchName
+		}
+		if in.DefaultBranch != "" {
+			opts.DefaultBranch = in.DefaultBranch
+		}
+		if in.DefaultBump != "" {
+			opts.DefaultBump = in.DefaultBump
+		}
+		if in.ExtraContent != "" {
+			opts.ExtraContent = in.ExtraContent
+		}
+		opts.Prerelease = in.Prerelease
+		opts.TestMode = in.TestMode
+		opts.WithoutPrefix = in.WithoutPrefix
+	}
+
+	return
 }
 
 func getExistingSemvers(lg *slog.Logger, repository *git.Repository) (semvers []*semver.Semver, err error) {
@@ -72,10 +101,10 @@ func getSemverToUse(lg *slog.Logger, semvers []*semver.Semver, bump semver.Incre
 	}
 
 	// setup the prefix
-	if options.WithPrefix {
-		use.Prefix = "v"
-	} else {
+	if options.WithoutPrefix {
 		use.Prefix = ""
+	} else {
+		use.Prefix = "v"
 	}
 
 	return
@@ -131,8 +160,10 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	if options.ExtraContent != "" {
 		newCommits = append(newCommits, &object.Commit{Hash: plumbing.ZeroHash, Message: options.ExtraContent})
 	}
+
 	// look for bump in the commits
-	if foundBump := semver.GetBumpFromCommits(newCommits, bump); foundBump != "" {
+	foundBump := semver.GetBumpFromCommits(newCommits, bump)
+	if len(newCommits) > 0 && foundBump != "" {
 		bump = foundBump
 	}
 
@@ -140,8 +171,8 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	// set the git ref to the current place
 	use.GitRef = currentCommit
 
-	// TODO: CREATE TAG
-	if !options.TestMode {
+	// make the tag if are not testing and if there is a tag to make
+	if !options.TestMode && bump != semver.NO_BUMP {
 		createdTag, err = tags.Create(repository, use.String(), currentCommit.Hash())
 		if err != nil {
 			return
@@ -159,14 +190,6 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	return
 }
 
-// Debug is a helper function that runs printf against a json
-// string version of the item passed.
-// Used for testing only.
-func debug[T any](item T) {
-	bytes, _ := json.MarshalIndent(item, "", "  ")
-	fmt.Printf("%+v\n", string(bytes))
-}
-
 // init does the setup of args
 func init() {
 	flag.StringVar(&runOptions.RepositoryDirectory, "directory", runOptions.RepositoryDirectory, "The directory path of the git repository.")
@@ -179,7 +202,7 @@ func init() {
 	// Semver increments
 	flag.StringVar(&runOptions.DefaultBump, "bump", runOptions.DefaultBump, "The default value to increment semver by if no comment if found. (default: patch)")
 	// use a prefix?
-	flag.BoolVar(&runOptions.WithPrefix, "with-prefix", runOptions.WithPrefix, "Should we use a prefix. (default: true - will use v)")
+	flag.BoolVar(&runOptions.WithoutPrefix, "without-prefix", runOptions.WithoutPrefix, "Use to disable prefix usage.")
 	// test mode - disables creating tags
 	flag.BoolVar(&runOptions.TestMode, "test", runOptions.TestMode, "Set to true to disable creating tag.")
 	//
