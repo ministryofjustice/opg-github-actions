@@ -39,7 +39,7 @@ var runOptions *Options = &Options{
 	DefaultBranch:          "main",
 	DefaultBump:            string(semver.PATCH),
 	WithPrefix:             true,
-	TestMode:               false,
+	TestMode:               true,
 }
 
 func Run(lg *slog.Logger, options *Options) (result map[string]string, err error) {
@@ -110,6 +110,9 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	}
 
 	// TODO: CREATE TAG
+	if !options.TestMode {
+		tag, err := tags.Create(repository, use.String(), refBranch.Hash())
+	}
 
 	debug(use.String())
 
