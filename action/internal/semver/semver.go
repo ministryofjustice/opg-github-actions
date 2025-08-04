@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/maruel/natural"
 )
 
@@ -451,6 +452,17 @@ func Prerelease(logger *slog.Logger, existing []*Semver, bump Increment, suffix 
 
 	}
 	next.PrereleaseBuild = inc(next.PrereleaseBuild)
+	return
+}
+
+func GetBumpFromCommits(commits []*object.Commit, defaultBump Increment) (bump Increment) {
+
+	var messages = []string{}
+	for _, commit := range commits {
+		messages = append(messages, commit.Message)
+	}
+
+	bump = GetBump(messages, defaultBump)
 	return
 }
 

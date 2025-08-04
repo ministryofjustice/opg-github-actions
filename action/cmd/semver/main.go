@@ -124,8 +124,17 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		lg.Error("error commits between references", "err", err.Error(), "base", defaultBranch.Hash().String(), "head", currentCommit.Hash().String())
 		return
 	}
-	// TODO: find any #bump within commits
+
 	lg.Debug("found commits", "len", len(newCommits))
+
+	// add content to the commit list
+	if options.ExtraContent != "" {
+		newCommits = append(newCommits, &object.Commit{Hash: plumbing.ZeroHash, Message: options.ExtraContent})
+	}
+	// look for bump in the commits
+	if foundBump := semver.GetBumpFromCommits(newCommits, bump); foundBump != "" {
+		bump = foundBump
+	}
 
 	use = getSemverToUse(lg, semvers, bump, options)
 	// set the git ref to the current place
@@ -144,6 +153,7 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		"hash":    use.GitRef.Hash().String(),
 		"test":    fmt.Sprintf("%t", options.TestMode),
 		"created": fmt.Sprintf("%t", (createdTag != nil)),
+		"bump":    string(bump),
 	}
 
 	return
