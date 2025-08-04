@@ -15,18 +15,38 @@ inputs:
     description: "Max length of prerelease suffix string to use."
     default: "12"
 
+  with_prefix:
+    description: "When true, the prefix of v will be added to the new semver value"
+    default: "true"
+
   branch_name:
     description: "Overwrite the branch name with this value"
     default: ""
 
   default_bump:
-    description: "Value to increment semver by"
+    description: "Value to increment semver by. To reuse the same semver value, set this value to 'none'"
     default: "patch"
 
+outputs:
+  tag:
+    description: "Semver tag that has been created / found."
+    value: ${{ steps.cmd.outputs.tag }}
 
+  hash:
+    description: "Git sha / reference where the tag was created / found."
+    value: ${{ steps.cmd.outputs.hash} }
 
-# outputs:
+  created:
+    description: "Boolean to say if the tag was created or not."
+    value: ${{ steps.cmd.outputs.created }}
 
+  test:
+    description: "Boolean to say if test mode was enabled."
+    value: ${{ steps.cmd.outputs.test }}
+
+  bump:
+    description: "Value used to increment the semver by."
+    value: ${{ steps.cmd.outputs.bump }}
 
 runs:
   using: composite
@@ -83,19 +103,6 @@ runs:
       run: |
         echo "Running semver command ... "
 
-        echo "## Env " >> $GITHUB_STEP_SUMMARY
-        echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
-        echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
-        echo "| binary | ${{ env.binary }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| directory | ${{ env.directory }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| branch | ${{ env.branch }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| default_branch | ${{ env.default_branch }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| prerelease | ${{ env.prerelease }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| prerelease_suffix_length | ${{ env.prerelease_suffix_length }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| default_bump | ${{ env.default_bump }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| with_prefix | ${{ env.with_prefix }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| test_mode | ${{ env.test_mode }} |" >> $GITHUB_STEP_SUMMARY
-
         ${{ env.binary }} \
           --directory=${{ env.directory }} \
           --branch=${{ env.branch}} \
@@ -103,3 +110,42 @@ runs:
           --bump=${{ env.default_bump}} \
           --extra-content="${{ env.extras }}" \
           --prerelease-suffix-length=${{ env.prerelease_suffix_length }} ${{ env.prerelease }} ${{ env.with_prefix }} ${{ env.test_mode }}
+
+    - name: "Summary"
+      id: summary
+      shell: bash
+      env:
+        # config values copied from above
+        branch: ${{ inputs.branch_name != '' && inputs.branch_name || github.head_ref != '' && github.head_ref || github.ref_name }}
+        default_branch: ${{ github.event.repository.default_branch }}
+        prerelease: ${{ inputs.prerelease }}
+        prerelease_suffix_length: ${{ inputs.prelease_suffix_length }}
+        default_bump: ${{ inputs.default_bump }}
+        with_prefix: ${{ inputs.with_prefix }}
+        test_mode: ${{ inputs.test }}
+        # outputs of the command
+        tag: ${{ steps.cmd.outputs.tag }}
+        hash: ${{ steps.cmd.outputs.hash }}
+        test: ${{ steps.cmd.outputs.test }}
+        created: ${{ steps.cmd.outputs.created }}
+        bump: ${{ steps.cmd.outputs.bump }}
+
+      run: |
+        echo "### Config " >> $GITHUB_STEP_SUMMARY
+        echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
+        echo "| branch | ${{ env.branch }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| default_branch | ${{ env.default_branch }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| prerelease | ${{ env.prerelease }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| prerelease_suffix_length | ${{ env.prerelease_suffix_length }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| default_bump | ${{ env.default_bump }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| with_prefix | ${{ env.with_prefix }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| test_mode | ${{ env.test_mode }} |" >> $GITHUB_STEP_SUMMARY
+        echo "### Result " >> $GITHUB_STEP_SUMMARY
+        echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
+        echo "| tag | ${{ env.tag }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| hash | ${{ env.hash }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| created | ${{ env.created }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| test | ${{ env.test }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| bump | ${{ env.bump }} |" >> $GITHUB_STEP_SUMMARY

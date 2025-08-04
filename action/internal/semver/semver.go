@@ -455,6 +455,13 @@ func Prerelease(logger *slog.Logger, existing []*Semver, bump Increment, suffix 
 	return
 }
 
+// GetBumpFromCommits scans the commit messages and looks for triggers that
+// would increment the semver (#major|#minor|#patch) and returns a counter for each type
+//
+// If no triggers are found then the counter that matches 'fallback' param will be
+// incremented instead.
+//
+// Calls `GetBump` underneath
 func GetBumpFromCommits(commits []*object.Commit, defaultBump Increment) (bump Increment) {
 
 	var messages = []string{}
