@@ -119,9 +119,11 @@ runs:
         # test mode
         test_mode: ${{ inputs.test == 'true' && '--test' || '' }}
          # extra text from a pr
-        extras: "${{ github.event.pull_request.title }}${{ github.event.pull_request.body }}"
+        extras: '${{ github.event.pull_request.title }}${{ github.event.pull_request.body }}'
       run: |
         echo "Running semver command ... "
+        echo "Sanitising pr data ... "
+        printf "%s" ${{ env.extras }}
 
         ${{ env.binary }} \
           --directory=${{ env.directory }} \
@@ -129,7 +131,7 @@ runs:
           --default-branch=${{ env.default_branch }} \
           --bump=${{ env.default_bump}} \
           --prerelease-suffix-length=${{ env.prerelease_suffix_length }} ${{ env.prerelease }} ${{ env.without_prefix }} ${{ env.test_mode }} \
-          --extra-content="${{ env.extras }}"
+          --extra-content='${{ env.extras }}'
 
     - name: "Create a release for [tag: ${{ steps.cmd.outputs.tag }} pre: ${{ inputs.prerelease}} ]"
       shell: bash
