@@ -3,29 +3,48 @@ description: >
   Generate (or return) a semantic version tag to use for images / releases and so on.
 
 inputs:
-  test:
-    description: "When true, the tag will not be created"
-    default: "true"
-
+  github_token:
+    description: "GitHub token for authentication to allow tag to be pushed to the remote"
+    default: ""
+  # is this a prerelease?
   prerelease:
     description: "If set, flags this as being a pre-release."
+    required: true
     default: "true"
-
-  prelease_suffix_length:
-    description: "Max length of prerelease suffix string to use."
-    default: "12"
-
-  with_prefix:
-    description: "When true, the prefix of v will be added to the new semver value"
-    default: "true"
-
-  branch_name:
-    description: "Overwrite the branch name with this value"
-    default: ""
-
+  # semver increment
   default_bump:
     description: "Value to increment semver by. To reuse the same semver value, set this value to 'none'"
     default: "patch"
+  # length of the suffix
+  prelease_suffix_length:
+    description: "Max length of prerelease suffix string to use."
+    default: "14"
+  # should we use v at the start
+  with_prefix:
+    description: "When true, the prefix of v will be added to the new semver value"
+    default: "true"
+  # branch name override
+  branch_name:
+    description: "Overwrite the branch name with this value"
+    default: ""
+  # release related items
+  create_release:
+    description: "Create a release for this semver tag"
+    default: "true"
+  # attach artifact matching this pattern
+  release_artifact:
+    description: "Pattern to attach any artifacts. Should be based from the `github.workspace` path."
+    default: "false"
+  # the gh tool has two methods for generating notes, this lets you swap between them
+  release_notes_flag:
+    description: "Flag to use for note generation - can be `--notes-from-tag` or `--generate-notes`"
+    default: "--notes-from-tag"
+  # test mode disables creating tags and releasees
+  test:
+    description: "When true, the tag will not be created"
+    default: "false"
+
+
 
 outputs:
   tag:
@@ -81,6 +100,9 @@ runs:
       id: cmd
       shell: bash
       env:
+        # github token for pushing tag to remote
+        GH_TOKEN: ${{ inputs.github_token != '' && inputs.github_token || github.token }}
+        # location of the built binary
         binary: "${{ github.action_path }}/builds/semver"
         # location of github repo
         directory: ${{ github.workspace }}
@@ -96,7 +118,7 @@ runs:
         default_bump: ${{ inputs.default_bump }}
         # extra text from a pr
         extras: '${{ github.event.pull_request.title }}${{ github.event.pull_request.body }}'
-        # prefix
+        # prefix usage
         without_prefix: ${{ inputs.with_prefix == 'true' && '' || '--without-prefix' }}
         # test mode
         test_mode: ${{ inputs.test == 'true' && '--test' || '' }}
@@ -110,6 +132,29 @@ runs:
           --bump=${{ env.default_bump}} \
           --extra-content="${{ env.extras }}" \
           --prerelease-suffix-length=${{ env.prerelease_suffix_length }} ${{ env.prerelease }} ${{ env.without_prefix }} ${{ env.test_mode }}
+
+    - name: "Create a release for [tag: ${{ steps.cmd.outputs.tag }} pre: ${{ inputs.prerelease}} ]"
+      shell: bash
+      id: create_release
+      if: ${{ inputs.create_release == 'true' && inputs.test == 'false' }}
+      env:
+        # token auth
+        GH_TOKEN: ${{ inputs.github_token != '' && inputs.github_token || github.token }}
+        # prerelease for the release aligns with the prelreease flag for the tag generation
+        prerelease: ${{ inputs.prerelease == 'true' && '--prerelease' || '' }}
+        # latest is only true when this is not a prerelease
+        latest: ${{ inputs.prerelease == 'true' && '--latest=false' || '--latest=true' }}
+        # how to generate notes
+        notes: ${{ inputs.release_notes_flag != '' && inputs.release_notes_flag || '--notes-from-tag' }}
+        # the tag value to use
+        tag: ${{ steps.cmd.outputs.tag }}
+        # artifact pattern
+        artifacts: ${{ inputs.release_artifact }}
+      run: |
+        echo "Creating release ... ${{ env.tag }}"
+        gh release create ${{ env.tag }} ${{ env.artifacts }} \
+          ${{ env.prerelease }} ${{ env.latest }} ${{ env.notes }} --verify-tag \
+          -t ${{ env.tag }}
 
     - name: "Summary"
       id: summary
