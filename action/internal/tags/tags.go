@@ -2,6 +2,7 @@ package tags
 
 import (
 	"fmt"
+	"log/slog"
 	"slices"
 	"sort"
 	"strings"
@@ -49,12 +50,13 @@ func branchCount(repo *git.Repository) (count int) {
 // Will check if the repository has some tags and more than one branch
 // and will flag an error - so the first tag on brand new repo may cause
 // unexpected error. TODO: how to improve shallow clone detection
-func All(repo *git.Repository) (tags []*plumbing.Reference, err error) {
-	var (
-		iter storer.ReferenceIter
-	)
-	tags = []*plumbing.Reference{}
+func All(lg *slog.Logger, repo *git.Repository) (tags []*plumbing.Reference, err error) {
+	var iter storer.ReferenceIter
 
+	tags = []*plumbing.Reference{}
+	lg = lg.With("operation", "All")
+
+	lg.Debug("getting tags ... ")
 	iter, err = repo.Tags()
 	if err != nil {
 		return
@@ -67,6 +69,8 @@ func All(repo *git.Repository) (tags []*plumbing.Reference, err error) {
 
 	// if no tags are found, check branches and if there is only one, this is likely a
 	// shallow clone
+	// TODO: how to improve shallow clone detection
+
 	if len(tags) == 0 && branchCount(repo) == 1 {
 		err = fmt.Errorf(ErrLikelyShallowRepository)
 		return
@@ -83,12 +87,14 @@ func All(repo *git.Repository) (tags []*plumbing.Reference, err error) {
 // usage - like the Must pattern.
 //
 // If there is an error passed, then return empty slice
-func Strings(tags []*plumbing.Reference, err error) (refs []string) {
+func Strings(lg *slog.Logger, tags []*plumbing.Reference, err error) (refs []string) {
+	lg = lg.With("operation", "Strings")
 
 	refs = []string{}
 	if err != nil {
 		return
 	}
+	lg.Debug("converting references to string versions ... ")
 
 	for _, tag := range tags {
 		var nameAndHash = fmt.Sprintf("%s %s", tag.Name().String(), tag.Hash().String())
@@ -106,13 +112,15 @@ func Strings(tags []*plumbing.Reference, err error) (refs []string) {
 // the Must pattern.
 //
 // If there is an error passed, then return empty slice
-func Refs(tags []*plumbing.Reference, err error) (refs []string) {
+func Refs(lg *slog.Logger, tags []*plumbing.Reference, err error) (refs []string) {
 
 	refs = []string{}
+	lg = lg.With("operation", "Refs")
+
 	if err != nil {
 		return
 	}
-
+	lg.Debug("generating tag names from full references ... ")
 	for _, tag := range tags {
 		var name = tag.Name().String()
 		refs = append(refs, name)
@@ -129,13 +137,15 @@ func Refs(tags []*plumbing.Reference, err error) (refs []string) {
 // the Must pattern.
 //
 // If there is an error passed, then return empty slice
-func ShortRefs(tags []*plumbing.Reference, err error) (shortRefs []string) {
-
+func ShortRefs(lg *slog.Logger, tags []*plumbing.Reference, err error) (shortRefs []string) {
 	shortRefs = []string{}
+	lg = lg.With("operation", "ShortRefs")
+
 	if err != nil {
 		return
 	}
 
+	lg.Debug("generating short strings from full references ... ")
 	for _, tag := range tags {
 		var name = tag.Name().Short()
 		shortRefs = append(shortRefs, name)
@@ -146,18 +156,23 @@ func ShortRefs(tags []*plumbing.Reference, err error) (shortRefs []string) {
 
 // Sort will take set of tags references, convert to strings,
 // use natural sorting to order them and then convert back to references
-func Sort(tags []*plumbing.Reference, order SortOrder) (sorted []*plumbing.Reference) {
+func Sort(lg *slog.Logger, tags []*plumbing.Reference, order SortOrder) (sorted []*plumbing.Reference) {
 	sorted = []*plumbing.Reference{}
+	lg = lg.With("operation", "Sort")
 
-	toSort := Strings(tags, nil)
+	toSort := Strings(lg, tags, nil)
 	if order == SORT_DESC {
+		lg.Debug("sort descending ... ")
 		sort.Sort(sort.Reverse(natural.StringSlice(toSort)))
 	} else {
+		lg.Debug("sort ascending ... ")
 		sort.Sort(natural.StringSlice(toSort))
 	}
 	// remove dups
+	lg.Debug("removing duplicates ... ")
 	toSort = slices.Compact(toSort)
 
+	lg.Debug("creating sorted references from sorted strings ... ")
 	for _, str := range toSort {
 		info := strings.Split(str, " ")
 		ref := plumbing.NewReferenceFromStrings(info[0], info[1])

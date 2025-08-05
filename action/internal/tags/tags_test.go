@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"opg-github-actions/action/internal/logger"
 	"strconv"
 	"testing"
 
@@ -18,6 +19,7 @@ type tTagSorted struct {
 }
 
 func TestTagsSort(t *testing.T) {
+	var lg = logger.New("ERROR", "TEXT")
 	var tests = []*tTagSorted{
 		{
 			Refs: []*plumbing.Reference{
@@ -42,7 +44,7 @@ func TestTagsSort(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		sorted := Sort(test.Refs, SORT_ASC)
+		sorted := Sort(lg, test.Refs, SORT_ASC)
 
 		for idx, actual := range sorted {
 			if actual.Name().Short() != test.Expected[idx].Name().Short() {
@@ -60,7 +62,7 @@ type tTagStrings struct {
 }
 
 func TestTagsStrings(t *testing.T) {
-
+	var lg = logger.New("ERROR", "TEXT")
 	var tests = []*tTagStrings{
 		{
 			Error: nil,
@@ -76,7 +78,7 @@ func TestTagsStrings(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		actual := Strings(test.Refs, test.Error)
+		actual := Strings(lg, test.Refs, test.Error)
 
 		for _, expected := range test.Expected {
 			found := false
@@ -96,7 +98,7 @@ func TestTagsStrings(t *testing.T) {
 }
 
 func TestTagsRefs(t *testing.T) {
-
+	var lg = logger.New("ERROR", "TEXT")
 	var tests = []*tTagStrings{
 		{
 			Error: nil,
@@ -112,7 +114,7 @@ func TestTagsRefs(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		actual := Refs(test.Refs, test.Error)
+		actual := Refs(lg, test.Refs, test.Error)
 
 		for _, expected := range test.Expected {
 			found := false
@@ -132,7 +134,7 @@ func TestTagsRefs(t *testing.T) {
 }
 
 func TestTagsShortRefs(t *testing.T) {
-
+	var lg = logger.New("ERROR", "TEXT")
 	var tests = []*tTagStrings{
 		{
 			Error: nil,
@@ -148,7 +150,7 @@ func TestTagsShortRefs(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		actual := ShortRefs(test.Refs, test.Error)
+		actual := ShortRefs(lg, test.Refs, test.Error)
 
 		for _, expected := range test.Expected {
 			found := false
@@ -169,16 +171,17 @@ func TestTagsShortRefs(t *testing.T) {
 
 func TestTagCreationSimple(t *testing.T) {
 	var (
+		lg      = logger.New("ERROR", "TEXT")
 		dir     = t.TempDir()
 		tagName = "test-tag"
 	)
 
 	repo, head := randomRepository(dir)
-	tags1, _ := All(repo)
+	tags1, _ := All(lg, repo)
 
 	Create(repo, tagName, head.Hash())
 
-	tags2, _ := All(repo)
+	tags2, _ := All(lg, repo)
 
 	if len(tags1)+1 != len(tags2) {
 		t.Errorf("tag count not as expected")

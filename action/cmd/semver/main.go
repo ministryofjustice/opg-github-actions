@@ -84,7 +84,7 @@ func getExistingSemvers(lg *slog.Logger, repository *git.Repository) (semvers []
 
 	var gittags []*plumbing.Reference // all tags in the repo
 	// get the tags
-	if gittags, err = tags.All(repository); err != nil {
+	if gittags, err = tags.All(lg, repository); err != nil {
 		lg.Error("error getting tags from repository", "err", err.Error())
 		return
 	}
