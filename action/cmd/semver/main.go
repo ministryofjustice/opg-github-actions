@@ -175,11 +175,12 @@ func createAndPushTag(
 // Doing it this way as the event content contains special
 // characters that dont escape very well
 func getContentFromEventFile(lg *slog.Logger, file string) (content string) {
-	var err error
-	var bytes []byte
-	var event *github.Event
-	var parsed any
-	var pr *github.PullRequest
+	var (
+		err     error
+		bytes   []byte
+		prEvent *github.PullRequestEvent = &github.PullRequestEvent{}
+		raw     map[string]interface{}   = map[string]interface{}{}
+	)
 
 	content = ""
 	if bytes, err = os.ReadFile(file); err != nil {
@@ -187,24 +188,20 @@ func getContentFromEventFile(lg *slog.Logger, file string) (content string) {
 		return
 	}
 
-	err = json.Unmarshal(bytes, &event)
+	// first, unmarshal into a map to test
+	err = json.Unmarshal(bytes, &raw)
 	if err != nil {
 		lg.Error("err with unmarshal", "err", err.Error())
 		return
 	}
 
-	parsed, err = event.ParsePayload()
-	if err != nil {
-		lg.Error("err with parsing payload", "err", err.Error())
-		return
+	// now look if its a pull request, and if so, parse as a
+	// pr and generate the content from that
+	if _, ok := raw["pull_request"]; ok {
+		json.Unmarshal(bytes, &prEvent)
+		content = fmt.Sprintf("%s%s", *prEvent.PullRequest.Title, *prEvent.PullRequest.Body)
 	}
-	debug(parsed)
-	debug(event)
 
-	if *event.Type == "pull_request" {
-		pr = parsed.(*github.PullRequest)
-		content = fmt.Sprintf("%s%s", *pr.Title, *pr.Body)
-	}
 	return
 }
 
