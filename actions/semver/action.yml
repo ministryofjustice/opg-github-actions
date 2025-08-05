@@ -122,8 +122,6 @@ runs:
         extras: '${{ github.event.pull_request.title }}${{ github.event.pull_request.body }}'
       run: |
         echo "Running semver command ... "
-        echo "Sanitising pr data ... "
-        printf "%s" ${{ env.extras }}
 
         ${{ env.binary }} \
           --directory=${{ env.directory }} \
