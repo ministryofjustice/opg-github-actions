@@ -71,9 +71,9 @@ Common inputs:
 
 Rarely used inputs:
 - `prelease_suffix_length` (default: "12")
-- `branch_name` (default: "")
+- `branch_name`
 - `without_prefix` (default: "false")
-- `github_token` (default: "")
+- `github_token`
 - `release_notes_flag` (default: "--notes-from-tag")
 - `test` (default: "false")
 
@@ -101,14 +101,17 @@ Pattern or file path for artifacts you want to attach to this release, such as b
 #### `prelease_suffix_length` (default: "14")
 Length of the suffix to use in creating a prerelease tag
 
-#### `branch_name` (default: "")
+#### `branch_name`
 The branch name is used for generating the prerelease suffix (`v1.2.3-$suffix.1`) and is generally determined from the github context values (`github.head_ref` & `github.ref_name`), but you can pass in a value here to overwrite that.
 
 #### `without_prefix` (default: "false")
 By default, the semver tag is created with a `v` prefix at the start - if this is set to true, then it will be removed.
 
-#### `github_token` (default: "")
+#### `github_token`
 By default, the action uses the `github.token` value to push to the repository, but if you need a different scope of auth, then pass along your own token in this variable.
+
+#### `release_notes_flag` (default: "--notes-from-tag")
+When creating a release with the `gh` cli tool there are two two methods for generating notes, this lets you swap between them.
 
 #### `test` (default: "false")
 When set to `true`, the semver tag is no actually created, allows you try the workflow with another tool.
