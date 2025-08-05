@@ -166,10 +166,12 @@ func Sort(tags []*plumbing.Reference, order SortOrder) (sorted []*plumbing.Refer
 	return
 }
 
+// Create tag on this repository at the ref point
 func Create(repository *git.Repository, tagName string, ref plumbing.Hash) (*plumbing.Reference, error) {
 	return repository.CreateTag(tagName, ref, nil)
 }
 
+// Push all tags to the remote origin
 func Push(repository *git.Repository, auth *http.BasicAuth) (err error) {
 	err = repository.Push(
 		&git.PushOptions{
