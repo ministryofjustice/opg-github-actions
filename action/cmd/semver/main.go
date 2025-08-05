@@ -30,7 +30,7 @@ type Options struct {
 	DefaultBranch          string // default branch name - generally main, used to compare commits against
 	BranchName             string // branch name is used as the prerelease suffix
 	DefaultBump            string // what to increment the semver by (major, minor, patch)
-	ExtraContentFile       string // content from pull request title / body where their might be extra #major content
+	EventContentFile       string // content from pull request title / body where their might be extra #major content
 	WithoutPrefix          bool
 	TestMode               bool
 }
@@ -47,7 +47,7 @@ func newRunOptions(in *Options) (opts *Options) {
 		BranchName:             "",
 		DefaultBranch:          "",
 		DefaultBump:            string(semver.PATCH),
-		ExtraContentFile:       "",
+		EventContentFile:       "",
 		WithoutPrefix:          false,
 		TestMode:               true,
 	}
@@ -68,8 +68,8 @@ func newRunOptions(in *Options) (opts *Options) {
 		if in.DefaultBump != "" {
 			opts.DefaultBump = in.DefaultBump
 		}
-		if in.ExtraContentFile != "" {
-			opts.ExtraContentFile = in.ExtraContentFile
+		if in.EventContentFile != "" {
+			opts.EventContentFile = in.EventContentFile
 		}
 		opts.Prerelease = in.Prerelease
 		opts.TestMode = in.TestMode
@@ -174,7 +174,7 @@ func createAndPushTag(
 // that might be present at this path
 // Doing it this way as the event content contains special
 // characters that dont escape very well
-func getContentFromEventFile(file string) (content string) {
+func getContentFromEventFile(lg *slog.Logger, file string) (content string) {
 	var err error
 	var bytes []byte
 	var event *github.Event
@@ -183,19 +183,19 @@ func getContentFromEventFile(file string) (content string) {
 
 	content = ""
 	if bytes, err = os.ReadFile(file); err != nil {
-		fmt.Println(err)
+		lg.Error("err with reading file", "err", err.Error())
 		return
 	}
 
 	err = json.Unmarshal(bytes, &event)
 	if err != nil {
-		fmt.Println(err)
+		lg.Error("err with unmarshal", "err", err.Error())
 		return
 	}
 
 	parsed, err = event.ParsePayload()
 	if err != nil {
-		fmt.Println(err)
+		lg.Error("err with parsing payload", "err", err.Error())
 		return
 	}
 	debug(parsed)
@@ -269,9 +269,10 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		return
 	}
 
+	lg.Warn("event file", "file", options.EventContentFile)
 	// add content to the commit list
-	if options.ExtraContentFile != "" {
-		extra := getContentFromEventFile(options.ExtraContentFile)
+	if options.EventContentFile != "" {
+		extra := getContentFromEventFile(lg, options.EventContentFile)
 		newCommits = append(newCommits, &object.Commit{Hash: plumbing.ZeroHash, Message: extra})
 	}
 
@@ -319,7 +320,7 @@ func init() {
 	// test mode - disables creating tags
 	flag.BoolVar(&runOptions.TestMode, "test", runOptions.TestMode, "Set to true to disable creating tag.")
 	//
-	flag.StringVar(&runOptions.ExtraContentFile, "event-content-file", runOptions.ExtraContentFile, "The github event file that contains extra content")
+	flag.StringVar(&runOptions.EventContentFile, "event-content-file", runOptions.EventContentFile, "The github event file that contains extra content")
 }
 
 func main() {
