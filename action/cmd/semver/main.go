@@ -141,12 +141,14 @@ func createAndPushTag(
 			Password: token,
 		}
 	)
+	lg = lg.With("operation", "createAndPushTag")
 
 	// we do nothing if this is in test mode or we're using no bumping
 	if options.TestMode || bump == semver.NO_BUMP {
+		lg.Debug("returning, test mode / no increment enabled", "test", options.TestMode, "bump", string(bump))
 		return
 	}
-
+	lg.Debug("creating tag ... ")
 	// try to create the tag locally
 	createdTag, err = tags.Create(repository, use.String(), use.GitRef.Hash())
 	if err != nil {
@@ -156,6 +158,7 @@ func createAndPushTag(
 
 	// if we have some remotes, push
 	if len(remotes) > 0 {
+		lg.Debug("pushing tags ... ")
 		err = tags.Push(repository, auth)
 		if err != nil {
 			err = errors.Join(fmt.Errorf("failed to push tags"), err)
