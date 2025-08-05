@@ -15,6 +15,7 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
 const ErrNoBranchName string = "branch-name is required, but not found."
@@ -33,11 +34,13 @@ type Options struct {
 
 var runOptions *Options = newRunOptions(nil)
 
+// newRunOptions helper to return default options merged with
+// overwrites
 func newRunOptions(in *Options) (opts *Options) {
 	opts = &Options{
 		RepositoryDirectory:    "",
 		Prerelease:             false,
-		PrereleaseSuffixLength: 12,
+		PrereleaseSuffixLength: 14,
 		BranchName:             "",
 		DefaultBranch:          "main",
 		DefaultBump:            string(semver.PATCH),
@@ -73,6 +76,8 @@ func newRunOptions(in *Options) (opts *Options) {
 	return
 }
 
+// getExistingSemvers fetches all git tags and converts valid entries into semvers
+// which are then used to work out the next value
 func getExistingSemvers(lg *slog.Logger, repository *git.Repository) (semvers []*semver.Semver, err error) {
 
 	var gittags []*plumbing.Reference // all tags in the repo
@@ -89,6 +94,8 @@ func getExistingSemvers(lg *slog.Logger, repository *git.Repository) (semvers []
 	return
 }
 
+// getSemverToUse looks at the semvers and the options passed along and determines if we should be used prerelease or release
+// semver tag and handles prefix usage.
 func getSemverToUse(lg *slog.Logger, semvers []*semver.Semver, bump semver.Increment, options *Options) (use *semver.Semver) {
 	use = &semver.Semver{}
 	// decide if we do prerelease or not based on input
@@ -120,6 +127,7 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		createdTag    *plumbing.Reference                                         // the new semver tag thats been created
 		newCommits    []*object.Commit                                            // all commits that exist in the ref
 		bump          semver.Increment    = semver.Increment(options.DefaultBump) // default increment
+		token         string              = os.Getenv("GH_TOKEN")                 // github auth token for pushing to the remote
 	)
 	result = map[string]string{}
 
@@ -154,14 +162,14 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		return
 	}
 
-	lg.Debug("found commits", "len", len(newCommits))
+	lg.Info("found commits", "len", len(newCommits))
 
 	// add content to the commit list
 	if options.ExtraContent != "" {
 		newCommits = append(newCommits, &object.Commit{Hash: plumbing.ZeroHash, Message: options.ExtraContent})
 	}
 
-	// look for bump in the commits
+	// look for bump in the commits,
 	foundBump := semver.GetBumpFromCommits(newCommits, bump)
 	if len(newCommits) > 0 && foundBump != "" {
 		bump = foundBump
@@ -171,9 +179,18 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	// set the git ref to the current place
 	use.GitRef = currentCommit
 
-	// make the tag if are not testing and if there is a tag to make
+	// make the tag if we're not testing and if there is a tag to make
 	if !options.TestMode && bump != semver.NO_BUMP {
+		// create the tag
 		createdTag, err = tags.Create(repository, use.String(), currentCommit.Hash())
+		if err != nil {
+			return
+		}
+		// push to the remote
+		err = tags.Push(repository, &http.BasicAuth{
+			Username: "opg-github-actions",
+			Password: token,
+		})
 		if err != nil {
 			return
 		}
