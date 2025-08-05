@@ -18,6 +18,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	"github.com/google/go-github/v74/github"
 )
 
 const ErrNoBranchName string = "branch-name is required, but not found."
@@ -29,7 +30,7 @@ type Options struct {
 	DefaultBranch          string // default branch name - generally main, used to compare commits against
 	BranchName             string // branch name is used as the prerelease suffix
 	DefaultBump            string // what to increment the semver by (major, minor, patch)
-	ExtraContent           string // content from pull request title / body where their might be extra #major content
+	ExtraContentFile       string // content from pull request title / body where their might be extra #major content
 	WithoutPrefix          bool
 	TestMode               bool
 }
@@ -46,7 +47,7 @@ func newRunOptions(in *Options) (opts *Options) {
 		BranchName:             "",
 		DefaultBranch:          "",
 		DefaultBump:            string(semver.PATCH),
-		ExtraContent:           "",
+		ExtraContentFile:       "",
 		WithoutPrefix:          false,
 		TestMode:               true,
 	}
@@ -67,8 +68,8 @@ func newRunOptions(in *Options) (opts *Options) {
 		if in.DefaultBump != "" {
 			opts.DefaultBump = in.DefaultBump
 		}
-		if in.ExtraContent != "" {
-			opts.ExtraContent = in.ExtraContent
+		if in.ExtraContentFile != "" {
+			opts.ExtraContentFile = in.ExtraContentFile
 		}
 		opts.Prerelease = in.Prerelease
 		opts.TestMode = in.TestMode
@@ -169,6 +170,38 @@ func createAndPushTag(
 	return
 }
 
+// getContentFromEventFile reads and parses the event file
+// that might be present at this path
+// Doing it this way as the event content contains special
+// characters that dont escape very well
+func getContentFromEventFile(file string) (content string) {
+	var err error
+	var bytes []byte
+	var event *github.Event
+	var parsed any
+	var pr *github.PullRequest
+
+	content = ""
+	if bytes, err = os.ReadFile(file); err != nil {
+		return
+	}
+
+	err = json.Unmarshal(bytes, &event)
+	if err != nil {
+		return
+	}
+
+	parsed, err = event.ParsePayload()
+	if err != nil {
+		return
+	}
+	if *event.Type == "pull_request" {
+		pr = parsed.(*github.PullRequest)
+		content = fmt.Sprintf("%s%s", *pr.Title, *pr.Body)
+	}
+	return
+}
+
 // Run handles gluing together the process of creating a new semver tag from the git repository and outputting the created
 // values.
 //
@@ -235,8 +268,9 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		fmt.Printf("==>\n%s\n<==\n", c.Message)
 	}
 	// add content to the commit list
-	if options.ExtraContent != "" {
-		newCommits = append(newCommits, &object.Commit{Hash: plumbing.ZeroHash, Message: options.ExtraContent})
+	if options.ExtraContentFile != "" {
+		extra := getContentFromEventFile(options.ExtraContentFile)
+		newCommits = append(newCommits, &object.Commit{Hash: plumbing.ZeroHash, Message: extra})
 	}
 
 	// look for bump in the commits,
@@ -278,7 +312,7 @@ func init() {
 	// test mode - disables creating tags
 	flag.BoolVar(&runOptions.TestMode, "test", runOptions.TestMode, "Set to true to disable creating tag.")
 	//
-	flag.StringVar(&runOptions.ExtraContent, "extra-content", runOptions.ExtraContent, "Additional content that might also contain # references")
+	flag.StringVar(&runOptions.ExtraContentFile, "event-content-file", runOptions.ExtraContentFile, "The github event file that contains extra content")
 }
 
 func main() {
