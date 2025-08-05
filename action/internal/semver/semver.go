@@ -481,6 +481,11 @@ func GetBumpFromCommits(commits []*object.Commit, defaultBump Increment) (bump I
 func GetBump(commitMessages []string, defaultBump Increment) (bump Increment) {
 	bump = ""
 
+	// if there are any commits, then should at lease be a patch bump
+	if len(commitMessages) > 0 {
+		bump = PATCH
+	}
+
 	for _, content := range commitMessages {
 		// if we find any major, then return
 		// if the bump isnt a major, and we find a minor, then set to minor
@@ -497,6 +502,7 @@ func GetBump(commitMessages []string, defaultBump Increment) (bump Increment) {
 	if bump == "" {
 		bump = defaultBump
 	}
+
 	return
 }
 

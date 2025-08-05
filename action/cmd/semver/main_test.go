@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"opg-github-actions/action/internal/logger"
@@ -37,7 +36,7 @@ func TestMain(t *testing.T) {
 		// test a prerelease tag that clashes with a similar branch and
 		// tag that triggers a patch
 		{
-			ExpectedTag:   "v1.0.1-renovatefeat.2",
+			ExpectedTag:   "v1.0.1-renovatefeatur.2",
 			ExpectedBump:  string(semver.PATCH),
 			ShouldError:   false,
 			CreateRelease: true,
@@ -49,7 +48,7 @@ func TestMain(t *testing.T) {
 				{
 					Message: "different, but similar commit that should trigger patch only",
 					Branch:  "renovate-feature-a",
-					Tag:     "v1.0.1-renovatefeat.1",
+					Tag:     "v1.0.1-renovatefeatur.1",
 				},
 				{
 					Message: "single commit thats not even a patch but using defaults",
@@ -57,10 +56,46 @@ func TestMain(t *testing.T) {
 				},
 			},
 		},
+		// trying to get the last semver, but there is a commit on a the branch
+		// being merged, so it should be incremented by patch (form commit)
+		{
+			ExpectedTag:   "v1.1.0",
+			ExpectedBump:  string(semver.MINOR),
+			ShouldError:   false,
+			CreateRelease: true,
+			Input: &Options{
+				Prerelease:    false,
+				DefaultBranch: "master",
+				BranchName:    "mybranch-testA",
+				DefaultBump:   string(semver.NO_BUMP),
+			},
+			Commits: []*tSemTestCommit{
+				{Message: "just one #minor", Branch: "mybranch-testA"},
+			},
+		},
+		// test requesting no bump, but there being a commit between the last tag
+		// and head of branch, so a patch should be returned
+		//  - some bits here where we are comparing the tag v1.0.0 to master
+		{
+			ExpectedTag:   "v1.0.1",
+			ExpectedBump:  string(semver.PATCH),
+			ShouldError:   false,
+			CreateRelease: true,
+			Input: &Options{
+				Prerelease:    false,
+				DefaultBranch: "v1.0.0",
+				BranchName:    "master",
+				DefaultBump:   string(semver.NO_BUMP),
+			},
+			Commits: []*tSemTestCommit{
+				{Message: "just one commit"},
+			},
+		},
+
 		// test a prerelease tag that clashes with a similar branch and
 		// tag that triggers a minor
 		{
-			ExpectedTag:   "v1.1.0-renovatefeat.2",
+			ExpectedTag:   "v1.1.0-renovatefeatur.2",
 			ExpectedBump:  string(semver.MINOR),
 			ShouldError:   false,
 			CreateRelease: true,
@@ -72,7 +107,7 @@ func TestMain(t *testing.T) {
 				{
 					Message: "different, but similar commit thats #minor",
 					Branch:  "renovate-feature-a",
-					Tag:     "v1.1.0-renovatefeat.1",
+					Tag:     "v1.1.0-renovatefeatur.1",
 				},
 				{
 					Message: "single commit thats #minor",
@@ -83,7 +118,7 @@ func TestMain(t *testing.T) {
 		// test a prerelease tag that clashes with a similar branch and
 		// tag that triggers a major
 		{
-			ExpectedTag:   "v2.0.0-renovatefeat.2",
+			ExpectedTag:   "v2.0.0-renovatefeatur.2",
 			ExpectedBump:  string(semver.MAJOR),
 			ShouldError:   false,
 			CreateRelease: true,
@@ -96,7 +131,7 @@ func TestMain(t *testing.T) {
 				{
 					Message: "different, but similar commit thats #major",
 					Branch:  "renovate-feature-a",
-					Tag:     "v2.0.0-renovatefeat.1",
+					Tag:     "v2.0.0-renovatefeatur.1",
 				},
 				{
 					Message: "single commit thats #major",
@@ -180,7 +215,6 @@ func TestMain(t *testing.T) {
 				},
 			},
 		},
-
 		// test a patch release version increment thats based on the
 		// default bump
 		{
@@ -272,12 +306,15 @@ func TestMain(t *testing.T) {
 	// var dir = "./test-repo"
 	// os.RemoveAll(dir)
 	// os.MkdirAll(dir, os.ModePerm)
-	// r, defBranch := randomRepository(dir, false)
+	// r, defBranch := randomRepository(dir, true)
+	// w, _ := r.Worktree()
 
 	for i, test := range tests {
-		var dir = t.TempDir()
-		r, defBranch := randomRepository(dir, test.CreateRelease)
-		w, _ := r.Worktree()
+		var (
+			dir          = t.TempDir()
+			r, defBranch = randomRepository(dir, test.CreateRelease)
+			w, _         = r.Worktree()
+		)
 
 		err := testSetup(test, r, w, defBranch)
 		if err != nil {
@@ -286,8 +323,12 @@ func TestMain(t *testing.T) {
 		}
 		// setup the options to run
 		opts := newRunOptions(test.Input)
-		opts.RepositoryDirectory = dir
-		opts.DefaultBranch = defBranch.Name().Short()
+		if opts.RepositoryDirectory == "" {
+			opts.RepositoryDirectory = dir
+		}
+		if opts.DefaultBranch == "" {
+			opts.DefaultBranch = defBranch.Name().Short()
+		}
 		// now run the command and compare
 		res, err := Run(lg, opts)
 		// check error states
@@ -313,24 +354,24 @@ func TestMain(t *testing.T) {
 
 }
 
-func debug[T any](item T) {
-	bytes, _ := json.MarshalIndent(item, "", "  ")
-	fmt.Printf("%+v\n", string(bytes))
-}
-
 func testSetup(test *tSemTest, r *git.Repository, w *git.Worktree, defBranch *plumbing.Reference) (err error) {
 	var author = &object.Signature{Name: "go test", Email: "test@example.com"}
 	// now create the test commits
 	for _, commit := range test.Commits {
 		var err error
 		var hash plumbing.Hash
+		var createBranch = true
 		var branch = defBranch.Name()
 		// if theres a branch name, use that instead of default
 		if commit.Branch != "" {
 			branch = plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", commit.Branch))
 		}
+		// if the branch being asked for is the default branch, then dont create it
+		if branch == defBranch.Name() {
+			createBranch = false
+		}
 		// checkout to the branch we want
-		err = w.Checkout(&git.CheckoutOptions{Create: true, Force: true, Branch: branch})
+		err = w.Checkout(&git.CheckoutOptions{Create: createBranch, Force: true, Branch: branch})
 		if err != nil {
 			return fmt.Errorf("checkout unexpected error [%s]: %s", branch, err.Error())
 		}
@@ -385,6 +426,7 @@ func randomRepository(dir string, createRelease bool) (r *git.Repository, defaul
 		rev := plumbing.Revision(hash.String())
 		sha, _ := r.ResolveRevision(rev)
 		r.CreateTag("v1.0.0", *sha, nil)
+
 	}
 
 	defaultBranch, _ = r.Head()

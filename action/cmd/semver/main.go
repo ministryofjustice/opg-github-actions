@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -32,7 +34,7 @@ type Options struct {
 	TestMode               bool
 }
 
-var runOptions *Options = newRunOptions(nil)
+var runOptions *Options = newRunOptions(&Options{DefaultBranch: "main"})
 
 // newRunOptions helper to return default options merged with
 // overwrites
@@ -42,7 +44,7 @@ func newRunOptions(in *Options) (opts *Options) {
 		Prerelease:             false,
 		PrereleaseSuffixLength: 14,
 		BranchName:             "",
-		DefaultBranch:          "main",
+		DefaultBranch:          "",
 		DefaultBump:            string(semver.PATCH),
 		ExtraContent:           "",
 		WithoutPrefix:          false,
@@ -117,6 +119,69 @@ func getSemverToUse(lg *slog.Logger, semvers []*semver.Semver, bump semver.Incre
 	return
 }
 
+// createAndPushTag handles the logic of creating and then pushing tags.
+//
+// If we are in test mode, or there is no semver increment to do, then
+// we immediately return and createdTag will be nil
+//
+// If there is no remote on the repository (ie a locally created repo)
+// then the tag is created, but not pushed
+func createAndPushTag(
+	lg *slog.Logger,
+	repository *git.Repository,
+	use *semver.Semver,
+	bump semver.Increment,
+	token string,
+	options *Options) (createdTag *plumbing.Reference, err error) {
+
+	var (
+		remotes, _ = repository.Remotes()
+		auth       = &http.BasicAuth{
+			Username: "opg-github-actions",
+			Password: token,
+		}
+	)
+
+	// we do nothing if this is in test mode or we're using no bumping
+	if options.TestMode || bump == semver.NO_BUMP {
+		return
+	}
+
+	// try to create the tag locally
+	createdTag, err = tags.Create(repository, use.String(), use.GitRef.Hash())
+	if err != nil {
+		err = errors.Join(fmt.Errorf("failed to create a tag"), err)
+		return
+	}
+
+	// if we have some remotes, push
+	if len(remotes) > 0 {
+		err = tags.Push(repository, auth)
+		if err != nil {
+			err = errors.Join(fmt.Errorf("failed to push tags"), err)
+			return
+		}
+	}
+
+	return
+}
+
+// Run handles gluing together the process of creating a new semver tag from the git repository and outputting the created
+// values.
+//
+//   - Generate a repository object from the directory path arguments (or returns error)
+//   - Finds all existing semver formatted git tags in the repository
+//   - Finds the git sha / hash reference for the configured default branch and the currently checked out location
+//   - Finds all commits that exist in the currently checked out location, but not in default branch tree - these are the new ones
+//     -- Merges the extra-content argument into this data (pull request details)
+//   - Looks at the new commits for #major|minor|patch content to determine the semver increment
+//   - Works out the new new tag
+//   - Creates and pushes the tag
+//   - Outputs data
+//
+// If you have enabled test mode (via `--test`) the tag will not be created or pushed.
+// If there are no new commits, or no commits with #major|minor|patch then the default increment (`--bump`)
+// will be used.
 func Run(lg *slog.Logger, options *Options) (result map[string]string, err error) {
 	var (
 		repository    *git.Repository                                             // the object for this repo
@@ -162,7 +227,7 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		return
 	}
 
-	lg.Info("found commits", "len", len(newCommits))
+	lg.Debug("found commits", "len", len(newCommits))
 
 	// add content to the commit list
 	if options.ExtraContent != "" {
@@ -178,23 +243,8 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	use = getSemverToUse(lg, semvers, bump, options)
 	// set the git ref to the current place
 	use.GitRef = currentCommit
-
-	// make the tag if we're not testing and if there is a tag to make
-	if !options.TestMode && bump != semver.NO_BUMP {
-		// create the tag
-		createdTag, err = tags.Create(repository, use.String(), currentCommit.Hash())
-		if err != nil {
-			return
-		}
-		// push to the remote
-		err = tags.Push(repository, &http.BasicAuth{
-			Username: "opg-github-actions",
-			Password: token,
-		})
-		if err != nil {
-			return
-		}
-	}
+	// create and try to push tags
+	createdTag, err = createAndPushTag(lg, repository, use, bump, token, options)
 
 	result = map[string]string{
 		"tag":     use.String(),
@@ -239,4 +289,9 @@ func main() {
 	}
 	logger.Result(lg, res)
 
+}
+
+func debug[T any](item T) {
+	bytes, _ := json.MarshalIndent(item, "", "  ")
+	fmt.Printf("%+v\n", string(bytes))
 }
