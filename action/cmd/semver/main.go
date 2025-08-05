@@ -274,6 +274,7 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	}
 
 	lg.Warn("found commits", "len", len(newCommits))
+
 	for _, c := range newCommits {
 		fmt.Printf("==>\n%s\n<==\n", c.Message)
 	}
