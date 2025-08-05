@@ -25,7 +25,6 @@ runs:
         echo "| action_ref| ${{ env.action_ref }} |" >> $GITHUB_STEP_SUMMARY
         cd ${{ env.action_root_path }}
         pwd
-        ls -lat
     - name: "Git contexts"
       shell: bash
       env:
