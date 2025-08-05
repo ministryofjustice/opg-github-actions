@@ -183,18 +183,24 @@ func getContentFromEventFile(file string) (content string) {
 
 	content = ""
 	if bytes, err = os.ReadFile(file); err != nil {
+		fmt.Println(err)
 		return
 	}
 
 	err = json.Unmarshal(bytes, &event)
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
 	parsed, err = event.ParsePayload()
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
+	debug(parsed)
+	debug(event)
+
 	if *event.Type == "pull_request" {
 		pr = parsed.(*github.PullRequest)
 		content = fmt.Sprintf("%s%s", *pr.Title, *pr.Body)
