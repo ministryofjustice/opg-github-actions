@@ -1,0 +1,55 @@
+name: "Create a release"
+description: >
+  Generate a release
+
+inputs:
+  github_token:
+    description: "GitHub token for authentication to allow tag to be pushed to the remote"
+    default: ""
+  tag:
+    description: "Git tag to use for the release"
+    required: true
+  # is this a prerelease?
+  prerelease:
+    description: "If set, flags this as being a pre-release."
+    required: true
+    default: "true"
+
+  latest:
+    description: "If set, flags this as being latest release. When empty, will work this out from prerelease"
+    default: ""
+  # attach artifact matching this pattern
+  release_artifact:
+    description: "Pattern to attach any artifacts. Should be based from the `github.workspace` path."
+    default: "false"
+  # the gh tool has two methods for generating notes, this lets you swap between them
+  release_notes_flag:
+    description: "Flag to use for note generation - can be `--notes-from-tag` or `--generate-notes`"
+    default: "--notes-from-tag"
+
+
+runs:
+  using: composite
+  steps:
+    ####### RUN COMMAND
+    - name: "Create a release for [tag: ${{ inputs.tag }} pre: ${{ inputs.prerelease}} ]"
+      shell: bash
+      id: create_release
+      env:
+        # token auth
+        GH_TOKEN: ${{ inputs.github_token != '' && inputs.github_token || github.token }}
+        # prerelease for the release aligns with the prelreease flag for the tag generation
+        prerelease: ${{ inputs.prerelease == 'true' && '--prerelease' || '' }}
+        # latest is only true when this is not a prerelease; input can overwrite this
+        latest: ${{ inputs.latest !='' && '--latest=true' || inputs.prerelease == 'true' && '--latest=false' || '--latest=true' }}
+        # how to generate notes
+        notes: ${{ inputs.release_notes_flag != '' && inputs.release_notes_flag || '--notes-from-tag' }}
+        # the tag value to use
+        tag: ${{ inputs.tag }}
+        # artifact pattern
+        artifacts: ${{ inputs.release_artifact }}
+      run: |
+        echo "Creating release ... ${{ env.tag }}"
+        gh release create ${{ env.tag }} ${{ env.artifacts }} \
+          ${{ env.prerelease }} ${{ env.latest }} ${{ env.notes }} --verify-tag \
+          -t ${{ env.tag }}
