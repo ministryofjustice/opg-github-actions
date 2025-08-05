@@ -3,12 +3,13 @@ description: >
   Generate a release
 
 inputs:
-  github_token:
-    description: "GitHub token for authentication to allow tag to be pushed to the remote"
-    default: ""
   tag:
     description: "Git tag to use for the release"
     required: true
+  # optional github token
+  github_token:
+    description: "GitHub token for authentication to allow tag to be pushed to the remote"
+    default: ""
   # is this a prerelease?
   prerelease:
     description: "If set, flags this as being a pre-release."
