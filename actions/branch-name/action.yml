@@ -18,7 +18,7 @@ inputs:
 
   length:
     description: "Max length of the safe string"
-    default: "12"
+    default: "14"
 
 outputs:
   branch_name:

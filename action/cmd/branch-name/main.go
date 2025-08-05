@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	maxLength int    = 12
+	maxLength int    = 14
 	original  string = ""
 )
 

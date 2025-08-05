@@ -29,17 +29,17 @@ func TestBranchNameCommandWorking(t *testing.T) {
 		{
 			Length:   maxLength,
 			Source:   "long/string/with/slashes",
-			Expected: map[string]string{"full_length": "longstringwithslashes", "safe": "longstringwi"},
+			Expected: map[string]string{"full_length": "longstringwithslashes", "safe": "longstringwith"},
 		},
 		{
 			Length:   maxLength,
 			Source:   "long/string-with-others?!.><~@#",
-			Expected: map[string]string{"full_length": "longstringwithothers", "safe": "longstringwi"},
+			Expected: map[string]string{"full_length": "longstringwithothers", "safe": "longstringwith"},
 		},
 		{
 			Length:   maxLength,
 			Source:   "long/string-with-others?!.><~@#♥",
-			Expected: map[string]string{"full_length": "longstringwithothers", "safe": "longstringwi", "branch_name": "long/string-with-others?!.><~@#♥"},
+			Expected: map[string]string{"full_length": "longstringwithothers", "safe": "longstringwith", "branch_name": "long/string-with-others?!.><~@#♥"},
 		},
 		{
 			Length:   6,
