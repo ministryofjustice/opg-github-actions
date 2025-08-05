@@ -19,6 +19,14 @@ env:
 
 # jobs
 jobs:
+  env_values:
+    runs-on: ubuntu-latest
+    name: "ENV values"
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: "env values"
+        uses: ./actions/test-env
+
   # run tests for the public github actions
   tests_gha:
     name: "Test public actions"
@@ -35,6 +43,7 @@ jobs:
   setup:
     name: "Set variables"
     needs:
+      - env_values
       - tests_go
       - tests_gha
     runs-on: ubuntu-latest

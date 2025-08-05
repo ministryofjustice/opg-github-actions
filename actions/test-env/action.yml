@@ -32,8 +32,11 @@ runs:
         head_ref: ${{ github.head_ref }}
         ref_name: ${{ github.ref_name }}
         ref: ${{ github.ref }}
+        sha: ${{ github.sha }}
         workspace: ${{ github.workspace }}
+        branch: ${{ github.head_ref != '' && github.head_ref || github.ref_name }}
         default_branch: ${{ github.event.repository.default_branch }}
+        extras: '${{ github.event.pull_request.title }}${{ github.event.pull_request.body }}'
       run: |
         echo "## Git " >> $GITHUB_STEP_SUMMARY
         echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
