@@ -119,7 +119,7 @@ runs:
         # test mode
         test_mode: ${{ inputs.test == 'true' && '--test' || '' }}
          # extra text from a pr
-        extras: '${{ github.event.pull_request.title }}${{ github.event.pull_request.body }}'
+        extras: "${{ github.event.pull_request.title }}${{ github.event.pull_request.body }}"
       run: |
         echo "Running semver command ... "
 
