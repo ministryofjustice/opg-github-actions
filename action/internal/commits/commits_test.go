@@ -3,6 +3,7 @@ package commits
 import (
 	"fmt"
 	"math/rand"
+	"opg-github-actions/action/internal/logger"
 	"strconv"
 	"testing"
 
@@ -12,22 +13,22 @@ import (
 )
 
 func TestCommitsDiffBetween(t *testing.T) {
-
+	var lg = logger.New("ERROR", "TEXT")
 	var dir = t.TempDir()
 	repo, defBranch := randomRepository(dir)
 
 	// get the default branch
-	base, err := FindReference(repo, defBranch.Name().String())
+	base, err := FindReference(lg, repo, defBranch.Name().String())
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
 	// get a test branch
-	other, err := FindReference(repo, "my-branch-1")
+	other, err := FindReference(lg, repo, "my-branch-1")
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
 
-	commits, err := DiffBetween(repo, base.Hash(), other.Hash())
+	commits, err := DiffBetween(lg, repo, base.Hash(), other.Hash())
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
@@ -37,7 +38,7 @@ func TestCommitsDiffBetween(t *testing.T) {
 	}
 
 	// compare same commit points
-	commits, err = DiffBetween(repo, base.Hash(), base.Hash())
+	commits, err = DiffBetween(lg, repo, base.Hash(), base.Hash())
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
@@ -46,7 +47,7 @@ func TestCommitsDiffBetween(t *testing.T) {
 	}
 
 	// compare same commit points
-	commits, err = DiffBetween(repo, other.Hash(), other.Hash())
+	commits, err = DiffBetween(lg, repo, other.Hash(), other.Hash())
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
@@ -57,13 +58,13 @@ func TestCommitsDiffBetween(t *testing.T) {
 }
 
 func TestCommitsFindReference(t *testing.T) {
-
+	var lg = logger.New("ERROR", "TEXT")
 	var dir = t.TempDir()
 	repo, _ := randomRepository(dir)
 
 	// this tag should always exist on the main branch
 	lookFor := "v1.0.1-thing"
-	found, err := FindReference(repo, lookFor)
+	found, err := FindReference(lg, repo, lookFor)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
@@ -74,7 +75,7 @@ func TestCommitsFindReference(t *testing.T) {
 
 	// look for a set tag on the end of a branch
 	lookFor = "v1.1.1-pre"
-	found, err = FindReference(repo, lookFor)
+	found, err = FindReference(lg, repo, lookFor)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
@@ -85,7 +86,7 @@ func TestCommitsFindReference(t *testing.T) {
 
 	// look for a known branch name
 	lookFor = "my-branch-1"
-	found, err = FindReference(repo, lookFor)
+	found, err = FindReference(lg, repo, lookFor)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}

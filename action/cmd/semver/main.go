@@ -212,17 +212,17 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		return
 	}
 	// get the default branch info
-	if defaultBranch, err = commits.FindReference(repository, options.DefaultBranch); err != nil {
+	if defaultBranch, err = commits.FindReference(lg, repository, options.DefaultBranch); err != nil {
 		lg.Error("error getting git reference for default branch", "err", err.Error(), "default_branch", options.DefaultBranch)
 		return
 	}
 	// get info on the current commit
-	if currentCommit, err = commits.FindReference(repository, options.BranchName); err != nil {
+	if currentCommit, err = commits.FindReference(lg, repository, options.BranchName); err != nil {
 		lg.Error("error getting git reference for branch", "err", err.Error(), "branch", options.BranchName)
 		return
 	}
 	// find new commits that are in the current tree, but not
-	if newCommits, err = commits.DiffBetween(repository, defaultBranch.Hash(), currentCommit.Hash()); err != nil {
+	if newCommits, err = commits.DiffBetween(lg, repository, defaultBranch.Hash(), currentCommit.Hash()); err != nil {
 		lg.Error("error commits between references", "err", err.Error(), "base", defaultBranch.Hash().String(), "head", currentCommit.Hash().String())
 		return
 	}
