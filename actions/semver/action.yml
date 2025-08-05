@@ -44,8 +44,6 @@ inputs:
     description: "When true, the tag will not be created"
     default: "false"
 
-
-
 outputs:
   tag:
     description: "Semver tag that has been created / found."

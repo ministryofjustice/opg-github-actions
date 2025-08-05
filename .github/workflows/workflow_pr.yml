@@ -50,19 +50,13 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-      # generate semver
-      # Using own version of semver tag!
+      # generate semver - using own version of semver tag!
       - name: "Generate semver tag and release"
         id: semver_tag
         uses: ./actions/semver
         with:
           prerelease: ${{ env.PRERELEASE }}
           create_release: false
-        # uses: ministryofjustice/opg-github-actions/.github/actions/semver-tag@c9c5dfb290b8f614df0884928c521165ba83d630 # v3.1.4
-        # with:
-        #   prerelease: ${{ env.PRERELEASE }}
-        #   releases_enabled: false
-        #   with_v: true
       # get the git sha
       - name: "Get git sha"
         id: revhead
@@ -92,20 +86,6 @@ jobs:
           tag: ${{ needs.setup.outputs.semver_tag }}
           prerelease: ${{ env.PRERELEASE }}
           github_token: ${{ github.token }}
-
-      # - name: "Create release [${{ needs.setup.outputs.semver_tag }}]"
-      #   id: create
-      #   env:
-      #     GH_TOKEN: ${{ github.token }}
-      #     pre: ${{ env.PRERELEASE == 'true' && '--prerelease' || '' }}
-      #     latest:  ${{ env.PATH_TO_LIVE == 'true' && '--latest=true' || '--latest=false' }}
-      #     tag: ${{ needs.setup.outputs.semver_tag }}
-      #   run: |
-      #     echo "Creating release ... ${{ env.tag }}"
-      #     gh release create ${{ env.tag }} \
-      #       ${{ env.pre }} ${{ env.latest }} --verify-tag \
-      #       -t ${{ env.tag }} \
-      #       --notes-from-tag
 
   # final step
   end:
