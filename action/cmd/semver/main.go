@@ -263,14 +263,15 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		return
 	}
 
-	lg.Warn("found commits", "len", len(newCommits))
-	for _, c := range newCommits {
-		fmt.Printf("==>\n%s\n<==\n", c.Message)
-	}
 	// add content to the commit list
 	if options.ExtraContentFile != "" {
 		extra := getContentFromEventFile(options.ExtraContentFile)
 		newCommits = append(newCommits, &object.Commit{Hash: plumbing.ZeroHash, Message: extra})
+	}
+
+	lg.Warn("found commits", "len", len(newCommits))
+	for _, c := range newCommits {
+		fmt.Printf("==>\n%s\n<==\n", c.Message)
 	}
 
 	// look for bump in the commits,
