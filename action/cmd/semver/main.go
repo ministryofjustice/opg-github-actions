@@ -235,7 +235,7 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	}
 
 	// look for bump in the commits,
-	foundBump := semver.GetBumpFromCommits(newCommits, bump)
+	foundBump := semver.GetBumpFromCommits(lg, newCommits, bump)
 	if len(newCommits) > 0 && foundBump != "" {
 		bump = foundBump
 	}

@@ -15,6 +15,7 @@ type tBump struct {
 }
 
 func TestSemverBumpCount(t *testing.T) {
+	var lg = logger.New("ERROR", "TEXT")
 	var tests = []*tBump{
 		{
 			Default:  PATCH,
@@ -56,7 +57,7 @@ func TestSemverBumpCount(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		actual := GetBump(test.Content, test.Default)
+		actual := GetBump(lg, test.Content, test.Default)
 
 		if actual != test.Expected {
 			t.Errorf("[%d] bump did not match, expected [%s] actual [%s]", i, test.Expected, actual)
@@ -250,6 +251,7 @@ type tSemverSort struct {
 }
 
 func TestSemverSort(t *testing.T) {
+	var lg = logger.New("ERROR", "TEXT")
 	// tests that include invalid semvers that wont be returned in the sorting
 	// and duplicates that will be removed
 	var tests = []*tSemverSort{
@@ -279,7 +281,7 @@ func TestSemverSort(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		sorted := Sort(test.Data, SORT_ASC, true)
+		sorted := Sort(lg, test.Data, SORT_ASC, true)
 
 		if len(sorted) != len(test.Expected) {
 			t.Errorf("semver sort test [%d] - mismatch length", i)

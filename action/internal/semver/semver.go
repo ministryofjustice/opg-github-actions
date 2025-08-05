@@ -15,11 +15,11 @@ import (
 	"github.com/maruel/natural"
 )
 
-type SortOrder bool
+type SortOrder string
 
 const (
-	SORT_ASC  SortOrder = true
-	SORT_DESC SortOrder = false
+	SORT_ASC  SortOrder = "asc"
+	SORT_DESC SortOrder = "desc"
 )
 
 type Increment string
@@ -198,6 +198,7 @@ func convert[T any, R any](source T, destination R) (err error) {
 	return
 }
 
+// Strings takes semvers and returns string version of those; generally used for sorting
 func Strings(versions []*Semver, prefix bool) (strs []string) {
 	strs = []string{}
 	for _, v := range versions {
@@ -211,10 +212,16 @@ func Strings(versions []*Semver, prefix bool) (strs []string) {
 // Sort orders semvers in order based on their .String() values
 //
 // Removes duplicates and invalid semvers
-func Sort(versions []*Semver, order SortOrder, prefixes bool) (sorted []*Semver) {
-	var toSort []string = Strings(versions, prefixes)
-
+func Sort(lg *slog.Logger, versions []*Semver, order SortOrder, prefixes bool) (sorted []*Semver) {
+	var toSort []string
 	sorted = []*Semver{}
+
+	lg = lg.With("operation", "Sort", "order", string(order))
+
+	lg.Debug("getting string versions for sorting ... ")
+	toSort = Strings(versions, prefixes)
+
+	lg.Debug("sorting and removing duplicates ... ")
 	// sort & remove duplicates
 	slices.Sort(toSort)
 	toSort = slices.Compact(toSort)
@@ -225,6 +232,7 @@ func Sort(versions []*Semver, order SortOrder, prefixes bool) (sorted []*Semver)
 		sort.Sort(natural.StringSlice(toSort))
 	}
 
+	lg.Debug("adding values based on sort order and ignoring duplicates ... ")
 	// loop over all the sorted version and add the first semver that matches
 	// breaking the inner loop when one is found to avoid duplicates
 	for _, key := range toSort {
@@ -377,13 +385,15 @@ func atoi(s string) (i int) {
 // By using `NONE` the last release version is returned instead.
 //
 // If no releases are found, `0.0.0` is used instead.
-func Release(logger *slog.Logger, existing []*Semver, bump Increment) (next *Semver) {
+func Release(lg *slog.Logger, existing []*Semver, bump Increment) (next *Semver) {
 	var (
 		last     *Semver
 		releases []*Semver
 	)
+	lg = lg.With("operation", "Release", "bump", string(bump))
+	lg.Debug("sorting releases ... ")
 	// get releases only and sort them descending order
-	releases = Sort(GetReleases(existing), SORT_DESC, false)
+	releases = Sort(lg, GetReleases(existing), SORT_DESC, false)
 	// If there are no releases, then use 0 as base
 	// Otherwise, use the last release
 	if len(releases) == 0 {
@@ -392,6 +402,7 @@ func Release(logger *slog.Logger, existing []*Semver, bump Increment) (next *Sem
 		last = releases[0]
 	}
 
+	lg.Debug("last release ... ", "last", last.Stringy(true))
 	next = last
 	// if we are bumping just patch, update and return
 	// if bump is minor or major then patch is reset
@@ -406,7 +417,7 @@ func Release(logger *slog.Logger, existing []*Semver, bump Increment) (next *Sem
 		next.Minor = "0"
 		next.Major = inc(next.Major)
 	}
-
+	lg.Debug("next release ... ", "next", next.Stringy(true))
 	return
 }
 
@@ -417,7 +428,7 @@ func Release(logger *slog.Logger, existing []*Semver, bump Increment) (next *Sem
 //
 // If gets all prereleases from the existing set and matches those with the same
 // `MAJOR.MINOR.PATCH-suffix.buildNumber` pattern, then increments the buildNumber
-func Prerelease(logger *slog.Logger, existing []*Semver, bump Increment, suffix string) (next *Semver) {
+func Prerelease(lg *slog.Logger, existing []*Semver, bump Increment, suffix string) (next *Semver) {
 	var (
 		partial string
 		build   int      = 0
@@ -428,19 +439,23 @@ func Prerelease(logger *slog.Logger, existing []*Semver, bump Increment, suffix 
 			BuildMetadata:   false,
 		}
 	)
+	lg = lg.With("operation", "Prerelease", "bump", string(bump), "suffix", suffix)
 	// get the last release by passing along -1, so an increment is never triggered
-	next = Release(logger, existing, bump)
+	next = Release(lg, existing, bump)
 	// now setup the prefixes for this being a prerelease
 	next.PreleaseName = suffix
 	next.PrereleaseBuild = "0"
+	lg.Debug("release semver", "release", next.Stringy(true))
 	// grab most of the semver signature, ignore the build number & build metadata
 	partial = format(next, opts)
+	lg.Debug("partial string to match ... ", "partial", partial)
 	// now look for any prereleases that have the same partial signature
 	// and if we find them, we use the latest values and increment the build number
 	pres := GetPrereleases(existing)
 	for _, pre := range pres {
 		// grab most of this semver signature, ignore the build number & build metadata
 		compare := format(pre, opts)
+		lg.Debug("compare == partial ... ", "partial", partial, "compare", compare)
 		if compare == partial {
 			// if the build number is higher than one we've seen before, use this prerelease as a bench mark
 			// and track the build number of compare
@@ -452,6 +467,7 @@ func Prerelease(logger *slog.Logger, existing []*Semver, bump Increment, suffix 
 
 	}
 	next.PrereleaseBuild = inc(next.PrereleaseBuild)
+	lg.Debug("prerelease generated ...  ", "next", next.Stringy(true))
 	return
 }
 
@@ -462,14 +478,16 @@ func Prerelease(logger *slog.Logger, existing []*Semver, bump Increment, suffix 
 // incremented instead.
 //
 // Calls `GetBump` underneath
-func GetBumpFromCommits(commits []*object.Commit, defaultBump Increment) (bump Increment) {
+func GetBumpFromCommits(lg *slog.Logger, commits []*object.Commit, defaultBump Increment) (bump Increment) {
+
+	lg.Debug("generating message strings from commits", "operation", "GetBumpFromCommits", "defaultBump", string(defaultBump))
 
 	var messages = []string{}
 	for _, commit := range commits {
 		messages = append(messages, commit.Message)
 	}
 
-	bump = GetBump(messages, defaultBump)
+	bump = GetBump(lg, messages, defaultBump)
 	return
 }
 
@@ -478,31 +496,40 @@ func GetBumpFromCommits(commits []*object.Commit, defaultBump Increment) (bump I
 //
 // If no triggers are found then the counter that matches 'fallback' param will be
 // incremented instead.
-func GetBump(commitMessages []string, defaultBump Increment) (bump Increment) {
+func GetBump(lg *slog.Logger, commitMessages []string, defaultBump Increment) (bump Increment) {
+	lg = lg.With("operation", "GetBump", "defaultBump", string(defaultBump))
+
 	bump = ""
 
 	// if there are any commits, then should at lease be a patch bump
 	if len(commitMessages) > 0 {
+		lg.Debug("commits were found, so setting base increment to patch")
 		bump = PATCH
 	}
 
+	lg.Debug("checking commit messages ... ")
 	for _, content := range commitMessages {
 		// if we find any major, then return
 		// if the bump isnt a major, and we find a minor, then set to minor
 		// if the bump isnt major or minor and we find patch, set to patch
 		if strings.Contains(content, MAJOR.Stringy()) {
 			bump = MAJOR
+			lg.Debug("found major ... ")
 			return
 		} else if bump != MAJOR && strings.Contains(content, MINOR.Stringy()) {
+			lg.Debug("found minor ... ")
 			bump = MINOR
 		} else if bump != MAJOR && bump != MINOR && strings.Contains(content, PATCH.Stringy()) {
+			lg.Debug("found patch ... ")
 			bump = PATCH
 		}
 	}
+
 	if bump == "" {
 		bump = defaultBump
 	}
 
+	lg.Debug("calculated bump", "dump", string(bump))
 	return
 }
 
