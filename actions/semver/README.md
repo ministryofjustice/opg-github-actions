@@ -10,12 +10,33 @@ A set of collated information is sent to `${GITHUB_STEP_SUMMARY}` as a markdown 
 
 ## Usage
 
-To generate a prerelease (`v1.2.0-mybranch.1`) style tag within your workflow:
+This action is often used in conjuction with the release action to allow tag creation to be split from the release like this:
 
 ```yaml
     - name: "Create Semver tag"
       id: semver
-      uses: 'ministryofjustice/opg-github-actions/actions/semver@v3.2.0'
+      uses: 'ministryofjustice/opg-github-actions/actions/semver@v4.2.0'
+      with:
+        prerelease: ${{ github.ref != 'refs/heads/main' }}
+        create_release: false
+        github_token: ${{ github.token }}
+    ... other steps ...
+    - name: "Create release"
+      id: release
+      uses: 'ministryofjustice/opg-github-actions/actions/release@v4.2.0'
+      with:
+        tag: ${{ steps.semver.outputs.tag }}
+        prerelease: ${{ github.ref != 'refs/heads/main' }}
+        github_token: ${{ github.token }}
+```
+
+
+To generate a prerelease (`v1.2.0-mybranch.1`) style tag within your workflow which also creates a release:
+
+```yaml
+    - name: "Create Semver tag"
+      id: semver
+      uses: 'ministryofjustice/opg-github-actions/actions/semver@v4.2.0'
 ```
 
 To generate a release tag for use in a workflow that determines if its a prerelease or not dynamically:
@@ -23,7 +44,7 @@ To generate a release tag for use in a workflow that determines if its a prerele
 ```yaml
     - name: "Create Semver tag"
       id: semver
-      uses: 'ministryofjustice/opg-github-actions/actions/semver@v3.2.0'
+      uses: 'ministryofjustice/opg-github-actions/actions/semver@v4.2.0'
       with:
         prerelease: ${{ github.ref != 'refs/heads/main' }}
 ```
@@ -33,7 +54,7 @@ To return a the latest release tag that can be re-used:
 ```yaml
     - name: "Create Semver tag"
       id: semver
-      uses: 'ministryofjustice/opg-github-actions/actions/semver@v3.2.0'
+      uses: 'ministryofjustice/opg-github-actions/actions/semver@v4.2.0'
       with:
         prerelease: false
         bump: "none"
