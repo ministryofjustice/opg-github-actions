@@ -22,7 +22,7 @@ inputs:
   # attach artifact matching this pattern
   release_artifact:
     description: "Pattern to attach any artifacts. Should be based from the `github.workspace` path."
-    default: "false"
+    default: ""
   # the gh tool has two methods for generating notes, this lets you swap between them
   release_notes_flag:
     description: "Flag to use for note generation - can be `--notes-from-tag` or `--generate-notes`"

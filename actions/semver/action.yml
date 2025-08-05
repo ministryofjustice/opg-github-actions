@@ -20,9 +20,9 @@ inputs:
     description: "Max length of prerelease suffix string to use."
     default: "14"
   # should we use v at the start
-  with_prefix:
-    description: "When true, the prefix of v will be added to the new semver value"
-    default: "true"
+  without_prefix:
+    description: "When true, the prefix of v will not be added to the new semver value"
+    default: "false"
   # branch name override
   branch_name:
     description: "Overwrite the branch name with this value"
@@ -34,7 +34,7 @@ inputs:
   # attach artifact matching this pattern
   release_artifact:
     description: "Pattern to attach any artifacts. Should be based from the `github.workspace` path."
-    default: "false"
+    default: ""
   # the gh tool has two methods for generating notes, this lets you swap between them
   release_notes_flag:
     description: "Flag to use for note generation - can be `--notes-from-tag` or `--generate-notes`"
@@ -116,12 +116,12 @@ runs:
         prerelease_suffix_length: ${{ inputs.prelease_suffix_length }}
         # bump by
         default_bump: ${{ inputs.default_bump }}
-        # extra text from a pr
-        extras: '${{ github.event.pull_request.title }}${{ github.event.pull_request.body }}'
         # prefix usage
-        without_prefix: ${{ inputs.with_prefix == 'true' && '' || '--without-prefix' }}
+        without_prefix: ${{ inputs.without_prefix == 'true' && '--without-prefix=true' || '--without-prefix=false' }}
         # test mode
         test_mode: ${{ inputs.test == 'true' && '--test' || '' }}
+         # extra text from a pr
+        extras: '${{ github.event.pull_request.title }}${{ github.event.pull_request.body }}'
       run: |
         echo "Running semver command ... "
 
@@ -130,8 +130,8 @@ runs:
           --branch=${{ env.branch}} \
           --default-branch=${{ env.default_branch }} \
           --bump=${{ env.default_bump}} \
-          --extra-content="${{ env.extras }}" \
-          --prerelease-suffix-length=${{ env.prerelease_suffix_length }} ${{ env.prerelease }} ${{ env.without_prefix }} ${{ env.test_mode }}
+          --prerelease-suffix-length=${{ env.prerelease_suffix_length }} ${{ env.prerelease }} ${{ env.without_prefix }} ${{ env.test_mode }} \
+          --extra-content="${{ env.extras }}"
 
     - name: "Create a release for [tag: ${{ steps.cmd.outputs.tag }} pre: ${{ inputs.prerelease}} ]"
       shell: bash
