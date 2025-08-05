@@ -1,0 +1,194 @@
+name: "Semver"
+description: >
+  Generate (or return) a semantic version tag to use for images / releases and so on.
+
+inputs:
+  github_token:
+    description: "GitHub token for authentication to allow tag to be pushed to the remote"
+    default: ""
+  # is this a prerelease?
+  prerelease:
+    description: "If set, flags this as being a pre-release."
+    required: true
+    default: "true"
+  # semver increment
+  default_bump:
+    description: "Value to increment semver by. To reuse the same semver value, set this value to 'none'"
+    default: "patch"
+  # length of the suffix
+  prelease_suffix_length:
+    description: "Max length of prerelease suffix string to use."
+    default: "14"
+  # should we use v at the start
+  without_prefix:
+    description: "When true, the prefix of v will not be added to the new semver value"
+    default: "false"
+  # branch name override
+  branch_name:
+    description: "Overwrite the branch name with this value"
+    default: ""
+  # release related items
+  create_release:
+    description: "Create a release for this semver tag"
+    default: "true"
+  # attach artifact matching this pattern
+  release_artifact:
+    description: "Pattern to attach any artifacts. Should be based from the `github.workspace` path."
+    default: ""
+  # the gh tool has two methods for generating notes, this lets you swap between them
+  release_notes_flag:
+    description: "Flag to use for note generation - can be `--notes-from-tag` or `--generate-notes`"
+    default: "--notes-from-tag"
+  # test mode disables creating tags and releasees
+  test:
+    description: "When true, the tag will not be created"
+    default: "false"
+
+outputs:
+  tag:
+    description: "Semver tag that has been created / found."
+    value: ${{ steps.cmd.outputs.tag }}
+
+  hash:
+    description: "Git sha / reference where the tag was created / found."
+    value: ${{ steps.cmd.outputs.hash }}
+
+  created:
+    description: "Boolean to say if the tag was created or not."
+    value: ${{ steps.cmd.outputs.created }}
+
+  test:
+    description: "Boolean to say if test mode was enabled."
+    value: ${{ steps.cmd.outputs.test }}
+
+  bump:
+    description: "Value used to increment the semver by."
+    value: ${{ steps.cmd.outputs.bump }}
+
+runs:
+  using: composite
+  steps:
+    ####### BUILD THE BINARY
+    # Setup go version to use from the mod file it the base
+    - name: "Setup go version"
+      uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+      with:
+        # relative path to where the go.mod file sites from inside the ./action/$name path
+        go-version-file: '${{ github.action_path }}/../../go.mod'
+        cache: false
+    # Build the binary
+    - name: "Build binary"
+      id: builder
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      env:
+        source: "${{ github.action_path }}/../../action/cmd/semver"
+        build_directory: "${{ github.action_path }}/builds"
+        binary: "${{ github.action_path }}/builds/semver"
+        # we dont use CGO for this command
+        CGO_ENABLED: 0
+      run: |
+        echo "Build binary from source ... "
+        mkdir -p ${{ env.build_directory }}
+        go build -ldflags="-w -s" -o ${{ env.binary }} ${{ env.source }}/
+    ####### END BUILD
+    ####### RUN COMMAND
+    # run the command
+    - name: "Create semver tag"
+      id: cmd
+      shell: bash
+      env:
+        # github token for pushing tag to remote
+        GH_TOKEN: ${{ inputs.github_token != '' && inputs.github_token || github.token }}
+        # location of the built binary
+        binary: "${{ github.action_path }}/builds/semver"
+        # location of github repo
+        directory: ${{ github.workspace }}
+        # branch name to use - order here matters ... user input takes precendence, the pr, then push
+        branch: ${{ inputs.branch_name != '' && inputs.branch_name || github.head_ref != '' && github.head_ref || github.ref_name }}
+        # the default branch for this repo
+        default_branch: ${{ github.event.repository.default_branch }}
+        # is this a prerelease or not - appened the flag
+        prerelease: ${{ inputs.prerelease == 'true' && '--prerelease' || '' }}
+        # max length to use for a prerelease suffix
+        prerelease_suffix_length: ${{ inputs.prelease_suffix_length }}
+        # bump by
+        default_bump: ${{ inputs.default_bump }}
+        # prefix usage
+        without_prefix: ${{ inputs.without_prefix == 'true' && '--without-prefix=true' || '--without-prefix=false' }}
+        # test mode
+        test_mode: ${{ inputs.test == 'true' && '--test' || '' }}
+         # extra text from a pr
+        extras: '${{ github.event.pull_request.title }}${{ github.event.pull_request.body }}'
+      run: |
+        echo "Running semver command ... "
+
+        ${{ env.binary }} \
+          --directory=${{ env.directory }} \
+          --branch=${{ env.branch}} \
+          --default-branch=${{ env.default_branch }} \
+          --bump=${{ env.default_bump}} \
+          --prerelease-suffix-length=${{ env.prerelease_suffix_length }} ${{ env.prerelease }} ${{ env.without_prefix }} ${{ env.test_mode }} \
+          --extra-content='${{ env.extras }}'
+
+    - name: "Create a release for [tag: ${{ steps.cmd.outputs.tag }} pre: ${{ inputs.prerelease}} ]"
+      shell: bash
+      id: create_release
+      if: ${{ inputs.create_release == 'true' && inputs.test == 'false' }}
+      env:
+        # token auth
+        GH_TOKEN: ${{ inputs.github_token != '' && inputs.github_token || github.token }}
+        # prerelease for the release aligns with the prelreease flag for the tag generation
+        prerelease: ${{ inputs.prerelease == 'true' && '--prerelease' || '' }}
+        # latest is only true when this is not a prerelease
+        latest: ${{ inputs.prerelease == 'true' && '--latest=false' || '--latest=true' }}
+        # how to generate notes
+        notes: ${{ inputs.release_notes_flag != '' && inputs.release_notes_flag || '--notes-from-tag' }}
+        # the tag value to use
+        tag: ${{ steps.cmd.outputs.tag }}
+        # artifact pattern
+        artifacts: ${{ inputs.release_artifact }}
+      run: |
+        echo "Creating release ... ${{ env.tag }}"
+        gh release create ${{ env.tag }} ${{ env.artifacts }} \
+          ${{ env.prerelease }} ${{ env.latest }} ${{ env.notes }} --verify-tag \
+          -t ${{ env.tag }}
+
+    - name: "Summary"
+      id: summary
+      shell: bash
+      env:
+        # config values copied from above
+        branch: ${{ inputs.branch_name != '' && inputs.branch_name || github.head_ref != '' && github.head_ref || github.ref_name }}
+        default_branch: ${{ github.event.repository.default_branch }}
+        prerelease: ${{ inputs.prerelease }}
+        prerelease_suffix_length: ${{ inputs.prelease_suffix_length }}
+        default_bump: ${{ inputs.default_bump }}
+        without_prefix: ${{ inputs.with_prefix == 'true' && 'false' || 'true' }}
+        test_mode: ${{ inputs.test }}
+        # outputs of the command
+        tag: ${{ steps.cmd.outputs.tag }}
+        hash: ${{ steps.cmd.outputs.hash }}
+        test: ${{ steps.cmd.outputs.test }}
+        created: ${{ steps.cmd.outputs.created }}
+        bump: ${{ steps.cmd.outputs.bump }}
+
+      run: |
+        echo "### Config " >> $GITHUB_STEP_SUMMARY
+        echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
+        echo "| branch | ${{ env.branch }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| default_branch | ${{ env.default_branch }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| prerelease | ${{ env.prerelease }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| prerelease_suffix_length | ${{ env.prerelease_suffix_length }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| default_bump | ${{ env.default_bump }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| without_prefix | ${{ env.without_prefix }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| test_mode | ${{ env.test_mode }} |" >> $GITHUB_STEP_SUMMARY
+        echo "### Result " >> $GITHUB_STEP_SUMMARY
+        echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
+        echo "| tag | ${{ env.tag }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| hash | ${{ env.hash }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| created | ${{ env.created }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| test | ${{ env.test }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| bump | ${{ env.bump }} |" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,45 @@
+name: "[Test] GitHub Env"
+description: >
+  DO NOT USE. This action is only meant for discovery and testing purposed to help
+  determine values of various github.$x context values when importing from
+  external workflows in various ways (semver tag, sha, latest etc).
+
+  Also used to examine the git state on pull requests and similar events..
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Action contexts"
+      shell: bash
+      env:
+        action_repository: ${{ github.action_repository }}
+        action_path: ${{ github.action_path }}
+        action_ref: ${{ github.action_ref }}
+        action_root_path: "${{ github.action_path }}/../../"
+      run: |
+        echo "## Actions " >> $GITHUB_STEP_SUMMARY
+        echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
+        echo "| action_repository | ${{ env.action_repository }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| action_path | ${{ env.action_path }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| action_ref| ${{ env.action_ref }} |" >> $GITHUB_STEP_SUMMARY
+        cd ${{ env.action_root_path }}
+        pwd
+        ls -lat
+    - name: "Git contexts"
+      shell: bash
+      env:
+        head_ref: ${{ github.head_ref }}
+        ref_name: ${{ github.ref_name }}
+        ref: ${{ github.ref }}
+        workspace: ${{ github.workspace }}
+        default_branch: ${{ github.event.repository.default_branch }}
+      run: |
+        echo "## Git " >> $GITHUB_STEP_SUMMARY
+        echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
+        echo "| head_ref | ${{ env.head_ref }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| ref_name | ${{ env.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| ref | ${{ env.ref }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| workspace | ${{ env.workspace }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| default_branch | ${{ env.default_branch }} |" >> $GITHUB_STEP_SUMMARY

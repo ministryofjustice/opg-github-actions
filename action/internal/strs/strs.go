@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-const allowCharacters string = "[^a-zA-Z0-9]+"
+const allowedCharacters string = "[^a-zA-Z0-9]+"
 
 // Clean converts a string to only include alpha numerics characters, so removes
 // forward slashes and so on
@@ -15,7 +15,7 @@ func Clean(s string) (safe string) {
 		exp   *regexp.Regexp
 		lower string = strings.ToLower(s)
 	)
-	if exp, err = regexp.Compile(allowCharacters); err != nil {
+	if exp, err = regexp.Compile(allowedCharacters); err != nil {
 		return
 	}
 	safe = exp.ReplaceAllString(lower, "")

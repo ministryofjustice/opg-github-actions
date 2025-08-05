@@ -29,7 +29,7 @@ However, if you are using this action outside of `pull_request` and `push` event
 
 Inputs:
 - `name`
-- `length` (default: 12)
+- `length` (default: 14)
 
 Outputs:
 - `branch_name`
