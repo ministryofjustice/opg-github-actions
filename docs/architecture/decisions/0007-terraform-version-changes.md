@@ -16,7 +16,7 @@ For a while, the `terraform-version` action maintained backward compatability wi
 
 ## Decision
 
-Out code has moved to use the community approach, so this version will no longer support the `.terraform-version` file.
+Our code has moved to use the community approach, so this version will no longer support the `.terraform-version` file.
 
 ## Consequences
 
