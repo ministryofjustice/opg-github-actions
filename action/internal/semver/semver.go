@@ -378,6 +378,21 @@ func atoi(s string) (i int) {
 	return
 }
 
+// GetLastRelease returns the last release it can find, or nil
+func GetLastRelease(lg *slog.Logger, existing []*Semver) (last *Semver) {
+	var releases []*Semver
+
+	lg = lg.With("operation", "GetLastRelease")
+	lg.Debug("sorting releases ... ")
+	// get releases only and sort them descending order so the lastest is on the top
+	releases = Sort(lg, GetReleases(existing), SORT_DESC, false)
+	if len(releases) >= 0 {
+		last = releases[0]
+	}
+
+	return
+}
+
 // Release runs over the existing Semvers, finds that largest (naturally sorted) version
 // and increments that value by bump.
 //
@@ -386,20 +401,13 @@ func atoi(s string) (i int) {
 //
 // If no releases are found, `0.0.0` is used instead.
 func Release(lg *slog.Logger, existing []*Semver, bump Increment) (next *Semver) {
-	var (
-		last     *Semver
-		releases []*Semver
-	)
+	var last *Semver
 	lg = lg.With("operation", "Release", "bump", string(bump))
-	lg.Debug("sorting releases ... ")
-	// get releases only and sort them descending order
-	releases = Sort(lg, GetReleases(existing), SORT_DESC, false)
-	// If there are no releases, then use 0 as base
-	// Otherwise, use the last release
-	if len(releases) == 0 {
+
+	last = GetLastRelease(lg, existing)
+
+	if last == nil {
 		last = FromString("0.0.0")
-	} else {
-		last = releases[0]
 	}
 
 	lg.Debug("last release ... ", "last", last.Stringy(true))
