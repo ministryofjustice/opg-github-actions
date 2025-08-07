@@ -170,6 +170,17 @@ func createAndPushTag(
 	return
 }
 
+func fileExists(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil || os.IsNotExist(err) {
+		return false
+	}
+	if info.IsDir() {
+		return false
+	}
+	return true
+}
+
 // getContentFromEventFile reads and parses the event file
 // that might be present at this path
 // Doing it this way as the event content contains special
