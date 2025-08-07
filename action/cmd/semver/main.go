@@ -170,17 +170,33 @@ func createAndPushTag(
 	return
 }
 
+func fileExists(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil || os.IsNotExist(err) {
+		return false
+	}
+	if info.IsDir() {
+		return false
+	}
+	return true
+}
+
 // getContentFromEventFile reads and parses the event file
 // that might be present at this path
 // Doing it this way as the event content contains special
 // characters that dont escape very well
 func getContentFromEventFile(lg *slog.Logger, file string) (content string) {
 	var (
-		err     error
-		bytes   []byte
-		prEvent *github.PullRequestEvent = &github.PullRequestEvent{}
-		raw     map[string]interface{}   = map[string]interface{}{}
+		err       error
+		bytes     []byte
+		prEvent   *github.PullRequestEvent = &github.PullRequestEvent{}
+		pushEvent *github.PushEvent        = &github.PushEvent{}
+		raw       map[string]interface{}   = map[string]interface{}{}
 	)
+	// ignore empty of missing files
+	if file == "" || !fileExists(file) {
+		return
+	}
 
 	content = ""
 	if bytes, err = os.ReadFile(file); err != nil {
@@ -194,8 +210,14 @@ func getContentFromEventFile(lg *slog.Logger, file string) (content string) {
 		lg.Error("err with unmarshal", "err", err.Error())
 		return
 	}
-
-	// now look if its a pull request, and if so, parse as a
+	// handle push event
+	if _, ok := raw["commits"]; ok {
+		json.Unmarshal(bytes, &pushEvent)
+		for _, c := range pushEvent.Commits {
+			content += *c.Message
+		}
+	}
+	// look if its a pull request, and if so, parse as a
 	// pr and generate the content from that
 	if _, ok := raw["pull_request"]; ok {
 		json.Unmarshal(bytes, &prEvent)
@@ -226,11 +248,13 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		repository    *git.Repository                                             // the object for this repo
 		semvers       []*semver.Semver                                            // all valid semver tags in the repo
 		use           *semver.Semver                                              // the semver to use for the prerelease / release
-		defaultBranch *plumbing.Reference                                         // git ref for the default branch
+		lastRelease   *semver.Semver                                              // the last release or default branch
+		baseRef       *plumbing.Reference                                         // git ref for previous ref (main / or last release)
 		currentCommit *plumbing.Reference                                         // git sha / ref for where the git repo currently is
 		createdTag    *plumbing.Reference                                         // the new semver tag thats been created
 		newCommits    []*object.Commit                                            // all commits that exist in the ref
 		bump          semver.Increment    = semver.Increment(options.DefaultBump) // default increment
+		basePoint     string              = ""                                    // either ref of last release or the default branch
 		token         string              = os.Getenv("GH_TOKEN")                 // github auth token for pushing to the remote
 	)
 	result = map[string]string{}
@@ -250,9 +274,17 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	if err != nil {
 		return
 	}
+	// get the last release for the comparison point
+	lastRelease = semver.GetLastRelease(lg, semvers)
+	if lastRelease != nil {
+		basePoint = lastRelease.Stringy(true)
+	} else {
+		basePoint = options.DefaultBranch
+	}
+
 	// get the default branch info
-	if defaultBranch, err = commits.FindReference(lg, repository, options.DefaultBranch); err != nil {
-		lg.Error("error getting git reference for default branch", "err", err.Error(), "default_branch", options.DefaultBranch)
+	if baseRef, err = commits.FindReference(lg, repository, basePoint); err != nil {
+		lg.Error("error getting git reference for previous comparison point", "err", err.Error(), "basePoint", basePoint)
 		return
 	}
 	// get info on the current commit
@@ -260,23 +292,21 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		lg.Error("error getting git reference for branch", "err", err.Error(), "branch", options.BranchName)
 		return
 	}
-	// find new commits that are in the current tree, but not
-	if newCommits, err = commits.DiffBetween(lg, repository, defaultBranch.Hash(), currentCommit.Hash()); err != nil {
-		lg.Error("error commits between references", "err", err.Error(), "base", defaultBranch.Hash().String(), "head", currentCommit.Hash().String())
+	// find new commits between the baseRef (main / last release) and the current commit
+	if newCommits, err = commits.DiffBetween(lg, repository, baseRef.Hash(), currentCommit.Hash()); err != nil {
+		lg.Error("error commits between references", "err", err.Error(), "base", baseRef.Hash().String(), "head", currentCommit.Hash().String())
 		return
 	}
 
-	lg.Warn("event file", "file", options.EventContentFile)
-	// add content to the commit list
-	if options.EventContentFile != "" {
-		extra := getContentFromEventFile(lg, options.EventContentFile)
+	// add content to the commit list from the event file
+	if extra := getContentFromEventFile(lg, options.EventContentFile); len(extra) > 0 {
 		newCommits = append(newCommits, &object.Commit{Hash: plumbing.ZeroHash, Message: extra})
 	}
 
-	lg.Warn("found commits", "len", len(newCommits))
+	lg.Info("details", "commits", len(newCommits), "event-file", options.EventContentFile)
 
 	for _, c := range newCommits {
-		fmt.Printf("==>\n%s\n<==\n", c.Message)
+		fmt.Printf("> commit ==>\n%s\n<==\n", c.Message)
 	}
 
 	// look for bump in the commits,

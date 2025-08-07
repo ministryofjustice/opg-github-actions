@@ -28,8 +28,99 @@ type tSemTest struct {
 	ShouldError   bool
 }
 
-// Test generating various semvers
-func TestMain(t *testing.T) {
+// Tests that align to what happens on push - so commits on the default branch
+// after a release that should trigger a semver bump
+func TestMainPush(t *testing.T) {
+	var lg = logger.New("ERROR", "TEXT")
+	var tests = []*tSemTest{
+		// make a commit with #minor commit on the top of master (default branch)
+		{
+			ExpectedTag:   "v1.1.0",
+			ExpectedBump:  string(semver.MINOR),
+			ShouldError:   false,
+			CreateRelease: true,
+			Input: &Options{
+				Prerelease:    false,
+				DefaultBranch: "master",
+				BranchName:    "master",
+			},
+			Commits: []*tSemTestCommit{
+				{Message: "just one #minor", Branch: "master"},
+			},
+		},
+		// make commits with #major in there on the top of master (default branch)
+		{
+			ExpectedTag:   "v2.0.0",
+			ExpectedBump:  string(semver.MAJOR),
+			ShouldError:   false,
+			CreateRelease: true,
+			Input: &Options{
+				Prerelease:    false,
+				DefaultBranch: "master",
+				BranchName:    "master",
+			},
+			Commits: []*tSemTestCommit{
+				{Message: "foobar", Branch: "master"},
+				{Message: "just one #minor", Branch: "master"},
+				{Message: "this ones #major", Branch: "master"},
+				{Message: "so is this one #major", Branch: "master"},
+			},
+		},
+	}
+
+	// var dir = "./test-repo"
+	// os.RemoveAll(dir)
+	// os.MkdirAll(dir, os.ModePerm)
+	// r, defBranch := randomRepository(dir, true)
+	// w, _ := r.Worktree()
+
+	for i, test := range tests {
+		var (
+			dir          = t.TempDir()
+			r, defBranch = randomRepository(dir, test.CreateRelease)
+			w, _         = r.Worktree()
+		)
+
+		err := testSetup(test, r, w, defBranch)
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+		// setup the options to run
+		opts := newRunOptions(test.Input)
+		if opts.RepositoryDirectory == "" {
+			opts.RepositoryDirectory = dir
+		}
+		if opts.DefaultBranch == "" {
+			opts.DefaultBranch = defBranch.Name().Short()
+		}
+		// now run the command and compare
+		res, err := Run(lg, opts)
+		// check error states
+		if !test.ShouldError && err != nil {
+			t.Errorf("[%d] unexpected error: %s", i, err.Error())
+		} else if test.ShouldError && err == nil {
+			t.Errorf("[%d] expected an error, but did not get one", i)
+		}
+		// check values
+		if res["tag"] != test.ExpectedTag {
+			t.Errorf("[%d] expected tag [%s] actual [%s]", i, test.ExpectedTag, res["tag"])
+			debug(res)
+		}
+		if res["bump"] != test.ExpectedBump {
+			t.Errorf("[%d] expected bump [%s] actual [%s]", i, test.ExpectedBump, res["bump"])
+			debug(res)
+		}
+		// debug(res)
+
+	}
+
+	// t.FailNow()
+
+}
+
+// Test generating various semvers in setup that looks like pull requests
+func TestMainPR(t *testing.T) {
 
 	var lg = logger.New("ERROR", "TEXT")
 	var tests = []*tSemTest{
@@ -91,7 +182,6 @@ func TestMain(t *testing.T) {
 				{Message: "just one commit"},
 			},
 		},
-
 		// test a prerelease tag that clashes with a similar branch and
 		// tag that triggers a minor
 		{
@@ -234,7 +324,6 @@ func TestMain(t *testing.T) {
 				},
 			},
 		},
-
 		// test returning the last semver release tag as there
 		// are no new commits and default bump is set to 'none'
 		{
@@ -249,7 +338,6 @@ func TestMain(t *testing.T) {
 			},
 			Commits: []*tSemTestCommit{},
 		},
-
 		// test a series of commits on a branch that should generate
 		// a prerelease tag
 		{
@@ -354,6 +442,7 @@ func TestMain(t *testing.T) {
 
 }
 
+// testSetup generates some base commits / branches / tags to use in test scenarios
 func testSetup(test *tSemTest, r *git.Repository, w *git.Worktree, defBranch *plumbing.Reference) (err error) {
 	var author = &object.Signature{Name: "go test", Email: "test@example.com"}
 	// now create the test commits
