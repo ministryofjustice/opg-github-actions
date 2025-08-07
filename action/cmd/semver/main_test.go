@@ -63,6 +63,7 @@ func TestMainPush(t *testing.T) {
 				{Message: "foobar", Branch: "master"},
 				{Message: "just one #minor", Branch: "master"},
 				{Message: "this ones #major", Branch: "master"},
+				{Message: "so is this one #major", Branch: "master"},
 			},
 		},
 	}
