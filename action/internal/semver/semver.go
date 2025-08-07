@@ -386,7 +386,7 @@ func GetLastRelease(lg *slog.Logger, existing []*Semver) (last *Semver) {
 	lg.Debug("sorting releases ... ")
 	// get releases only and sort them descending order so the lastest is on the top
 	releases = Sort(lg, GetReleases(existing), SORT_DESC, false)
-	if len(releases) >= 0 {
+	if len(releases) > 0 {
 		last = releases[0]
 	}
 
