@@ -194,8 +194,14 @@ func getContentFromEventFile(lg *slog.Logger, file string) (content string) {
 		lg.Error("err with unmarshal", "err", err.Error())
 		return
 	}
-
-	// now look if its a pull request, and if so, parse as a
+	// handle push event
+	if _, ok := raw["commits"]; ok {
+		json.Unmarshal(bytes, &pushEvent)
+		for _, c := range pushEvent.Commits {
+			content += *c.Message
+		}
+	}
+	// look if its a pull request, and if so, parse as a
 	// pr and generate the content from that
 	if _, ok := raw["pull_request"]; ok {
 		json.Unmarshal(bytes, &prEvent)
