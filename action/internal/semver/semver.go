@@ -405,7 +405,6 @@ func Release(lg *slog.Logger, existing []*Semver, bump Increment) (next *Semver)
 	lg = lg.With("operation", "Release", "bump", string(bump))
 
 	last = GetLastRelease(lg, existing)
-
 	if last == nil {
 		last = FromString("0.0.0")
 	}
