@@ -18,6 +18,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	"github.com/google/go-github/v74/github"
 )
 
 const ErrNoBranchName string = "branch-name is required, but not found."
@@ -29,7 +30,7 @@ type Options struct {
 	DefaultBranch          string // default branch name - generally main, used to compare commits against
 	BranchName             string // branch name is used as the prerelease suffix
 	DefaultBump            string // what to increment the semver by (major, minor, patch)
-	ExtraContent           string // content from pull request title / body where their might be extra #major content
+	EventContentFile       string // content from pull request title / body where their might be extra #major content
 	WithoutPrefix          bool
 	TestMode               bool
 }
@@ -46,7 +47,7 @@ func newRunOptions(in *Options) (opts *Options) {
 		BranchName:             "",
 		DefaultBranch:          "",
 		DefaultBump:            string(semver.PATCH),
-		ExtraContent:           "",
+		EventContentFile:       "",
 		WithoutPrefix:          false,
 		TestMode:               true,
 	}
@@ -67,8 +68,8 @@ func newRunOptions(in *Options) (opts *Options) {
 		if in.DefaultBump != "" {
 			opts.DefaultBump = in.DefaultBump
 		}
-		if in.ExtraContent != "" {
-			opts.ExtraContent = in.ExtraContent
+		if in.EventContentFile != "" {
+			opts.EventContentFile = in.EventContentFile
 		}
 		opts.Prerelease = in.Prerelease
 		opts.TestMode = in.TestMode
@@ -169,6 +170,41 @@ func createAndPushTag(
 	return
 }
 
+// getContentFromEventFile reads and parses the event file
+// that might be present at this path
+// Doing it this way as the event content contains special
+// characters that dont escape very well
+func getContentFromEventFile(lg *slog.Logger, file string) (content string) {
+	var (
+		err     error
+		bytes   []byte
+		prEvent *github.PullRequestEvent = &github.PullRequestEvent{}
+		raw     map[string]interface{}   = map[string]interface{}{}
+	)
+
+	content = ""
+	if bytes, err = os.ReadFile(file); err != nil {
+		lg.Error("err with reading file", "err", err.Error())
+		return
+	}
+
+	// first, unmarshal into a map to test
+	err = json.Unmarshal(bytes, &raw)
+	if err != nil {
+		lg.Error("err with unmarshal", "err", err.Error())
+		return
+	}
+
+	// now look if its a pull request, and if so, parse as a
+	// pr and generate the content from that
+	if _, ok := raw["pull_request"]; ok {
+		json.Unmarshal(bytes, &prEvent)
+		content = fmt.Sprintf("%s%s", *prEvent.PullRequest.Title, *prEvent.PullRequest.Body)
+	}
+
+	return
+}
+
 // Run handles gluing together the process of creating a new semver tag from the git repository and outputting the created
 // values.
 //
@@ -230,11 +266,17 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		return
 	}
 
-	lg.Debug("found commits", "len", len(newCommits))
-
+	lg.Warn("event file", "file", options.EventContentFile)
 	// add content to the commit list
-	if options.ExtraContent != "" {
-		newCommits = append(newCommits, &object.Commit{Hash: plumbing.ZeroHash, Message: options.ExtraContent})
+	if options.EventContentFile != "" {
+		extra := getContentFromEventFile(lg, options.EventContentFile)
+		newCommits = append(newCommits, &object.Commit{Hash: plumbing.ZeroHash, Message: extra})
+	}
+
+	lg.Warn("found commits", "len", len(newCommits))
+
+	for _, c := range newCommits {
+		fmt.Printf("==>\n%s\n<==\n", c.Message)
 	}
 
 	// look for bump in the commits,
@@ -276,7 +318,7 @@ func init() {
 	// test mode - disables creating tags
 	flag.BoolVar(&runOptions.TestMode, "test", runOptions.TestMode, "Set to true to disable creating tag.")
 	//
-	flag.StringVar(&runOptions.ExtraContent, "extra-content", runOptions.ExtraContent, "Additional content that might also contain # references")
+	flag.StringVar(&runOptions.EventContentFile, "event-content-file", runOptions.EventContentFile, "The github event file that contains extra content")
 }
 
 func main() {

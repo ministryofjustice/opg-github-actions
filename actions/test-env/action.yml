@@ -25,21 +25,17 @@ runs:
         echo "| action_ref| ${{ env.action_ref }} |" >> $GITHUB_STEP_SUMMARY
         cd ${{ env.action_root_path }}
         pwd
-        ls -lat
     - name: "Git contexts"
       shell: bash
       env:
         head_ref: ${{ github.head_ref }}
         ref_name: ${{ github.ref_name }}
         ref: ${{ github.ref }}
+        sha: ${{ github.sha }}
         workspace: ${{ github.workspace }}
+        branch: ${{ github.head_ref != '' && github.head_ref || github.ref_name }}
         default_branch: ${{ github.event.repository.default_branch }}
+        event_path: ${{ github.event_path }}
       run: |
-        echo "## Git " >> $GITHUB_STEP_SUMMARY
-        echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
-        echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
-        echo "| head_ref | ${{ env.head_ref }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| ref_name | ${{ env.ref_name }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| ref | ${{ env.ref }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| workspace | ${{ env.workspace }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| default_branch | ${{ env.default_branch }} |" >> $GITHUB_STEP_SUMMARY
+        echo "see env for github context values"
+        cat "${{ env.event_path }}"
