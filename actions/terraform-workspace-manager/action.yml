@@ -61,7 +61,7 @@ runs:
     - id: aws_creds
       if: ${{ inputs.oidc_role == '' }}
       name: Configure AWS Credentials For Terraform
-      uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+      uses: aws-actions/configure-aws-credentials@d0834ad3a60a024346910e522a81b0002bd37fea # v4.3.0
       with:
         aws-access-key-id: ${{ inputs.aws_access_key_id }}
         aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
@@ -71,7 +71,7 @@ runs:
     - id: aws_creds_oidc
       if: ${{ inputs.oidc_role != '' }}
       name: Configure AWS Credentials For Terraform
-      uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+      uses: aws-actions/configure-aws-credentials@d0834ad3a60a024346910e522a81b0002bd37fea # v4.3.0
       with:
         role-to-assume: ${{ inputs.oidc_role }}
         aws-region: ${{ inputs.aws_region }}
