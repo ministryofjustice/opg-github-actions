@@ -374,7 +374,7 @@ func TestMainPR(t *testing.T) {
 		{
 			ExpectedTag:    "v2.0.0-testbranchutf.1",
 			ExpectedBump:   string(semver.MAJOR),
-			ExpectedBranch: "testbranch-utf",
+			ExpectedBranch: "testbranchutf",
 			ShouldError:    false,
 			CreateRelease:  true,
 			Input: &Options{
