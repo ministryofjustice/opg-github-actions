@@ -80,6 +80,7 @@ Rarely used inputs:
 Outputs:
 - **`tag`**
 - `hash`
+- `branch`
 - `created`
 - `bump`
 - `test`
@@ -123,6 +124,9 @@ Contains the tag that has been created.
 
 #### `hash`
 The git hash / sha that the tag was created at.
+
+#### `branch`
+The cleaned and truncated branch name that was used for this tag. Is always set.
 
 #### `created`
 A boolean shoing if the tag was actually created - helpful for `test` and `none` increment usages.
