@@ -226,9 +226,9 @@ func getContentFromEventFile(lg *slog.Logger, file string) (content string) {
 		err = json.Unmarshal(bytes, &prEvent)
 		if err != nil {
 			lg.Error("error unmarshaling pull request event", "err", err.Error())
-			debug(*prEvent)
+		} else {
+			content = fmt.Sprintf("%s %s", *prEvent.PullRequest.Title, *prEvent.PullRequest.Body)
 		}
-		content = fmt.Sprintf("%s %s", *prEvent.PullRequest.Title, *prEvent.PullRequest.Body)
 	}
 
 	return
