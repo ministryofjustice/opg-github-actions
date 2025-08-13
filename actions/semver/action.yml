@@ -168,7 +168,7 @@ runs:
         prerelease: ${{ inputs.prerelease }}
         prerelease_suffix_length: ${{ inputs.prelease_suffix_length }}
         default_bump: ${{ inputs.default_bump }}
-        without_prefix: ${{ inputs.with_prefix == 'true' && 'false' || 'true' }}
+        without_prefix: ${{ inputs.without_prefix }}
         test_mode: ${{ inputs.test }}
         # outputs of the command
         tag: ${{ steps.cmd.outputs.tag }}

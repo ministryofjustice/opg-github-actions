@@ -223,8 +223,12 @@ func getContentFromEventFile(lg *slog.Logger, file string) (content string) {
 	// look if its a pull request, and if so, parse as a
 	// pr and generate the content from that
 	if _, ok := raw["pull_request"]; ok {
-		json.Unmarshal(bytes, &prEvent)
-		content = fmt.Sprintf("%s%s", *prEvent.PullRequest.Title, *prEvent.PullRequest.Body)
+		err = json.Unmarshal(bytes, &prEvent)
+		if err != nil {
+			lg.Error("error unmarshaling pull request event", "err", err.Error())
+		} else {
+			content = fmt.Sprintf("%s %s", *prEvent.PullRequest.Title, *prEvent.PullRequest.Body)
+		}
 	}
 
 	return
