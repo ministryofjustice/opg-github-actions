@@ -70,7 +70,7 @@ Common inputs:
 - `release_artifact` (default: "")
 
 Rarely used inputs:
-- `prelease_suffix_length` (default: "12")
+- `prelease_suffix_length` (default: "14")
 - `branch_name`
 - `without_prefix` (default: "false")
 - `github_token`
@@ -80,6 +80,7 @@ Rarely used inputs:
 Outputs:
 - **`tag`**
 - `hash`
+- `branch`
 - `created`
 - `bump`
 - `test`
@@ -123,6 +124,9 @@ Contains the tag that has been created.
 
 #### `hash`
 The git hash / sha that the tag was created at.
+
+#### `branch`
+The cleaned and truncated branch name that was used for this tag. Is always set.
 
 #### `created`
 A boolean shoing if the tag was actually created - helpful for `test` and `none` increment usages.

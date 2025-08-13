@@ -53,6 +53,10 @@ outputs:
     description: "Git sha / reference where the tag was created / found."
     value: ${{ steps.cmd.outputs.hash }}
 
+  branch:
+    description: "The safe, truncated branch name used in the semver creation. Always returned."
+    value: ${{ steps.cmd.outputs.branch }}
+
   created:
     description: "Boolean to say if the tag was created or not."
     value: ${{ steps.cmd.outputs.created }}
@@ -169,6 +173,7 @@ runs:
         # outputs of the command
         tag: ${{ steps.cmd.outputs.tag }}
         hash: ${{ steps.cmd.outputs.hash }}
+        branch_output: ${{ steps.cmd.outputs.branch }}
         test: ${{ steps.cmd.outputs.test }}
         created: ${{ steps.cmd.outputs.created }}
         bump: ${{ steps.cmd.outputs.bump }}
@@ -189,6 +194,7 @@ runs:
         echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
         echo "| tag | ${{ env.tag }} |" >> $GITHUB_STEP_SUMMARY
         echo "| hash | ${{ env.hash }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| branch | ${{ env.branch_output }} |" >> $GITHUB_STEP_SUMMARY
         echo "| created | ${{ env.created }} |" >> $GITHUB_STEP_SUMMARY
         echo "| test | ${{ env.test }} |" >> $GITHUB_STEP_SUMMARY
         echo "| bump | ${{ env.bump }} |" >> $GITHUB_STEP_SUMMARY
