@@ -224,7 +224,7 @@ func getContentFromEventFile(lg *slog.Logger, file string) (content string) {
 	// pr and generate the content from that
 	if _, ok := raw["pull_request"]; ok {
 		json.Unmarshal(bytes, &prEvent)
-		content = fmt.Sprintf("%s%s", *prEvent.PullRequest.Title, *prEvent.PullRequest.Body)
+		content = fmt.Sprintf("%s|%s", *prEvent.PullRequest.Title, *prEvent.PullRequest.Body)
 	}
 
 	return
