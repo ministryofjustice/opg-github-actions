@@ -369,6 +369,30 @@ func TestMainPR(t *testing.T) {
 				},
 			},
 		},
+		// test a series of commits on a branch with slashes that should
+		// be removed and not in the a prerelease tag
+		{
+			ExpectedTag:    "v1.1.0-testbrancha.1",
+			ExpectedBump:   string(semver.MINOR),
+			ExpectedBranch: "testbrancha",
+			ShouldError:    false,
+			CreateRelease:  true,
+			Input: &Options{
+				Prerelease: true,
+				BranchName: "test/branch/a",
+			},
+			Commits: []*tSemTestCommit{
+				{
+					Message: "my test commit without anything",
+					Branch:  "test/branch/a",
+					ChildCommits: []string{
+						"this commit is not really a patch or minor and really not major",
+						"clearly a change #patch",
+						"a bigger change #minor",
+					},
+				},
+			},
+		},
 		// test a series commits with multi lines and special chars
 		// that should create a minor
 		{
