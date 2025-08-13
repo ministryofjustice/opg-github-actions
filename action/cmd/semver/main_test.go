@@ -20,12 +20,13 @@ type tSemTestCommit struct {
 }
 
 type tSemTest struct {
-	Commits       []*tSemTestCommit
-	ExpectedTag   string
-	ExpectedBump  string
-	Input         *Options
-	CreateRelease bool
-	ShouldError   bool
+	Commits        []*tSemTestCommit
+	ExpectedTag    string
+	ExpectedBump   string
+	ExpectedBranch string
+	Input          *Options
+	CreateRelease  bool
+	ShouldError    bool
 }
 
 // Tests that align to what happens on push - so commits on the default branch
@@ -35,10 +36,11 @@ func TestMainPush(t *testing.T) {
 	var tests = []*tSemTest{
 		// make a commit with #minor commit on the top of master (default branch)
 		{
-			ExpectedTag:   "v1.1.0",
-			ExpectedBump:  string(semver.MINOR),
-			ShouldError:   false,
-			CreateRelease: true,
+			ExpectedTag:    "v1.1.0",
+			ExpectedBump:   string(semver.MINOR),
+			ExpectedBranch: "master",
+			ShouldError:    false,
+			CreateRelease:  true,
 			Input: &Options{
 				Prerelease:    false,
 				DefaultBranch: "master",
@@ -109,6 +111,11 @@ func TestMainPush(t *testing.T) {
 		}
 		if res["bump"] != test.ExpectedBump {
 			t.Errorf("[%d] expected bump [%s] actual [%s]", i, test.ExpectedBump, res["bump"])
+			debug(res)
+		}
+
+		if test.ExpectedBranch != "" && res["branch"] != test.ExpectedBranch {
+			t.Errorf("[%d] expected branch [%s] actual [%s]", i, test.ExpectedBranch, res["branch"])
 			debug(res)
 		}
 		// debug(res)
@@ -341,10 +348,11 @@ func TestMainPR(t *testing.T) {
 		// test a series of commits on a branch that should generate
 		// a prerelease tag
 		{
-			ExpectedTag:   "v1.1.0-testbrancha.1",
-			ExpectedBump:  string(semver.MINOR),
-			ShouldError:   false,
-			CreateRelease: true,
+			ExpectedTag:    "v1.1.0-testbrancha.1",
+			ExpectedBump:   string(semver.MINOR),
+			ExpectedBranch: "testbrancha",
+			ShouldError:    false,
+			CreateRelease:  true,
 			Input: &Options{
 				Prerelease: true,
 				BranchName: "test-branch-a",
@@ -364,10 +372,11 @@ func TestMainPR(t *testing.T) {
 		// test a series commits with multi lines and special chars
 		// that should create a minor
 		{
-			ExpectedTag:   "v2.0.0-testbranchutf.1",
-			ExpectedBump:  string(semver.MAJOR),
-			ShouldError:   false,
-			CreateRelease: true,
+			ExpectedTag:    "v2.0.0-testbranchutf.1",
+			ExpectedBump:   string(semver.MAJOR),
+			ExpectedBranch: "testbranch-utf",
+			ShouldError:    false,
+			CreateRelease:  true,
 			Input: &Options{
 				PrereleaseSuffixLength: 15,
 				Prerelease:             true,
@@ -434,6 +443,11 @@ func TestMainPR(t *testing.T) {
 			t.Errorf("[%d] expected bump [%s] actual [%s]", i, test.ExpectedBump, res["bump"])
 			debug(res)
 		}
+		if test.ExpectedBranch != "" && res["branch"] != test.ExpectedBranch {
+			t.Errorf("[%d] expected branch [%s] actual [%s]", i, test.ExpectedBranch, res["branch"])
+			debug(res)
+		}
+
 		// debug(res)
 
 	}

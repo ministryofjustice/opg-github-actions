@@ -35,6 +35,11 @@ type Options struct {
 	TestMode               bool
 }
 
+func (self *Options) SafeSuffix() (safeAndShort string) {
+	safeAndShort, _ = strs.Safe(self.BranchName, self.PrereleaseSuffixLength)
+	return
+}
+
 var runOptions *Options = newRunOptions(&Options{DefaultBranch: "main"})
 
 // newRunOptions helper to return default options merged with
@@ -103,9 +108,7 @@ func getSemverToUse(lg *slog.Logger, semvers []*semver.Semver, bump semver.Incre
 	use = &semver.Semver{}
 	// decide if we do prerelease or not based on input
 	if options.Prerelease {
-		// run safe on the branch name for prerelease usage
-		suffix, _ := strs.Safe(options.BranchName, options.PrereleaseSuffixLength)
-		use = semver.Prerelease(lg, semvers, bump, suffix)
+		use = semver.Prerelease(lg, semvers, bump, options.SafeSuffix())
 	} else {
 		use = semver.Release(lg, semvers, bump)
 	}
@@ -305,8 +308,9 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 
 	lg.Info("details", "commits", len(newCommits), "event-file", options.EventContentFile)
 
+	// dump the commits for debugging
 	for _, c := range newCommits {
-		fmt.Printf("> commit ==>\n%s\n<==\n", c.Message)
+		lg.Info("commit", "message", c.Message, "hash", c.Hash)
 	}
 
 	// look for bump in the commits,
@@ -324,6 +328,7 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	result = map[string]string{
 		"tag":     use.String(),
 		"hash":    use.GitRef.Hash().String(),
+		"branch":  options.SafeSuffix(),
 		"test":    fmt.Sprintf("%t", options.TestMode),
 		"created": fmt.Sprintf("%t", (createdTag != nil)),
 		"bump":    string(bump),

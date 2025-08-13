@@ -70,7 +70,7 @@ Common inputs:
 - `release_artifact` (default: "")
 
 Rarely used inputs:
-- `prelease_suffix_length` (default: "12")
+- `prelease_suffix_length` (default: "14")
 - `branch_name`
 - `without_prefix` (default: "false")
 - `github_token`

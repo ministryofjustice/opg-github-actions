@@ -53,6 +53,10 @@ outputs:
     description: "Git sha / reference where the tag was created / found."
     value: ${{ steps.cmd.outputs.hash }}
 
+  branch:
+    description: "The safe, truncated branch name used in the semver creation. Always returned."
+    value: ${{ steps.cmd.outputs.branch }}
+
   created:
     description: "Boolean to say if the tag was created or not."
     value: ${{ steps.cmd.outputs.created }}
