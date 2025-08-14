@@ -192,6 +192,7 @@ func getContentFromEventFile(lg *slog.Logger, file string) (content string) {
 	var (
 		err       error
 		bytes     []byte
+		pr        *github.PullRequest      = nil
 		prEvent   *github.PullRequestEvent = &github.PullRequestEvent{}
 		pushEvent *github.PushEvent        = &github.PushEvent{}
 		raw       map[string]interface{}   = map[string]interface{}{}
@@ -226,8 +227,18 @@ func getContentFromEventFile(lg *slog.Logger, file string) (content string) {
 		err = json.Unmarshal(bytes, &prEvent)
 		if err != nil {
 			lg.Error("error unmarshaling pull request event", "err", err.Error())
-		} else {
-			content = fmt.Sprintf("%s %s", *prEvent.PullRequest.Title, *prEvent.PullRequest.Body)
+			return
+		}
+		// If the pr body or title are empty, then their pointer is nil, so add
+		// handling for that
+		if prEvent != nil && prEvent.PullRequest != nil {
+			pr = prEvent.PullRequest
+		}
+		if pr != nil && pr.Title != nil {
+			content += fmt.Sprintf("%s\n", *pr.Title)
+		}
+		if pr != nil && pr.Body != nil {
+			content += fmt.Sprintf(" %s", *pr.Body)
 		}
 	}
 
