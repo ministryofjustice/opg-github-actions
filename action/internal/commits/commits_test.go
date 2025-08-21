@@ -13,7 +13,7 @@ import (
 )
 
 func TestCommitsDiffBetween(t *testing.T) {
-	var lg = logger.New("ERROR", "TEXT")
+	var lg = logger.New("error", "text")
 	var dir = t.TempDir()
 	repo, defBranch := randomRepository(dir)
 
@@ -58,7 +58,7 @@ func TestCommitsDiffBetween(t *testing.T) {
 }
 
 func TestCommitsFindReference(t *testing.T) {
-	var lg = logger.New("ERROR", "TEXT")
+	var lg = logger.New("error", "text")
 	var dir = t.TempDir()
 	repo, _ := randomRepository(dir)
 

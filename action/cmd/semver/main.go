@@ -374,7 +374,7 @@ func init() {
 }
 
 func main() {
-	var lg *slog.Logger = logger.New("INFO", "TEXT")
+	var lg *slog.Logger = logger.New("info", "text")
 	// process the arguments and fetch the fallback value from environment values
 	flag.Parse()
 

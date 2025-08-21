@@ -13,7 +13,7 @@ type cmdFixture struct {
 }
 
 func TestBranchNameCommandWorking(t *testing.T) {
-	lg := logger.New("ERROR", "TEXT")
+	lg := logger.New("error", "text")
 	tests := []cmdFixture{
 		{
 

@@ -32,7 +32,7 @@ type tSemTest struct {
 // Tests that align to what happens on push - so commits on the default branch
 // after a release that should trigger a semver bump
 func TestMainPush(t *testing.T) {
-	var lg = logger.New("ERROR", "TEXT")
+	var lg = logger.New("error", "text")
 	var tests = []*tSemTest{
 		// make a commit with #minor commit on the top of master (default branch)
 		{

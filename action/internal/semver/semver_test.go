@@ -93,7 +93,7 @@ type tSemverNextPre struct {
 }
 
 func TestSemverPrerelease(t *testing.T) {
-	var lg = logger.New("ERROR", "TEXT")
+	var lg = logger.New("error", "text")
 	var tests = []*tSemverNextPre{
 		{
 			Bump:   MAJOR,
@@ -151,7 +151,7 @@ type tSemverNext struct {
 }
 
 func TestSemverNextRelease(t *testing.T) {
-	var lg = logger.New("ERROR", "TEXT")
+	var lg = logger.New("error", "text")
 	var tests = []*tSemverNext{
 		{
 			Bump: MAJOR,
@@ -270,7 +270,7 @@ type tSemverSort struct {
 }
 
 func TestSemverSort(t *testing.T) {
-	var lg = logger.New("ERROR", "TEXT")
+	var lg = logger.New("error", "text")
 	// tests that include invalid semvers that wont be returned in the sorting
 	// and duplicates that will be removed
 	var tests = []*tSemverSort{

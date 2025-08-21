@@ -19,7 +19,7 @@ type tTagSorted struct {
 }
 
 func TestTagsSort(t *testing.T) {
-	var lg = logger.New("ERROR", "TEXT")
+	var lg = logger.New("error", "text")
 	var tests = []*tTagSorted{
 		{
 			Refs: []*plumbing.Reference{
@@ -62,7 +62,7 @@ type tTagStrings struct {
 }
 
 func TestTagsStrings(t *testing.T) {
-	var lg = logger.New("ERROR", "TEXT")
+	var lg = logger.New("error", "text")
 	var tests = []*tTagStrings{
 		{
 			Error: nil,
@@ -98,7 +98,7 @@ func TestTagsStrings(t *testing.T) {
 }
 
 func TestTagsRefs(t *testing.T) {
-	var lg = logger.New("ERROR", "TEXT")
+	var lg = logger.New("error", "text")
 	var tests = []*tTagStrings{
 		{
 			Error: nil,
@@ -134,7 +134,7 @@ func TestTagsRefs(t *testing.T) {
 }
 
 func TestTagsShortRefs(t *testing.T) {
-	var lg = logger.New("ERROR", "TEXT")
+	var lg = logger.New("error", "text")
 	var tests = []*tTagStrings{
 		{
 			Error: nil,
@@ -171,7 +171,7 @@ func TestTagsShortRefs(t *testing.T) {
 
 func TestTagCreationSimple(t *testing.T) {
 	var (
-		lg      = logger.New("ERROR", "TEXT")
+		lg      = logger.New("error", "text")
 		dir     = t.TempDir()
 		tagName = "test-tag"
 	)
