@@ -2,6 +2,8 @@
 
 Will create a new release using `gh` cli tool based on the tag value passed along.
 
+Limited to one release per tag.
+
 
 ## Usage
 
@@ -58,3 +60,8 @@ Pattern or file path for artifacts you want to attach to this release, such as b
 
 #### `release_notes_flag` (default: "--notes-from-tag")
 When creating a release with the `gh` cli tool there are two two methods for generating notes, this lets you swap between them.
+
+### Outputs
+
+#### `url`
+Link to the url of the release for the tag passed.

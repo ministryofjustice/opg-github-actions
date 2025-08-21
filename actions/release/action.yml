@@ -28,6 +28,10 @@ inputs:
     description: "Flag to use for note generation - can be `--notes-from-tag` or `--generate-notes`"
     default: "--notes-from-tag"
 
+outputs:
+  url:
+    description: "Link to the release"
+    value: "${{ steps.release_url.outputs.URL }}"
 
 runs:
   using: composite
@@ -49,7 +53,7 @@ runs:
         list=$(gh release list --json='name,tagName,isDraft,isPrerelease' --jq='.[] | select(.tagName=="${{ env.tag }}") ${{ env.prerelease_select }} | .tagName')
         echo "found=${list}"
 
-        if [[ "$list" == "${{ env.tag }}" ]]; then
+        if [[ "${list}" == "${{ env.tag }}" ]]; then
           echo "RELEASE_EXISTS=true" >> $GITHUB_OUTPUT
         fi
 
@@ -57,10 +61,9 @@ runs:
       shell: bash
       if: steps.find_release.outputs.RELEASE_EXISTS == 'true'
       run: |
-        echo "release already exists for this tag "
+        echo "release already exists for this tag"
 
     - name: "Create a release for [tag: ${{ inputs.tag }} pre: ${{ inputs.prerelease }}]"
-      id: create_release
       shell: bash
       if: steps.find_release.outputs.RELEASE_EXISTS != 'true'
       env:
@@ -83,3 +86,21 @@ runs:
         gh release create ${{ env.tag }} ${{ env.artifacts }} \
           ${{ env.prerelease }} ${{ env.latest }} ${{ env.notes }} --verify-tag \
           -t ${{ env.tag }}
+
+    # output details about release to github
+    - name: "Fetching link to release [tag: ${{ inputs.tag }} pre: ${{ inputs.prerelease }} ]"
+      id: release_url
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token != '' && inputs.github_token || github.token }}
+        tag: ${{ inputs.tag }}
+      run: |
+        echo "Looking for release with tag name: ${{ env.tag }}"
+        link=$(gh release view ${{ env.tag }} --json="url" --jq=".url")
+
+        if [[ "${link}" != "" ]]; then
+          echo "URL=${link}" >> $GITHUB_OUTPUT
+          echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |"  >> $GITHUB_STEP_SUMMARY
+          echo "| release_url | ${link} |"  >> $GITHUB_STEP_SUMMARY
+        fi
