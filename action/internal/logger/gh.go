@@ -26,12 +26,11 @@ func Result(logger *slog.Logger, results map[string]string) {
 	}
 
 	for k, v := range results {
-		str := fmt.Sprintf("%s=%s", k, v)
-		fmt.Print(`printf "%q\n" "` + str + `"` + "\n")
+		str := fmt.Sprintf("%s=%s\n", k, v)
+		fmt.Print(str)
 		if outFile != "" && f != nil {
 			logger.Debug("writting to GITHUB_OUTPUT")
-			str += "\n"
-			f.WriteString(str + "")
+			f.WriteString(str)
 		}
 	}
 }
