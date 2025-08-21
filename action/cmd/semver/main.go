@@ -138,7 +138,7 @@ func createAndPushTag(
 	repository *git.Repository,
 	use *semver.Semver,
 	bump semver.Increment,
-	token string,
+	auth *http.BasicAuth,
 	options *Options) (createdTag *plumbing.Reference, err error) {
 
 	var (
@@ -146,10 +146,6 @@ func createAndPushTag(
 		tagName              string = use.String()
 		errFailedToCreateTag string = "error: failed to create tag [%s]"
 		errFailedToPush      string = "error: failed to push tags to remote [tag: %s]"
-		auth                        = &http.BasicAuth{
-			Username: "opg-github-actions",
-			Password: token,
-		}
 	)
 	lg = lg.With("operation", "createAndPushTag", "semver", use.String())
 
@@ -298,14 +294,19 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		currentCommit *plumbing.Reference                                         // git sha / ref for where the git repo currently is
 		createdTag    *plumbing.Reference                                         // the new semver tag thats been created
 		newCommits    []*object.Commit                                            // all commits that exist in the ref
+		auth          *http.BasicAuth                                             // github auth config for pull / pushing to the remote
 		bump          semver.Increment    = semver.Increment(options.DefaultBump) // default increment
 		basePoint     string              = ""                                    // either ref of last release or the default branch
-		token         string              = os.Getenv("GH_TOKEN")                 // github auth token for pushing to the remote
 		bumpCommit    string              = ""                                    // commit message the bump was found within
 		errTagExists  string              = "reference already exists"            // in cases where tag exists, look for this error string
 		maxRetries    int                 = 20                                    // max retries
+
 	)
 	result = map[string]string{}
+	auth = &http.BasicAuth{
+		Username: "opg-github-actions",
+		Password: os.Getenv("GH_TOKEN"),
+	}
 
 	if options.Prerelease && options.BranchName == "" {
 		err = fmt.Errorf(ErrNoBranchName)
@@ -369,19 +370,19 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	if len(newCommits) > 0 && foundBump != "" {
 		bump = foundBump
 	}
+
 	// retry loop
 	// In some places the semver action may run on the same repository at almost the same time
 	// (such as mono repos with multiple projects)
 	// In those cases we loop multiple times to try to create a new tag for each thing
 	for attempt := 0; attempt < maxRetries; attempt++ {
 		var n = rand.IntN(5)
-		repo.Fetch(lg, repository)
 		// find the semver and set the git ref to the current place
 		use = getSemverToUse(lg, semvers, bump, options)
 		use.GitRef = currentCommit
 		lg.Info("generated semver ... ", "use", use, "attempt", attempt)
 		// create and try to push tags
-		createdTag, err = createAndPushTag(lg, repository, use, bump, token, options)
+		createdTag, err = createAndPushTag(lg, repository, use, bump, auth, options)
 
 		// if there is an error and its not about existing tags, then exit
 		if err != nil && !strings.Contains(err.Error(), errTagExists) {
@@ -393,6 +394,9 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		}
 		lg.Info("need to retry tag creation; sleeping ... ", "seconds", n)
 		time.Sleep(time.Duration(n) * time.Second)
+		// fetch repo to check its up to date
+		repo.Fetch(lg, repository, auth)
+
 	}
 
 	result = map[string]string{

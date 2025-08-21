@@ -91,8 +91,8 @@ func Init(localDirectory string) (r *git.Repository, err error) {
 // fetch might not be needed - added for when
 // repo is shallow and doesnt have all the refs
 // when then causes a failure on branch look up
-func Fetch(lg *slog.Logger, r *git.Repository) (err error) {
-	slog.Info("fetching remotes ...")
+func Fetch(lg *slog.Logger, r *git.Repository, auth *http.BasicAuth) (err error) {
+	lg.Info("fetching updates from remotes ...")
 
 	remotes, err := r.Remotes()
 	specs := []config.RefSpec{
@@ -104,18 +104,18 @@ func Fetch(lg *slog.Logger, r *git.Repository) (err error) {
 	for _, remote := range remotes {
 		// fetch branches and tags for this remote
 		name := remote.Config().Name
-		lg.Debug("fetching remote data for: " + name)
+		lg.Debug("fetching data for remote ", "remote", name)
 
 		err = r.Fetch(&git.FetchOptions{
 			RemoteName: name,
 			RefSpecs:   specs,
+			Auth:       auth,
 		})
 
 		if err != nil && err != git.NoErrAlreadyUpToDate {
-			lg.Error("Error with fetch")
-			lg.Error(err.Error())
+			lg.Error("error with fetching repository", "err", err.Error())
 		} else if err != nil {
-			lg.Warn(err.Error())
+			lg.Warn("repository up to date", "warning", err.Error())
 			err = nil
 		}
 	}
