@@ -211,26 +211,33 @@ func getContentFromEventFile(lg *slog.Logger, file string) (content string) {
 		pushEvent *github.PushEvent        = &github.PushEvent{}
 		raw       map[string]interface{}   = map[string]interface{}{}
 	)
+	lg = lg.With("event_file", file)
 	// ignore empty of missing files
 	if file == "" || !fileExists(file) {
+		lg.Warn("warn: no event file.")
 		return
 	}
 
 	content = ""
 	if bytes, err = os.ReadFile(file); err != nil {
-		lg.Error("err with reading file", "err", err.Error())
+		lg.Error("error with reading from event file file", "err", err.Error())
 		return
 	}
 
 	// first, unmarshal into a map to test
 	err = json.Unmarshal(bytes, &raw)
 	if err != nil {
-		lg.Error("err with unmarshal", "err", err.Error())
+		lg.Error("error unmarshaling event file", "err", err.Error())
 		return
 	}
 	// handle push event
 	if _, ok := raw["commits"]; ok {
-		json.Unmarshal(bytes, &pushEvent)
+		err = json.Unmarshal(bytes, &pushEvent)
+		if err != nil {
+			lg.Error("error unmarshaling push event", "err", err.Error())
+			return
+		}
+		// merge in the commits
 		for _, c := range pushEvent.Commits {
 			content += *c.Message
 		}
@@ -305,6 +312,7 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	// get the semvers from the tags
 	semvers, err = getExistingSemvers(lg, repository)
 	if err != nil {
+		lg.Error("error getting existing semvers for this repository")
 		return
 	}
 
