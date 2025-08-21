@@ -1,6 +1,7 @@
 package tags
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"slices"
@@ -182,12 +183,19 @@ func Sort(lg *slog.Logger, tags []*plumbing.Reference, order SortOrder) (sorted 
 }
 
 // Create tag on this repository at the ref point
-func Create(repository *git.Repository, tagName string, ref plumbing.Hash) (*plumbing.Reference, error) {
-	return repository.CreateTag(tagName, ref, nil)
+func Create(lg *slog.Logger, repository *git.Repository, tagName string, ref plumbing.Hash) (hash *plumbing.Reference, err error) {
+	hash, err = repository.CreateTag(tagName, ref, nil)
+	// skip up to date error
+	if errors.Is(err, git.NoErrAlreadyUpToDate) {
+		lg.With("operation", "Create").Warn("warning from creating a tag: already up-to-date")
+		err = nil
+	}
+
+	return
 }
 
 // Push all tags to the remote origin
-func Push(repository *git.Repository, auth *http.BasicAuth) (err error) {
+func Push(lg *slog.Logger, repository *git.Repository, auth *http.BasicAuth) (err error) {
 	err = repository.Push(
 		&git.PushOptions{
 			RemoteName: "origin",
@@ -195,5 +203,10 @@ func Push(repository *git.Repository, auth *http.BasicAuth) (err error) {
 			Auth:       auth,
 		},
 	)
+	// skip up to date error
+	if errors.Is(err, git.NoErrAlreadyUpToDate) {
+		lg.With("operation", "Push").Warn("warning from pushing a tag: already up-to-date")
+		err = nil
+	}
 	return
 }

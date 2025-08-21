@@ -1,10 +1,13 @@
 package repo
 
 import (
+	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
@@ -82,6 +85,41 @@ func Init(localDirectory string) (r *git.Repository, err error) {
 	r, err = git.PlainInit(localDirectory, false)
 	if err != nil {
 		return
+	}
+	return
+}
+
+// fetch might not be needed - added for when
+// repo is shallow and doesnt have all the refs
+// when then causes a failure on branch look up
+func Fetch(lg *slog.Logger, r *git.Repository, auth *http.BasicAuth) (err error) {
+	lg = lg.With("operation", "Fetch")
+
+	lg.Info("fetching updates from remotes ...")
+
+	remotes, err := r.Remotes()
+	specs := []config.RefSpec{
+		"refs/*:refs/*",
+		"HEAD:refs/heads/HEAD",
+		"+refs/tags/*:refs/tags/*",
+		"+refs/heads/*:refs/remotes/origin/*",
+	}
+	for _, remote := range remotes {
+		// fetch branches and tags for this remote
+		name := remote.Config().Name
+		lg.Debug("fetching data for remote ", "remote", name)
+
+		err = r.Fetch(&git.FetchOptions{
+			RemoteName: name,
+			RefSpecs:   specs,
+			Auth:       auth,
+		})
+		// this isnt an error, so handle and ignore it
+		if errors.Is(err, git.NoErrAlreadyUpToDate) {
+			lg.Warn("repository up to date", "warning", err.Error())
+			err = nil
+		}
+
 	}
 	return
 }

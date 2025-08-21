@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
+	"math/rand/v2"
 	"opg-github-actions/action/internal/commits"
 	"opg-github-actions/action/internal/logger"
 	"opg-github-actions/action/internal/repo"
@@ -13,6 +14,8 @@ import (
 	"opg-github-actions/action/internal/strs"
 	"opg-github-actions/action/internal/tags"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -135,18 +138,14 @@ func createAndPushTag(
 	repository *git.Repository,
 	use *semver.Semver,
 	bump semver.Increment,
-	token string,
+	auth *http.BasicAuth,
 	options *Options) (createdTag *plumbing.Reference, err error) {
 
 	var (
 		remotes              []*git.Remote
+		tagName              string = use.String()
 		errFailedToCreateTag string = "error: failed to create tag [%s]"
 		errFailedToPush      string = "error: failed to push tags to remote [tag: %s]"
-		tagName              string = use.String()
-		auth                        = &http.BasicAuth{
-			Username: "opg-github-actions",
-			Password: token,
-		}
 	)
 	lg = lg.With("operation", "createAndPushTag", "semver", use.String())
 
@@ -164,7 +163,7 @@ func createAndPushTag(
 
 	lg.Debug("creating tag ... ")
 	// try to create the tag locally
-	createdTag, err = tags.Create(repository, tagName, use.GitRef.Hash())
+	createdTag, err = tags.Create(lg, repository, tagName, use.GitRef.Hash())
 	if err != nil {
 		tagErr := fmt.Errorf(errFailedToCreateTag, tagName)
 		err = errors.Join(tagErr, err)
@@ -175,11 +174,11 @@ func createAndPushTag(
 	// if we have some remotes, push
 	if len(remotes) > 0 {
 		lg.Debug("pushing tags ... ")
-		err = tags.Push(repository, auth)
+		err = tags.Push(lg, repository, auth)
 		if err != nil {
 			tagErr := fmt.Errorf(errFailedToPush, tagName)
 			err = errors.Join(tagErr, err)
-			lg.Error("failed to push tag ... ", "err", err.Error())
+			lg.Error("error pushing tag ... ", "err", err.Error())
 			return
 		}
 	}
@@ -275,13 +274,16 @@ func getContentFromEventFile(lg *slog.Logger, file string) (content string) {
 //   - Finds all commits that exist in the currently checked out location, but not in default branch tree - these are the new ones
 //     -- Merges the extra-content argument into this data (pull request details)
 //   - Looks at the new commits for #major|minor|patch content to determine the semver increment
-//   - Works out the new new tag
-//   - Creates and pushes the tag
+//   - Retry loop
+//     -- Works out the new new tag
+//     -- Creates and pushes the tag
 //   - Outputs data
 //
 // If you have enabled test mode (via `--test`) the tag will not be created or pushed.
 // If there are no new commits, or no commits with #major|minor|patch then the default increment (`--bump`)
 // will be used.
+//
+// Will try to create tag multiple times
 func Run(lg *slog.Logger, options *Options) (result map[string]string, err error) {
 	var (
 		repository    *git.Repository                                             // the object for this repo
@@ -292,12 +294,19 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		currentCommit *plumbing.Reference                                         // git sha / ref for where the git repo currently is
 		createdTag    *plumbing.Reference                                         // the new semver tag thats been created
 		newCommits    []*object.Commit                                            // all commits that exist in the ref
+		auth          *http.BasicAuth                                             // github auth config for pull / pushing to the remote
 		bump          semver.Increment    = semver.Increment(options.DefaultBump) // default increment
 		basePoint     string              = ""                                    // either ref of last release or the default branch
-		token         string              = os.Getenv("GH_TOKEN")                 // github auth token for pushing to the remote
-		bumpCommit    string              = ""                                    // commit message the cump wasa found within
+		bumpCommit    string              = ""                                    // commit message the bump was found within
+		errTagExists  string              = "reference already exists"            // in cases where tag exists, look for this error string
+		maxRetries    int                 = 20                                    // max retries
+
 	)
 	result = map[string]string{}
+	auth = &http.BasicAuth{
+		Username: "opg-github-actions",
+		Password: os.Getenv("GH_TOKEN"),
+	}
 
 	if options.Prerelease && options.BranchName == "" {
 		err = fmt.Errorf(ErrNoBranchName)
@@ -362,12 +371,33 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		bump = foundBump
 	}
 
-	use = getSemverToUse(lg, semvers, bump, options)
-	lg.Info("got semver ... ", "use", use)
-	// set the git ref to the current place
-	use.GitRef = currentCommit
-	// create and try to push tags
-	createdTag, err = createAndPushTag(lg, repository, use, bump, token, options)
+	// retry loop
+	// In some places the semver action may run on the same repository at almost the same time
+	// (such as mono repos with multiple projects)
+	// In those cases we loop multiple times to try to create a new tag for each thing
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		var n = rand.IntN(5)
+		// find the semver and set the git ref to the current place
+		use = getSemverToUse(lg, semvers, bump, options)
+		use.GitRef = currentCommit
+		lg.Info("generated semver ... ", "use", use, "attempt", attempt)
+		// create and try to push tags
+		createdTag, err = createAndPushTag(lg, repository, use, bump, auth, options)
+
+		// if there is an error and its not about existing tags, then exit
+		if err != nil && !strings.Contains(err.Error(), errTagExists) {
+			return
+		}
+		// if there is no error, then break the loop
+		if err == nil {
+			break
+		}
+		lg.Info("need to retry tag creation; sleeping ... ", "seconds", n)
+		time.Sleep(time.Duration(n) * time.Second)
+		// fetch repo to check its up to date
+		repo.Fetch(lg, repository, auth)
+
+	}
 
 	result = map[string]string{
 		"tag":     use.String(),

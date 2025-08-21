@@ -179,7 +179,7 @@ func TestTagCreationSimple(t *testing.T) {
 	repo, head := randomRepository(dir)
 	tags1, _ := All(lg, repo)
 
-	Create(repo, tagName, head.Hash())
+	Create(lg, repo, tagName, head.Hash())
 
 	tags2, _ := All(lg, repo)
 
