@@ -47,20 +47,22 @@ runs:
         echo "Looking for release with tag name: ${{ env.tag }}"
 
         list=$(gh release list --json='name,tagName,isDraft,isPrerelease' --jq='.[] | select(.tagName=="${{ env.tag }}") ${{ env.prerelease_select }} | .tagName')
+        echo "found=${list}"
+
         if [[ "$list" == "${{ env.tag }}" ]]; then
           echo "RELEASE_EXISTS=true" >> $GITHUB_OUTPUT
         fi
 
     - name: "Release already exists, skipping [tag: ${{ inputs.tag }} pre: ${{ inputs.prerelease }}]"
       shell: bash
-      if: steps.find_release.outputs.RELEASE_EXISTS != 'true'
+      if: steps.find_release.outputs.RELEASE_EXISTS == 'true'
       run: |
         echo "release already exists for this tag "
 
     - name: "Create a release for [tag: ${{ inputs.tag }} pre: ${{ inputs.prerelease }}]"
       id: create_release
       shell: bash
-      if: steps.find_release.outputs.RELEASE_EXISTS == 'true'
+      if: steps.find_release.outputs.RELEASE_EXISTS != 'true'
       env:
         # token auth
         GH_TOKEN: ${{ inputs.github_token != '' && inputs.github_token || github.token }}
