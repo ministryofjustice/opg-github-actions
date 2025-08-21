@@ -41,7 +41,7 @@ jobs:
 
   # setup provides all vars used in the workflow to make it easier
   setup:
-    name: "Set variables"
+    name: "Setup"
     needs:
       - env_values
       - tests_go
@@ -60,7 +60,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
       # generate semver - using own version of semver tag!
-      - name: "Generate semver tag and release"
+      - name: "Generate semver tag"
         id: semver_tag
         uses: ./actions/semver
         with:
