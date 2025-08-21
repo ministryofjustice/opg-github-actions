@@ -55,6 +55,9 @@ runs:
       id: cmd
       shell: bash
       env:
+        # log level triggers
+        LOG_LEVEL: ${{ runner.debug == '1' && 'DEBUG' || 'INFO' }}
+        LOG_HANDLER: ${{ runner.debug == '1' && 'JSON' || 'TEXT' }}
         binary: "${{ github.action_path }}/builds/terraform-version"
         TF_DIRECTORY: ${{ inputs.terraform_directory }}
         TF_FILE: ${{ inputs.terraform_versions_file }}
