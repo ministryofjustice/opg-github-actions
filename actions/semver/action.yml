@@ -102,6 +102,9 @@ runs:
       id: cmd
       shell: bash
       env:
+        # log level triggers
+        LOG_LEVEL: ${{ runner.debug == '1' && 'DEBUG' || 'INFO' }}
+        LOG_HANDLER: ${{ runner.debug == '1' && 'JSON' || 'TEXT' }}
         # github token for pushing tag to remote
         GH_TOKEN: ${{ inputs.github_token != '' && inputs.github_token || github.token }}
         # location of the built binary

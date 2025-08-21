@@ -1,8 +1,10 @@
 # Semver Composite Action
 
-Will generate a new (or return latest) git tag formatted as a semver, typically used for releases, docker image tags and so on.
+Will generate a new (or return latest) git tag formatted as a semver, typically used for releases, docker image tags and so on. Commit messages can contain `#major`, `#minor` or `#patch` to trigger semver increment increase. Defaults to a `patch` increment.
 
-Commit messages can contain `#major, #minor, #patch` to trigger semver increment increase.
+Some tooling (such as dependabot and renovate) will include release notes in their pull request content, which in turn may include increment triggers and therefore generate a version thats not the expected result. In such cases you can add `!major`, `!minor` or `!patch` to a commit to force the value you need.
+
+The pull request body and title are also evaulated for the increment triggers, but please be aware that the data may differ on the actual merge request.
 
 You can toggle the use of a `v` prefix on or off depending on your needs.
 

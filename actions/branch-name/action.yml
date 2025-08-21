@@ -64,6 +64,10 @@ runs:
       id: cmd
       shell: bash
       env:
+        # log level triggers
+        LOG_LEVEL: ${{ runner.debug == '1' && 'DEBUG' || 'INFO' }}
+        LOG_HANDLER: ${{ runner.debug == '1' && 'JSON' || 'TEXT' }}
+        # command
         binary: "${{ github.action_path }}/builds/branch-name"
         head_ref: ${{ github.head_ref }}
         ref_name:  ${{ github.ref_name }}

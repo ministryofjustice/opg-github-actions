@@ -9,9 +9,19 @@ import (
 // New returns a configured slog.Logger instance
 // that sets the log level and log handler.
 //
+// Will check env values (LOG_LEVEL, LOG_HANDLER) and
+// replace the passed values with those if found
+//
 // By default, the level is set to Info and TextHandler
 func New(lvl string, as string) (logger *slog.Logger) {
 	var options = &slog.HandlerOptions{}
+
+	if l := os.Getenv("LOG_LEVEL"); l != "" {
+		lvl = l
+	}
+	if t := os.Getenv("LOG_HANDLER"); t != "" {
+		as = t
+	}
 
 	switch lvl {
 	case "ERROR", "error":

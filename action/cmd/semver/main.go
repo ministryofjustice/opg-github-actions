@@ -274,6 +274,7 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		bump          semver.Increment    = semver.Increment(options.DefaultBump) // default increment
 		basePoint     string              = ""                                    // either ref of last release or the default branch
 		token         string              = os.Getenv("GH_TOKEN")                 // github auth token for pushing to the remote
+		bumpCommit    string              = ""                                    // commit message the cump wasa found within
 	)
 	result = map[string]string{}
 
@@ -325,11 +326,11 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 
 	// dump the commits for debugging
 	for _, c := range newCommits {
-		lg.Info("commit", "message", c.Message, "hash", c.Hash)
+		lg.Debug("commit", "message", c.Message, "hash", c.Hash)
 	}
 
 	// look for bump in the commits,
-	foundBump := semver.GetBumpFromCommits(lg, newCommits, bump)
+	foundBump, bumpCommit := semver.GetBumpFromCommits(lg, newCommits, bump)
 	if len(newCommits) > 0 && foundBump != "" {
 		bump = foundBump
 	}
@@ -347,6 +348,7 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		"test":    fmt.Sprintf("%t", options.TestMode),
 		"created": fmt.Sprintf("%t", (createdTag != nil)),
 		"bump":    string(bump),
+		"commit":  bumpCommit,
 	}
 
 	return
@@ -372,7 +374,7 @@ func init() {
 }
 
 func main() {
-	var lg *slog.Logger = logger.New("INFO", "TEXT")
+	var lg *slog.Logger = logger.New("info", "text")
 	// process the arguments and fetch the fallback value from environment values
 	flag.Parse()
 
