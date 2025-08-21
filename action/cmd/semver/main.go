@@ -139,24 +139,36 @@ func createAndPushTag(
 	options *Options) (createdTag *plumbing.Reference, err error) {
 
 	var (
-		remotes, _ = repository.Remotes()
-		auth       = &http.BasicAuth{
+		remotes              []*git.Remote
+		errFailedToCreateTag string = "error: failed to create tag [%s]"
+		errFailedToPush      string = "error: failed to push tags to remote [tag: %s]"
+		tagName              string = use.String()
+		auth                        = &http.BasicAuth{
 			Username: "opg-github-actions",
 			Password: token,
 		}
 	)
-	lg = lg.With("operation", "createAndPushTag")
+	lg = lg.With("operation", "createAndPushTag", "semver", use.String())
 
 	// we do nothing if this is in test mode or we're using no bumping
 	if options.TestMode || bump == semver.NO_BUMP {
 		lg.Debug("returning, test mode / no increment enabled", "test", options.TestMode, "bump", string(bump))
 		return
 	}
+	// fetch the remotes of the repo
+	remotes, err = repository.Remotes()
+	if err != nil {
+		lg.Error("error getting remotes on repository")
+		return
+	}
+
 	lg.Debug("creating tag ... ")
 	// try to create the tag locally
-	createdTag, err = tags.Create(repository, use.String(), use.GitRef.Hash())
+	createdTag, err = tags.Create(repository, tagName, use.GitRef.Hash())
 	if err != nil {
-		err = errors.Join(fmt.Errorf("failed to create a tag"), err)
+		tagErr := fmt.Errorf(errFailedToCreateTag, tagName)
+		err = errors.Join(tagErr, err)
+		lg.Error("failed to create tag ... ", "err", err.Error())
 		return
 	}
 
@@ -165,7 +177,9 @@ func createAndPushTag(
 		lg.Debug("pushing tags ... ")
 		err = tags.Push(repository, auth)
 		if err != nil {
-			err = errors.Join(fmt.Errorf("failed to push tags"), err)
+			tagErr := fmt.Errorf(errFailedToPush, tagName)
+			err = errors.Join(tagErr, err)
+			lg.Error("failed to push tag ... ", "err", err.Error())
 			return
 		}
 	}
@@ -197,26 +211,33 @@ func getContentFromEventFile(lg *slog.Logger, file string) (content string) {
 		pushEvent *github.PushEvent        = &github.PushEvent{}
 		raw       map[string]interface{}   = map[string]interface{}{}
 	)
+	lg = lg.With("event_file", file)
 	// ignore empty of missing files
 	if file == "" || !fileExists(file) {
+		lg.Warn("warn: no event file.")
 		return
 	}
 
 	content = ""
 	if bytes, err = os.ReadFile(file); err != nil {
-		lg.Error("err with reading file", "err", err.Error())
+		lg.Error("error with reading from event file file", "err", err.Error())
 		return
 	}
 
 	// first, unmarshal into a map to test
 	err = json.Unmarshal(bytes, &raw)
 	if err != nil {
-		lg.Error("err with unmarshal", "err", err.Error())
+		lg.Error("error unmarshaling event file", "err", err.Error())
 		return
 	}
 	// handle push event
 	if _, ok := raw["commits"]; ok {
-		json.Unmarshal(bytes, &pushEvent)
+		err = json.Unmarshal(bytes, &pushEvent)
+		if err != nil {
+			lg.Error("error unmarshaling push event", "err", err.Error())
+			return
+		}
+		// merge in the commits
 		for _, c := range pushEvent.Commits {
 			content += *c.Message
 		}
@@ -291,6 +312,7 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	// get the semvers from the tags
 	semvers, err = getExistingSemvers(lg, repository)
 	if err != nil {
+		lg.Error("error getting existing semvers for this repository")
 		return
 	}
 
@@ -341,6 +363,7 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	}
 
 	use = getSemverToUse(lg, semvers, bump, options)
+	lg.Info("got semver ... ", "use", use)
 	// set the git ref to the current place
 	use.GitRef = currentCommit
 	// create and try to push tags
