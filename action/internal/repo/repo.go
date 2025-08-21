@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -92,6 +93,8 @@ func Init(localDirectory string) (r *git.Repository, err error) {
 // repo is shallow and doesnt have all the refs
 // when then causes a failure on branch look up
 func Fetch(lg *slog.Logger, r *git.Repository, auth *http.BasicAuth) (err error) {
+	lg = lg.With("operation", "Fetch")
+
 	lg.Info("fetching updates from remotes ...")
 
 	remotes, err := r.Remotes()
@@ -111,13 +114,12 @@ func Fetch(lg *slog.Logger, r *git.Repository, auth *http.BasicAuth) (err error)
 			RefSpecs:   specs,
 			Auth:       auth,
 		})
-
-		if err != nil && err != git.NoErrAlreadyUpToDate {
-			lg.Error("error with fetching repository", "err", err.Error())
-		} else if err != nil {
+		// this isnt an error, so handle and ignore it
+		if errors.Is(err, git.NoErrAlreadyUpToDate) {
 			lg.Warn("repository up to date", "warning", err.Error())
 			err = nil
 		}
+
 	}
 	return
 }

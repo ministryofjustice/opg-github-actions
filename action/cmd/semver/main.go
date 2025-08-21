@@ -163,7 +163,7 @@ func createAndPushTag(
 
 	lg.Debug("creating tag ... ")
 	// try to create the tag locally
-	createdTag, err = tags.Create(repository, tagName, use.GitRef.Hash())
+	createdTag, err = tags.Create(lg, repository, tagName, use.GitRef.Hash())
 	if err != nil {
 		tagErr := fmt.Errorf(errFailedToCreateTag, tagName)
 		err = errors.Join(tagErr, err)
@@ -174,11 +174,11 @@ func createAndPushTag(
 	// if we have some remotes, push
 	if len(remotes) > 0 {
 		lg.Debug("pushing tags ... ")
-		err = tags.Push(repository, auth)
+		err = tags.Push(lg, repository, auth)
 		if err != nil {
 			tagErr := fmt.Errorf(errFailedToPush, tagName)
 			err = errors.Join(tagErr, err)
-			lg.Error("failed to push tag ... ", "err", err.Error())
+			lg.Error("error pushing tag ... ", "err", err.Error())
 			return
 		}
 	}
