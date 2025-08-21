@@ -2,9 +2,11 @@ package repo
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
@@ -82,6 +84,40 @@ func Init(localDirectory string) (r *git.Repository, err error) {
 	r, err = git.PlainInit(localDirectory, false)
 	if err != nil {
 		return
+	}
+	return
+}
+
+// fetch might not be needed - added for when
+// repo is shallow and doesnt have all the refs
+// when then causes a failure on branch look up
+func Fetch(lg *slog.Logger, r *git.Repository) (err error) {
+	slog.Info("fetching remotes ...")
+
+	remotes, err := r.Remotes()
+	specs := []config.RefSpec{
+		"refs/*:refs/*",
+		"HEAD:refs/heads/HEAD",
+		"+refs/tags/*:refs/tags/*",
+		"+refs/heads/*:refs/remotes/origin/*",
+	}
+	for _, remote := range remotes {
+		// fetch branches and tags for this remote
+		name := remote.Config().Name
+		lg.Debug("fetching remote data for: " + name)
+
+		err = r.Fetch(&git.FetchOptions{
+			RemoteName: name,
+			RefSpecs:   specs,
+		})
+
+		if err != nil && err != git.NoErrAlreadyUpToDate {
+			lg.Error("Error with fetch")
+			lg.Error(err.Error())
+		} else if err != nil {
+			lg.Warn(err.Error())
+			err = nil
+		}
 	}
 	return
 }
