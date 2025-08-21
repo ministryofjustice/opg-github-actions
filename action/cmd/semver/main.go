@@ -297,7 +297,6 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		auth          *http.BasicAuth                                             // github auth config for pull / pushing to the remote
 		bump          semver.Increment    = semver.Increment(options.DefaultBump) // default increment
 		basePoint     string              = ""                                    // either ref of last release or the default branch
-		bumpCommit    string              = ""                                    // commit message the bump was found within
 		errTagExists  string              = "reference already exists"            // in cases where tag exists, look for this error string
 		maxRetries    int                 = 20                                    // max retries
 
@@ -366,7 +365,7 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	}
 
 	// look for bump in the commits,
-	foundBump, bumpCommit := semver.GetBumpFromCommits(lg, newCommits, bump)
+	foundBump, _ := semver.GetBumpFromCommits(lg, newCommits, bump)
 	if len(newCommits) > 0 && foundBump != "" {
 		bump = foundBump
 	}
@@ -406,7 +405,6 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		"test":    fmt.Sprintf("%t", options.TestMode),
 		"created": fmt.Sprintf("%t", (createdTag != nil)),
 		"bump":    string(bump),
-		"commit":  bumpCommit,
 	}
 
 	return
