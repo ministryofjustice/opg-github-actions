@@ -44,9 +44,9 @@ runs:
         tag: ${{ inputs.tag }}
         fields: "name,tagName,isDraft,isPrerelease"
         prerelease_select: ${{ inputs.prerelease == 'true' && '| select(.isPrerelease==true)' || '' }}
-        tagname_select: '| select(.tagName=="${{ env.tag }}")'
       run: |
-        list=$(gh release list --json="${{ env.fields }}" --jq='.[] ${{ env.tagname_select }} ${{ env.prerelease_select }} | .tagName')
+        echo "Looking for release with tag name: ${{ env.tag }}"
+        list=$(gh release list --json="${{ env.fields }}" --jq='.[] | select(.tagName=="${{ env.tag }}") ${{ env.prerelease_select }} | .tagName')
         if [[ "$list" == "${{ env.tag }}" ]];
           echo "RELEASE_EXISTS=true" >> $GITHUB_OUTPUT
         fi
