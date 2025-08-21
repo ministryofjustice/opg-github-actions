@@ -293,8 +293,13 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 	if err != nil {
 		return
 	}
+
+	// output all semvers for debuggin
+	lg.Debug("found semvers ... ", "semvers", semvers)
 	// get the last release for the comparison point
 	lastRelease = semver.GetLastRelease(lg, semvers)
+	lg.Debug("last release found ... ", "lastRelease", lastRelease)
+
 	if lastRelease != nil {
 		basePoint = lastRelease.Stringy(true)
 	} else {
@@ -303,17 +308,17 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 
 	// get the default branch info
 	if baseRef, err = commits.FindReference(lg, repository, basePoint); err != nil {
-		lg.Error("error getting git reference for previous comparison point", "err", err.Error(), "basePoint", basePoint)
+		lg.Error("error getting git reference for previous comparison point.", "err", err.Error(), "basePoint", basePoint)
 		return
 	}
 	// get info on the current commit
 	if currentCommit, err = commits.FindReference(lg, repository, options.BranchName); err != nil {
-		lg.Error("error getting git reference for branch", "err", err.Error(), "branch", options.BranchName)
+		lg.Error("error getting git reference for branch.", "err", err.Error(), "branch", options.BranchName)
 		return
 	}
 	// find new commits between the baseRef (main / last release) and the current commit
 	if newCommits, err = commits.DiffBetween(lg, repository, baseRef.Hash(), currentCommit.Hash()); err != nil {
-		lg.Error("error commits between references", "err", err.Error(), "base", baseRef.Hash().String(), "head", currentCommit.Hash().String())
+		lg.Error("error getting commits between references.", "err", err.Error(), "base", baseRef.Hash().String(), "head", currentCommit.Hash().String())
 		return
 	}
 
@@ -322,9 +327,9 @@ func Run(lg *slog.Logger, options *Options) (result map[string]string, err error
 		newCommits = append(newCommits, &object.Commit{Hash: plumbing.ZeroHash, Message: extra})
 	}
 
-	lg.Info("details", "commits", len(newCommits), "event-file", options.EventContentFile)
+	lg.Info("commits found and event file used ... ", "commits", len(newCommits), "event-file", options.EventContentFile)
 
-	// dump the commits for debugging
+	// dump the commits for debugging one at a time (messages can be long)
 	for _, c := range newCommits {
 		lg.Debug("commit", "message", c.Message, "hash", c.Hash)
 	}
