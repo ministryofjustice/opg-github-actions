@@ -129,8 +129,33 @@ func TestMainPush(t *testing.T) {
 // Test generating various semvers in setup that looks like pull requests
 func TestMainPR(t *testing.T) {
 
-	var lg = logger.New("ERROR", "TEXT")
+	var lg = logger.New("error", "text")
 	var tests = []*tSemTest{
+		// test a series of commits with major being set at the start, but then
+		// add overwrite commit to force it back to being a minor
+		{
+			ExpectedTag:    "v1.1.0-testbrancha.1",
+			ExpectedBump:   string(semver.MINOR),
+			ExpectedBranch: "testbrancha",
+			ShouldError:    false,
+			CreateRelease:  true,
+			Input: &Options{
+				Prerelease: true,
+				BranchName: "test-branch-a",
+			},
+			Commits: []*tSemTestCommit{
+				{
+					Message: "my test commit without anything",
+					Branch:  "test-branch-a",
+					ChildCommits: []string{
+						"this is not #major",
+						"somthing else",
+						"random thing",
+						"a bigger change !minor",
+					},
+				},
+			},
+		},
 		// test a prerelease tag that clashes with a similar branch and
 		// tag that triggers a patch
 		{

@@ -22,18 +22,21 @@ const (
 	SORT_DESC SortOrder = "desc"
 )
 
-type Increment string
-
-func (self Increment) Stringy() string {
-	return fmt.Sprintf("#%s", strings.ToLower(string(self)))
-}
-
 const (
 	NO_BUMP Increment = "none"
 	MAJOR   Increment = "major"
 	MINOR   Increment = "minor"
 	PATCH   Increment = "patch"
 )
+
+type Increment string
+
+func (self Increment) Stringy() string {
+	return fmt.Sprintf("#%s", strings.ToLower(string(self)))
+}
+func (self Increment) Override() string {
+	return fmt.Sprintf("!%s", strings.ToLower(string(self)))
+}
 
 // Regex patterns for validation matching
 // see:
@@ -485,7 +488,7 @@ func Prerelease(lg *slog.Logger, existing []*Semver, bump Increment, suffix stri
 // incremented instead.
 //
 // Calls `GetBump` underneath
-func GetBumpFromCommits(lg *slog.Logger, commits []*object.Commit, defaultBump Increment) (bump Increment) {
+func GetBumpFromCommits(lg *slog.Logger, commits []*object.Commit, defaultBump Increment) (bump Increment, commitMesage string) {
 
 	lg.Debug("generating message strings from commits", "operation", "GetBumpFromCommits", "defaultBump", string(defaultBump))
 
@@ -494,7 +497,42 @@ func GetBumpFromCommits(lg *slog.Logger, commits []*object.Commit, defaultBump I
 		messages = append(messages, commit.Message)
 	}
 
-	bump = GetBump(lg, messages, defaultBump)
+	bump, commitMesage = GetBump(lg, messages, defaultBump)
+
+	return
+}
+
+// GetBumpOverride functions like GetBump, but uses a different pattern (.Override) to match
+// against in the commits
+// This allows a pr / commit to correct the semver status of the change before, so if the
+// commit accidently has #major added, tou can add a follow up commit with !minor to force
+// that difference
+func GetBumpOverride(lg *slog.Logger, commitMessages []string) (bump Increment, commit string) {
+	bump = ""
+	commit = ""
+	lg = lg.With("operation", "GetBumpOverride")
+
+	for _, content := range commitMessages {
+		lg = lg.With("commit", content)
+		// if we find any major, then return
+		// if the bump isnt a major, and we find a minor, then set to minor
+		// if the bump isnt major or minor and we find patch, set to patch
+		if strings.Contains(content, MAJOR.Override()) {
+			lg.Debug("found major override ... ")
+			bump = MAJOR
+			commit = content
+			return
+		} else if bump != MAJOR && strings.Contains(content, MINOR.Override()) {
+			lg.Debug("found minor override ... ")
+			bump = MINOR
+			commit = content
+		} else if bump != MAJOR && bump != MINOR && strings.Contains(content, PATCH.Override()) {
+			lg.Debug("found patch override ... ")
+			bump = PATCH
+			commit = content
+		}
+	}
+
 	return
 }
 
@@ -503,10 +541,22 @@ func GetBumpFromCommits(lg *slog.Logger, commits []*object.Commit, defaultBump I
 //
 // If no triggers are found then the counter that matches 'fallback' param will be
 // incremented instead.
-func GetBump(lg *slog.Logger, commitMessages []string, defaultBump Increment) (bump Increment) {
+//
+// Before existing (via defer) will check the commit messages for any overwrite
+// syntax commits as well
+func GetBump(lg *slog.Logger, commitMessages []string, defaultBump Increment) (bump Increment, commit string) {
 	lg = lg.With("operation", "GetBump", "defaultBump", string(defaultBump))
 
 	bump = ""
+	commit = ""
+	// on exit, check for overwrite commits and adjust bump if found
+	defer func() {
+		if override, msg := GetBumpOverride(lg, commitMessages); override != "" {
+			bump = override
+			commit = msg
+		}
+		lg.Debug("calculated bump", "dump", string(bump))
+	}()
 
 	// if there are any commits, then should at lease be a patch bump
 	if len(commitMessages) > 0 {
@@ -516,19 +566,23 @@ func GetBump(lg *slog.Logger, commitMessages []string, defaultBump Increment) (b
 
 	lg.Debug("checking commit messages ... ")
 	for _, content := range commitMessages {
+		lg = lg.With("commit", content)
 		// if we find any major, then return
 		// if the bump isnt a major, and we find a minor, then set to minor
 		// if the bump isnt major or minor and we find patch, set to patch
 		if strings.Contains(content, MAJOR.Stringy()) {
-			bump = MAJOR
 			lg.Debug("found major ... ")
+			bump = MAJOR
+			commit = content
 			return
 		} else if bump != MAJOR && strings.Contains(content, MINOR.Stringy()) {
 			lg.Debug("found minor ... ")
 			bump = MINOR
+			commit = content
 		} else if bump != MAJOR && bump != MINOR && strings.Contains(content, PATCH.Stringy()) {
 			lg.Debug("found patch ... ")
 			bump = PATCH
+			commit = content
 		}
 	}
 
@@ -536,7 +590,6 @@ func GetBump(lg *slog.Logger, commitMessages []string, defaultBump Increment) (b
 		bump = defaultBump
 	}
 
-	lg.Debug("calculated bump", "dump", string(bump))
 	return
 }
 

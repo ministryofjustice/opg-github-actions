@@ -9,17 +9,19 @@ import (
 )
 
 type tBump struct {
-	Content  []string
-	Default  Increment
-	Expected Increment
+	Content        []string
+	Default        Increment
+	Expected       Increment
+	ExpectedCommit string
 }
 
 func TestSemverBumpCount(t *testing.T) {
-	var lg = logger.New("ERROR", "TEXT")
+	var lg = logger.New("error", "text")
 	var tests = []*tBump{
 		{
-			Default:  PATCH,
-			Expected: MINOR,
+			Default:        PATCH,
+			Expected:       MINOR,
+			ExpectedCommit: "just a #minor",
 			Content: []string{
 				"captain, my commit mesage has nothing in",
 				"just a #minor",
@@ -27,8 +29,9 @@ func TestSemverBumpCount(t *testing.T) {
 			},
 		},
 		{
-			Default:  MAJOR,
-			Expected: MINOR,
+			Default:        MAJOR,
+			Expected:       MINOR,
+			ExpectedCommit: "just a #minor",
 			Content: []string{
 				"major, my commit mesage has nothing in",
 				"just a #minor",
@@ -36,8 +39,9 @@ func TestSemverBumpCount(t *testing.T) {
 			},
 		},
 		{
-			Default:  MINOR,
-			Expected: MAJOR,
+			Default:        MINOR,
+			Expected:       MAJOR,
+			ExpectedCommit: "breaking something with a #major",
 			Content: []string{
 				"my commit mesage has nothing in",
 				"just a #minor",
@@ -46,21 +50,36 @@ func TestSemverBumpCount(t *testing.T) {
 			},
 		},
 		{
-			Default:  PATCH,
-			Expected: MAJOR,
+			Default:        PATCH,
+			Expected:       MAJOR,
+			ExpectedCommit: "breaking something with a #major",
 			Content: []string{
 				"major minor patch other",
 				"breaking something with a #major",
 				"a long bit of content that has many words and letters and all of those fun things without actually saying anything useful. #test",
 			},
 		},
+		{
+			Default:        PATCH,
+			Expected:       MINOR,
+			ExpectedCommit: "this is really only a !minor",
+			Content: []string{
+				"major minor patch other",
+				"breaking something with a #major",
+				"a long bit of content that has many words and letters and all of those fun things without actually saying anything useful. #test",
+				"this is really only a !minor",
+			},
+		},
 	}
 
 	for i, test := range tests {
-		actual := GetBump(lg, test.Content, test.Default)
+		actual, commit := GetBump(lg, test.Content, test.Default)
 
 		if actual != test.Expected {
 			t.Errorf("[%d] bump did not match, expected [%s] actual [%s]", i, test.Expected, actual)
+		}
+		if commit != test.ExpectedCommit {
+			t.Errorf("[%d] commit did not match, expected [%s] actual [%s]", i, test.ExpectedCommit, commit)
 		}
 	}
 
