@@ -38,6 +38,9 @@ runs:
       id: find_release
       shell: bash
       env:
+        # token auth
+        GH_TOKEN: ${{ inputs.github_token != '' && inputs.github_token || github.token }}
+        # setup
         tag: ${{ inputs.tag }}
         fields: "name,tagName,isDraft,isPrerelease"
         prerelease_select: ${{ inputs.prerelease == 'true' && '| select(.isPrerelease==true)' || '' }}
@@ -59,10 +62,10 @@ runs:
       shell: bash
       if: steps.find_release.outputs.RELEASE_EXISTS == 'true'
       env:
-        # release exists
-        exists: ${{ steps.find_release.outputs.RELEASE_EXISTS }}
         # token auth
         GH_TOKEN: ${{ inputs.github_token != '' && inputs.github_token || github.token }}
+        # release exists
+        exists: ${{ steps.find_release.outputs.RELEASE_EXISTS }}
         # prerelease for the release aligns with the prelreease flag for the tag generation
         prerelease: ${{ inputs.prerelease == 'true' && '--prerelease' || '' }}
         # latest is only true when this is not a prerelease; input can overwrite this
