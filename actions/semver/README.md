@@ -71,7 +71,7 @@ To return a the latest release tag that can be re-used:
       with:
         prerelease: false
         create_release: false
-        bump: "none"
+        default_bump: "none"
 ```
 
 

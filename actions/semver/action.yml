@@ -134,7 +134,7 @@ runs:
           --directory=${{ env.directory }} \
           --branch=${{ env.branch}} \
           --default-branch=${{ env.default_branch }} \
-          --bump=${{ env.default_bump}} \
+          --default-bump=${{ env.default_bump}} \
           --prerelease-suffix-length=${{ env.prerelease_suffix_length }} ${{ env.prerelease }} ${{ env.without_prefix }} ${{ env.test_mode }} \
           --event-content-file='${{ env.extras }}'
 
