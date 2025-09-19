@@ -6,15 +6,25 @@ Some tooling (such as dependabot and renovate) will include release notes in the
 
 The pull request body and title are also evaulated for the increment triggers, but please be aware that the data may differ on the actual merge request.
 
-You can toggle the use of a `v` prefix on or off depending on your needs.
+You can toggle the use of a `v` prefix on or off depending on your needs by changing the value of the `without_prefix` input variable.
 
 A set of collated information is sent to `${GITHUB_STEP_SUMMARY}` as a markdown table at the end of the run.
+
+**NOTE:** Checkout your codebase fully (all tags and branches) for this action to work correctly. The action will fail if it detects a shallow clone.
 
 ## Usage
 
 This action is often used in conjuction with the release action to allow tag creation to be split from the release like this:
 
+
 ```yaml
+    # Check the code base
+    - name: "Checkout"
+      id: checkout
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      with:
+        fetch-depth: 0
+        fetch-tags: true
     - name: "Create Semver tag"
       id: semver
       uses: 'ministryofjustice/opg-github-actions/actions/semver@v4.2.0'
@@ -33,7 +43,7 @@ This action is often used in conjuction with the release action to allow tag cre
 ```
 
 
-To generate a prerelease (`v1.2.0-mybranch.1`) style tag within your workflow which also creates a release:
+To generate a prerelease (`v1.2.0-mybranch.1`) style tag within your workflow which creates the semver tag and a release:
 
 ```yaml
     - name: "Create Semver tag"
@@ -49,6 +59,7 @@ To generate a release tag for use in a workflow that determines if its a prerele
       uses: 'ministryofjustice/opg-github-actions/actions/semver@v4.2.0'
       with:
         prerelease: ${{ github.ref != 'refs/heads/main' }}
+        create_release: false
 ```
 
 To return a the latest release tag that can be re-used:
@@ -59,6 +70,7 @@ To return a the latest release tag that can be re-used:
       uses: 'ministryofjustice/opg-github-actions/actions/semver@v4.2.0'
       with:
         prerelease: false
+        create_release: false
         bump: "none"
 ```
 
