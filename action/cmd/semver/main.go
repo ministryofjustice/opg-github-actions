@@ -420,7 +420,7 @@ func init() {
 	flag.BoolVar(&runOptions.Prerelease, "prerelease", runOptions.Prerelease, "Set to true to generate a prerelease version.")
 	flag.IntVar(&runOptions.PrereleaseSuffixLength, "prerelease-suffix-length", runOptions.PrereleaseSuffixLength, "Set the max length to use for tag suffixes")
 	// Semver increments
-	flag.StringVar(&runOptions.DefaultBump, "bump", runOptions.DefaultBump, "The default value to increment semver by if no comment if found. (default: patch)")
+	flag.StringVar(&runOptions.DefaultBump, "default-bump", runOptions.DefaultBump, "The default value to increment semver by if no comment if found. If set to `none`, last tag is returned. (default: patch)")
 	// use a prefix?
 	flag.BoolVar(&runOptions.WithoutPrefix, "without-prefix", runOptions.WithoutPrefix, "Use to disable prefix usage.")
 	// test mode - disables creating tags
