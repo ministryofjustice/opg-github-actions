@@ -5,6 +5,7 @@ go 1.24.4
 require (
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/google/go-github/v74 v74.0.0
+	github.com/google/go-github/v77 v77.0.0
 	github.com/maruel/natural v1.1.1
 )
 
