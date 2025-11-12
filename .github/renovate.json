@@ -9,6 +9,9 @@
     "labels": [
         "Renovate"
     ],
+    "postUpdateOptions": [
+        "gomodTidy"
+    ],
     "packageRules": [
       {
         "groupName": "Minor and Patch Updates",
