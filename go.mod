@@ -3,9 +3,8 @@ module opg-github-actions
 go 1.24.4
 
 require (
-	github.com/go-git/go-git/v5 v5.16.4
+	github.com/go-git/go-git/v5 v5.16.5
 	github.com/google/go-github/v74 v74.0.0
-	github.com/google/go-github/v82 v82.0.0
 	github.com/maruel/natural v1.3.0
 )
 
