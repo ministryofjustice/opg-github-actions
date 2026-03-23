@@ -27,5 +27,5 @@ runs:
         SNYK_TEST_IMAGE: ${{ inputs.SNYK_TEST_IMAGE }}
         SNYK_TOKEN: ${{ inputs.SNYK_TOKEN }}
       run: |
-        docker compose -f "${{ github.action_path }}/../../docker-compose.yml" run --rm snyk snyk auth ${SNYK_TOKEN}
-        docker compose -f "${{ github.action_path }}/../../docker-compose.yml" run --rm snyk snyk container test ${SNYK_TEST_IMAGE} 
+        docker compose -f "${{ github.action_path }}/../../docker-compose.yml" run --rm -e SNYK_TOKEN="${SNYK_TOKEN}" snyk snyk auth "${SNYK_TOKEN}"
+        docker compose -f "${{ github.action_path }}/../../docker-compose.yml" run --rm -e SNYK_TOKEN="${SNYK_TOKEN}" snyk snyk container test "${SNYK_TEST_IMAGE}"
