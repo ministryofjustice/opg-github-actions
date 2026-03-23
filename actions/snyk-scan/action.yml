@@ -27,6 +27,11 @@ inputs:
     required: false
     default: "snyk.sarif"
 
+  snyk_test_args:
+    description: "Additional arguments to pass to snyk test. Container test commands canb be found here https://docs.snyk.io/developer-tools/snyk-cli/commands/container-test"
+    required: false
+    default: ""
+
 runs:
   using: composite
   steps:
@@ -39,4 +44,5 @@ runs:
         mkdir -p "${{ inputs.sarif_filepath }}"
         docker compose -f "${{ github.action_path }}/../../docker-compose.yml" run --rm \
           -v "./${{ inputs.sarif_filepath }}:/${{ inputs.sarif_filepath }}" \
-          snyk snyk container test "${SNYK_TEST_IMAGE}" --sarif-file-output="/${{ inputs.sarif_filepath }}/${{ inputs.sarif_filename }}"
+          snyk snyk container test "${SNYK_TEST_IMAGE}" --sarif-file-output="/${{ inputs.sarif_filepath }}/${{ inputs.sarif_filename }}" \
+          ${{ inputs.snyk_test_args }}
