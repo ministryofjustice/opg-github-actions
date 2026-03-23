@@ -1,0 +1,30 @@
+name: "Snyk Scan"
+description: >
+  Run snyk test against a docker image. This action is meant to be used in a workflow
+  that builds a docker image and then wants to run snyk test against it before pushing
+  to a registry.
+
+  The SNYK_TOKEN secret to be set in the repository secrets. 
+  The SNYK_TEST_IMAGE input should be set to the name of the docker image to test with snyk,
+  including the tag if applicable (e.g. `my-image:latest`).
+
+inputs:
+
+  SNYK_TEST_IMAGE:
+    description: "The name of the docker image to test with snyk."
+    required: true
+
+  SNYK_TOKEN:
+    description: "The snyk token to use for authentication. This should be set as a secret in the repository or organization secrets."
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: "Run Snyk Test"
+      shell: bash
+      env:
+        SNYK_TEST_IMAGE: ${{ inputs.SNYK_TEST_IMAGE }}
+        SNYK_TOKEN: ${{ inputs.SNYK_TOKEN }}
+      run: |
+        docker compose -f "${{ github.action_path }}/../../docker-compose.yml" run --rm snyk snyk container test ${SNYK_TEST_IMAGE}

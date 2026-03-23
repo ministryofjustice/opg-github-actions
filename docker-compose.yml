@@ -1,0 +1,9 @@
+services:
+  snyk:
+    image: snyk/snyk:docker
+    platform : linux/amd64
+    # volumes:
+    #   - .:/app
+    # working_dir: /app
+    environment:
+      - SNYK_TOKEN=${SNYK_TOKEN}
