@@ -1,6 +1,6 @@
 services:
   snyk:
-    image: snyk/snyk:docker
+    image: snyk/snyk@sha256:ee546fc8c002ee2a0cabb30552e31ccb17d49ee2f621e8d8a302dcae470f913d
     platform: linux/amd64
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
