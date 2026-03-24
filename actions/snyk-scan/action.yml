@@ -9,11 +9,6 @@ description: >
   including the tag if applicable (e.g. `my-image:latest`).
 
 inputs:
-  additional_mounts:
-    description: "Additional mounts to pass to the docker run command. Should be in the format of `/host/path:/container/path`."
-    required: false
-    default: ""
-
   SNYK_TEST_IMAGE:
     description: "The name of the docker image to test with snyk."
     required: true
@@ -55,6 +50,5 @@ runs:
         docker compose -f "${{ github.action_path }}/../../docker-compose.yml" run --rm \
           -v "./${{ inputs.sarif_filepath }}:/${{ inputs.sarif_filepath }}" \
           -v "./${{ inputs.snyk_policy_path }}":/root/.snyk:ro \
-          -v "${{ inputs.additional_mounts }}" \
           snyk snyk container test "${SNYK_TEST_IMAGE}" --sarif-file-output="/${{ inputs.sarif_filepath }}/${{ inputs.sarif_filename }}" \
           ${{ inputs.snyk_test_args }}
