@@ -4,7 +4,7 @@ description: >
   that builds a docker image and then wants to run snyk test against it before pushing
   to a registry.
 
-  The SNYK_TOKEN secret to be set in the repository secrets. 
+  The SNYK_TOKEN secret to be set in the repository secrets.
   The SNYK_TEST_IMAGE input should be set to the name of the docker image to test with snyk,
   including the tag if applicable (e.g. `my-image:latest`).
 
@@ -27,6 +27,11 @@ inputs:
     required: false
     default: "snyk.sarif"
 
+  snyk_policy_path:
+    description: "The path to the snyk policy file."
+    required: false
+    default: "./.snyk"
+
   snyk_test_args:
     description: "Additional arguments to pass to snyk test. Container test commands canb be found here https://docs.snyk.io/developer-tools/snyk-cli/commands/container-test"
     required: false
@@ -44,5 +49,8 @@ runs:
         mkdir -p "${{ inputs.sarif_filepath }}"
         docker compose -f "${{ github.action_path }}/../../docker-compose.yml" run --rm \
           -v "./${{ inputs.sarif_filepath }}:/${{ inputs.sarif_filepath }}" \
-          snyk snyk container test "${SNYK_TEST_IMAGE}" --sarif-file-output="/${{ inputs.sarif_filepath }}/${{ inputs.sarif_filename }}" \
+          -v "${{ inputs.snyk_policy_path }}":/root/.snyk:ro \
+          snyk snyk container test "${SNYK_TEST_IMAGE}" \
+          --sarif-file-output="/${{ inputs.sarif_filepath }}/${{ inputs.sarif_filename }}" \
+          --policy-path="/root/.snyk" \
           ${{ inputs.snyk_test_args }}
