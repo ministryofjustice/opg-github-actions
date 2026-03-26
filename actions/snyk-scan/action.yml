@@ -46,6 +46,8 @@ runs:
         SNYK_TEST_IMAGE: ${{ inputs.SNYK_TEST_IMAGE }}
         SNYK_TOKEN: ${{ inputs.SNYK_TOKEN }}
       run: |
+        BEFORE="$(${{ github.action_path }}/../../scripts/image-identity.sh ${SNYK_TEST_IMAGE})"
+        
         mkdir -p "${{ inputs.sarif_filepath }}"
         docker compose -f "${{ github.action_path }}/../../docker-compose.yml" run --rm \
           -v "./${{ inputs.sarif_filepath }}:/${{ inputs.sarif_filepath }}" \
@@ -54,3 +56,15 @@ runs:
           --sarif-file-output="/${{ inputs.sarif_filepath }}/${{ inputs.sarif_filename }}" \
           --policy-path="/root/.snyk" \
           ${{ inputs.snyk_test_args }}
+        
+        
+        AFTER="$(${{ github.action_path }}/../../scripts/image-identity.sh ${SNYK_TEST_IMAGE})"
+
+        if [ "$BEFORE" != "$AFTER" ]; then
+          echo "❌ IMAGE MODIFIED"
+          echo "Before: $BEFORE"
+          echo "After:  $AFTER"
+          exit 1
+        else
+          echo "✅ Image unchanged"
+        fi
