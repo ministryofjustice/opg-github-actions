@@ -10,7 +10,7 @@ Within you github workflow job you can place a step such as, which will try to d
 ```yaml
 - name: "Generate safe branch name"
   id: branch_name
-  uses: 'ministryofjustice/opg-github-actions/actions/branch-name@v1.2.3'
+  uses: 'ministryofjustice/opg-github-actions/actions/branch-name@821b6f92327f0f195276860676aa8133d63f39dd # v4.5.1'
 ```
 
 However, if you are using this action outside of `pull_request` and `push` events, you can directly specify the original value to work from like:
@@ -18,7 +18,7 @@ However, if you are using this action outside of `pull_request` and `push` event
 ```yaml
 - name: "Generate safe branch name"
   id: branch_name
-  uses: 'ministryofjustice/opg-github-actions/actions/branch-name@v1.2.3'
+  uses: 'ministryofjustice/opg-github-actions/actions/branch-name@821b6f92327f0f195276860676aa8133d63f39dd # v4.5.1''
   with:
     name: feature/my-branch-1
 ```

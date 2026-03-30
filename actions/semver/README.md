@@ -27,7 +27,7 @@ This action is often used in conjuction with the release action to allow tag cre
         fetch-tags: true
     - name: "Create Semver tag"
       id: semver
-      uses: 'ministryofjustice/opg-github-actions/actions/semver@v4.2.0'
+      uses: 'ministryofjustice/opg-github-actions/actions/semver@821b6f92327f0f195276860676aa8133d63f39dd # v4.5.1'
       with:
         prerelease: ${{ github.ref != 'refs/heads/main' }}
         create_release: false
@@ -35,7 +35,7 @@ This action is often used in conjuction with the release action to allow tag cre
     ... other steps ...
     - name: "Create release"
       id: release
-      uses: 'ministryofjustice/opg-github-actions/actions/release@v4.2.0'
+      uses: 'ministryofjustice/opg-github-actions/actions/release@821b6f92327f0f195276860676aa8133d63f39dd # v4.5.1''
       with:
         tag: ${{ steps.semver.outputs.tag }}
         prerelease: ${{ github.ref != 'refs/heads/main' }}
@@ -48,7 +48,7 @@ To generate a prerelease (`v1.2.0-mybranch.1`) style tag within your workflow wh
 ```yaml
     - name: "Create Semver tag"
       id: semver
-      uses: 'ministryofjustice/opg-github-actions/actions/semver@v4.2.0'
+      uses: 'ministryofjustice/opg-github-actions/actions/semver@821b6f92327f0f195276860676aa8133d63f39dd # v4.5.1''
 ```
 
 To generate a release tag for use in a workflow that determines if its a prerelease or not dynamically:
@@ -56,7 +56,7 @@ To generate a release tag for use in a workflow that determines if its a prerele
 ```yaml
     - name: "Create Semver tag"
       id: semver
-      uses: 'ministryofjustice/opg-github-actions/actions/semver@v4.2.0'
+      uses: 'ministryofjustice/opg-github-actions/actions/semver@821b6f92327f0f195276860676aa8133d63f39dd # v4.5.1''
       with:
         prerelease: ${{ github.ref != 'refs/heads/main' }}
         create_release: false
@@ -67,7 +67,7 @@ To return a the latest release tag that can be re-used:
 ```yaml
     - name: "Create Semver tag"
       id: semver
-      uses: 'ministryofjustice/opg-github-actions/actions/semver@v4.2.0'
+      uses: 'ministryofjustice/opg-github-actions/actions/semver@821b6f92327f0f195276860676aa8133d63f39dd # v4.5.1''
       with:
         prerelease: false
         create_release: false
