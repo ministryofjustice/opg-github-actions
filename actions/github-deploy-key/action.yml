@@ -1,0 +1,26 @@
+name: "Github Deployment Key"
+description: Start SSH Agent and add a Github Deployment SSH Key to the Local Key Chain, sets the global SSH_AUTH_SOCK environment variable.  
+
+inputs:
+  deploy_key:
+    description: "Github SSH Key"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set Global SSH Auth Socket
+      shell: bash
+      run: echo "SSH_AUTH_SOCK=/tmp/ssh_agent.sock" >> $GITHUB_ENV
+    - name: Create SSH Dir
+      shell: bash
+      run: mkdir -p /home/runner/.ssh
+    - name: Get keys for github.com 
+      shell: bash
+      run: ssh-keyscan github.com >> /home/runner/.ssh/known_hosts
+    - name: Start Agent
+      shell: bash
+      run: ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+    - name: Add SSH Key
+      shell: bash
+      run: ssh-add - <<< "${{ inputs.deploy_key }}"
