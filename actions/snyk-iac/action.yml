@@ -45,11 +45,10 @@ runs:
       run: |
         mkdir -p "${{ inputs.sarif_filepath }}"
         docker compose -f "${{ github.action_path }}/../../docker-compose.yml" run --rm \
-          -v "${{ inputs.iac_test_directory }}:/${{ inputs.iac_test_directory }}" \
+          -v "${{ inputs.iac_test_directory }}:/app/iac" \
           -v "./${{ inputs.sarif_filepath }}:/${{ inputs.sarif_filepath }}" \
           -v "${{ inputs.snyk_policy_path }}":/root/.snyk:ro \
-          snyk container test "${SNYK_TEST_IMAGE}" \
+          snyk iac test /app/iac \
           --sarif-file-output="/${{ inputs.sarif_filepath }}/${{ inputs.sarif_filename }}" \
           --policy-path="/root/.snyk" \
           ${{ inputs.snyk_test_args }}
-          ${{ inputs.iac_test_directory }}
