@@ -1,17 +1,15 @@
 name: "Snyk Scan"
 description: >
-  Run snyk test against a docker image. This action is meant to be used in a workflow
-  that builds a docker image and then wants to run snyk test against it before pushing
-  to a registry.
+  Run snyk IAC test against a directory of IaC files.
 
   The SNYK_TOKEN secret to be set in the repository secrets.
-  The SNYK_TEST_IMAGE input should be set to the name of the docker image to test with snyk,
-  including the tag if applicable (e.g. `my-image:latest`).
+  The iac_test_directory input should be set to the directory containing the IaC files and will be volume mounted to the snyk container.
 
 inputs:
-  SNYK_TEST_IMAGE:
-    description: "The name of the docker image to test with snyk."
-    required: true
+  iac_test_directory:
+    description: "The directory containing the IaC files to test with snyk."
+    required: false
+    default: "./"
 
   SNYK_TOKEN:
     description: "The snyk token to use for authentication."
@@ -33,38 +31,24 @@ inputs:
     default: "./.snyk"
 
   snyk_test_args:
-    description: "Additional arguments to pass to snyk test. Container test commands can be found here https://docs.snyk.io/developer-tools/snyk-cli/commands/container-test"
+    description: "Additional arguments to pass to snyk test. IAC test commands can be found here https://docs.snyk.io/developer-tools/snyk-cli/commands/iac-test"
     required: false
     default: ""
 
 runs:
   using: composite
   steps:
-    - name: "Run Snyk Test"
+    - name: "Run Snyk IAC Test"
       shell: bash
       env:
-        SNYK_TEST_IMAGE: ${{ inputs.SNYK_TEST_IMAGE }}
         SNYK_TOKEN: ${{ inputs.SNYK_TOKEN }}
       run: |
-        BEFORE="$(${{ github.action_path }}/../../scripts/image-identity.sh ${SNYK_TEST_IMAGE})"
-
         mkdir -p "${{ inputs.sarif_filepath }}"
         docker compose -f "${{ github.action_path }}/../../docker-compose.yml" run --rm \
+          -v "${{ inputs.iac_test_directory }}:/app/iac:ro" \
           -v "./${{ inputs.sarif_filepath }}:/${{ inputs.sarif_filepath }}" \
           -v "${{ inputs.snyk_policy_path }}":/root/.snyk:ro \
-          snyk container test "${SNYK_TEST_IMAGE}" \
+          snyk iac test /app/iac \
           --sarif-file-output="/${{ inputs.sarif_filepath }}/${{ inputs.sarif_filename }}" \
           --policy-path="/root/.snyk" \
           ${{ inputs.snyk_test_args }}
-
-
-        AFTER="$(${{ github.action_path }}/../../scripts/image-identity.sh ${SNYK_TEST_IMAGE})"
-
-        if [ "$BEFORE" != "$AFTER" ]; then
-          echo "❌ IMAGE MODIFIED"
-          echo "Before: $BEFORE"
-          echo "After:  $AFTER"
-          exit 1
-        else
-          echo "✅ Image unchanged"
-        fi
