@@ -22,7 +22,6 @@
           "minor",
           "patch"
         ],
-        "stabilityDays": 5,
         "addLabels": ["minor-and-patch"]
       },
       {
@@ -31,12 +30,12 @@
         "matchUpdateTypes": [
           "major"
         ],
-        "stabilityDays": 5,
         "addLabels": ["major"]
       }
     ],
     "ignoreDeps": [
       "ministryofjustice/opg-github-actions",
       "ministryofjustice/opg-github-workflows"
-    ]
+    ],
+    "minimumReleaseAge": "7 days"
   }
