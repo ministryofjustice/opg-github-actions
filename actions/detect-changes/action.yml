@@ -1,0 +1,71 @@
+name: Detect Changes
+description: >
+  Detects whether files in given paths have changed.
+  Supports pull_request, push, merge_group, and workflow_dispatch events.
+  Requires the calling job to have run actions/checkout with fetch-depth: 0
+
+inputs:
+  paths:
+    description: "list of file paths to check for changes"
+    required: true
+
+outputs:
+  has_changes:
+    description: "true if any files in the specified paths changed"
+    value: ${{ steps.check.outputs.has_changes }}
+  only_changed:
+    description: "true if the specified paths are the only things that changed"
+    value: ${{ steps.check.outputs.only_changed }}
+  files:
+    description: "list of all changed files in the specified paths"
+    value: ${{ steps.check.outputs.files }}
+
+runs:
+  using: composite
+  steps:
+    - id: check
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        EVENT="${GITHUB_EVENT_NAME}"
+
+        case "$EVENT" in
+          pull_request)
+            RANGE="origin/${GITHUB_BASE_REF}...HEAD"
+            ;;
+          push)
+            RANGE="${GITHUB_EVENT_BEFORE} ${GITHUB_SHA}"
+            ;;
+          merge_group)
+            BASE=$(jq -r '.merge_group.base_sha' "$GITHUB_EVENT_PATH")
+            RANGE="${BASE} ${GITHUB_SHA}"
+            ;;
+          workflow_dispatch)
+            RANGE="origin/main...HEAD"
+            ;;
+          *)
+            exit 1
+            ;;
+        esac
+
+        ALL=$(git diff --name-only $RANGE)
+        MATCHED=$(git diff --name-only $RANGE -- ${{ inputs.paths }})
+
+        echo "files<<EOF" >> $GITHUB_OUTPUT
+        echo "$MATCHED" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+        if [[ -z "$MATCHED" ]]; then
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+          echo "only_changed=false" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
+        echo "has_changes=true" >> $GITHUB_OUTPUT
+
+        if [[ "$ALL" == "$MATCHED" ]]; then
+          echo "only_changed=true" >> $GITHUB_OUTPUT
+        else
+          echo "only_changed=false" >> $GITHUB_OUTPUT
+        fi
