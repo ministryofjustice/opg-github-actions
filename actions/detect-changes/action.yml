@@ -25,6 +25,8 @@ runs:
   steps:
     - id: check
       shell: bash
+      env:
+        INPUT_PATHS: ${{ inputs.paths }}
       run: |
         set -euo pipefail
 
@@ -49,8 +51,10 @@ runs:
             ;;
         esac
 
+        readarray -t PATHS <<< "${INPUT_PATHS%$'\n'}"
+
         ALL=$(git diff --name-only $RANGE)
-        MATCHED=$(git diff --name-only $RANGE -- ${{ inputs.paths }})
+        MATCHED=$(git diff --name-only $RANGE -- "${PATHS[@]}")
 
         echo "files<<EOF" >> $GITHUB_OUTPUT
         echo "$MATCHED" >> $GITHUB_OUTPUT
