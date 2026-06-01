@@ -37,7 +37,8 @@ runs:
             RANGE="origin/${GITHUB_BASE_REF}...HEAD"
             ;;
           push)
-            RANGE="${GITHUB_EVENT_BEFORE} ${GITHUB_SHA}"
+            BEFORE=$(jq -r '.before' "$GITHUB_EVENT_PATH")
+            RANGE="${BEFORE} ${GITHUB_SHA}"
             ;;
           merge_group)
             BASE=$(jq -r '.merge_group.base_sha' "$GITHUB_EVENT_PATH")
