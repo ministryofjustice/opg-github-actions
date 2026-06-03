@@ -21,6 +21,7 @@ on:
 permissions:
   contents: read
   security-events: write
+  id-token: write
 
 jobs:
 
@@ -41,18 +42,14 @@ jobs:
         id: configure_aws_creds
         uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ github.ref == 'refs/heads/main' && 'arn:aws:iam::631181914621:role/oidc-opg-github-actions-production' || 'arn:aws:iam::631181914621:role/oidc-opg-github-actions-development' }}
           aws-region: "eu-west-1"
           role-session-name: github-actions-sample-workspace-manager-terraform
       # run the account level terraform
       - name: "Account level terraform"
         uses: ./.github/actions/terraform
         env:
-          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           TF_VAR_github_token: ${{ secrets.GIT_API_TOKEN }}
-          TF_VAR_pagerduty_token: ${{ secrets.PAGERDUTY_TOKEN }}
           version: ${{ steps.terraform_account_version.outputs.version }}
         with:
           apply: true
