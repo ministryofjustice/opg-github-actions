@@ -41,12 +41,6 @@ provider "aws" {
 variable "github_token" {
 }
 
-variable "aws_access_key_id" {
-}
-
-variable "aws_secret_access_key" {
-}
-
 variable "DEFAULT_ROLE" {
   default = "gh-reusable-actions-ci"
 }
