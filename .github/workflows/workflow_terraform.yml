@@ -40,7 +40,7 @@ jobs:
       # configure the aws role
       - name: "Configure AWS credentials for terraform"
         id: configure_aws_creds
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.1
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           role-to-assume: ${{ github.ref == 'refs/heads/main' && 'arn:aws:iam::631181914621:role/oidc-opg-github-actions-production' || 'arn:aws:iam::631181914621:role/oidc-opg-github-actions-development' }}
           aws-region: "eu-west-1"
