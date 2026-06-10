@@ -6,7 +6,7 @@ on:
 
 permissions:
   actions: read
-
+  id-token: write
 jobs:
 
   branch_name_from_env:
@@ -95,8 +95,7 @@ jobs:
         uses: ./actions/terraform-workspace-manager
         with:
           # sandbox
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          oidc_role: ${{ github.ref == 'refs/heads/main' && 'arn:aws:iam::631181914621:role/oidc-opg-github-actions-production' || 'arn:aws:iam::631181914621:role/oidc-opg-github-actions-development' }}
           aws_account_id: '995199299616'
           aws_iam_role: 'gh-reusable-actions-ci'
           register_workspace: "t${{github.sha}}"
@@ -106,8 +105,7 @@ jobs:
         name: "Test listing"
         uses: ./actions/terraform-workspace-manager
         with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          oidc_role: ${{ github.ref == 'refs/heads/main' && 'arn:aws:iam::631181914621:role/oidc-opg-github-actions-production' || 'arn:aws:iam::631181914621:role/oidc-opg-github-actions-development' }}
           aws_account_id: '995199299616'
           aws_iam_role: 'gh-reusable-actions-ci'
       - id: test_results
