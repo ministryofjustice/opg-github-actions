@@ -159,6 +159,93 @@ jobs:
           echo "| only_changed | ${{ steps.detect.outputs.only_changed }} |" >> $GITHUB_STEP_SUMMARY
           echo "| files | ${{ steps.detect.outputs.files }} |" >> $GITHUB_STEP_SUMMARY
 
+  verify_readonly_fs:
+    name: "verify-readonly-fs"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Build a self-contained mock SSM JSON and compose file so the
+      # action can be exercised without any AWS dependency.
+      - name: "Set up mock mounts JSON and compose file"
+        id: setup
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mounts_json=$(jq -n '{
+            "api-app": {"tmpfs": [{"containerPath": "/tmp", "size": 64}, {"containerPath": "/tmp/cache", "size": 32}]}
+          }')
+          echo "mounts_json<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$mounts_json" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          printf '%s\n' \
+            'services:' \
+            '  api-app:' \
+            '    image: alpine' \
+            '    read_only: true' \
+            '    tmpfs:' \
+            '      - /tmp:size=67108864' \
+            '      - /tmp/cache:size=33554432' \
+            > "${RUNNER_TEMP}/docker-compose.yml"
+
+      - name: "Verify (expect pass)"
+        id: verify
+        uses: ./actions/verify-readonly-fs
+        with:
+          compose_file: ${{ runner.temp }}/docker-compose.yml
+          mounts_json: ${{ steps.setup.outputs.mounts_json }}
+          service_json: |
+            { "api-app": "api-app" }
+
+      - name: "Assert pass"
+        run: |
+          if [[ "${{ steps.verify.outputs.passed }}" != "true" ]]; then
+            echo "expected passed=true, got '${{ steps.verify.outputs.passed }}'"
+            exit 1
+          fi
+
+      # Failure case: compose has wrong tmpfs size and missing read_only.
+      - name: "Set up failing compose file"
+        id: setup_fail
+        shell: bash
+        run: |
+          printf '%s\n' \
+            'services:' \
+            '  api-app:' \
+            '    image: alpine' \
+            '    tmpfs:' \
+            '      - /tmp:size=1024' \
+            > "${RUNNER_TEMP}/docker-compose-bad.yml"
+
+      - name: "Verify (expect fail)"
+        id: verify_fail
+        continue-on-error: true
+        uses: ./actions/verify-readonly-fs
+        with:
+          compose_file: ${{ runner.temp }}/docker-compose-bad.yml
+          mounts_json: ${{ steps.setup.outputs.mounts_json }}
+          service_json: |
+            { "api-app": "api-app" }
+
+      - name: "Assert failure outputs"
+        run: |
+          if [[ "${{ steps.verify_fail.outputs.passed }}" != "false" ]]; then
+            echo "expected passed=false, got '${{ steps.verify_fail.outputs.passed }}'"
+            exit 1
+          fi
+          if [[ -z "${{ steps.verify_fail.outputs.errors }}" ]]; then
+            echo "expected non-empty errors output"
+            exit 1
+          fi
+          echo "| Output | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| pass/passed | ${{ steps.verify.outputs.passed }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| fail/passed | ${{ steps.verify_fail.outputs.passed }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| fail/errors | ${{ steps.verify_fail.outputs.errors }} |" >> $GITHUB_STEP_SUMMARY
+
   end:
     name: 'End'
     runs-on: 'ubuntu-latest'
@@ -168,6 +255,7 @@ jobs:
       - terraform_version
       - terraform_workspace_manager
       - detect_changes
+      - verify_readonly_fs
     steps:
       - name: "End"
         id: end
