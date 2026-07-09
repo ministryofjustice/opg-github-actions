@@ -1,0 +1,128 @@
+name: "Verify Read-only Filesystem"
+description: >-
+  Verifies that read_only and tmpfs config in a docker compose file matches the
+  ECS mounts config. See actions/verify-readonly-fs/README.md for full usage.
+
+inputs:
+  service_json:
+    description: "JSON object mapping compose service name to its mounts_json key, or null for services with no tmpfs."
+    required: true
+
+  mounts_json:
+    description: "JSON object containing the ECS tmpfs mount config, keyed by service name."
+    required: true
+
+  compose_file:
+    description: "Path to the docker compose file to verify."
+    default: "docker-compose.yml"
+
+outputs:
+  passed:
+    description: "'true' when every service matched, 'false' otherwise."
+    value: ${{ steps.verify.outputs.passed }}
+  errors:
+    description: "Newline-delimited list of mismatches (empty when passed)."
+    value: ${{ steps.verify.outputs.errors }}
+
+runs:
+  using: composite
+  steps:
+    - id: verify
+      shell: bash
+      env:
+        INPUT_SERVICE_JSON: ${{ inputs.service_json }}
+        INPUT_MOUNTS_JSON: ${{ inputs.mounts_json }}
+        INPUT_COMPOSE_FILE: ${{ inputs.compose_file }}
+      run: |
+        set -euo pipefail
+        trap 'echo "ERROR: line $LINENO exited with code $?" >&2' ERR
+
+        MIB=1048576
+
+        # Validate inputs are JSON objects.
+        if ! echo "$INPUT_SERVICE_JSON" | jq -e 'type == "object"' >/dev/null 2>&1; then
+          echo "ERROR: service_json must be a JSON object." >&2
+          exit 1
+        fi
+        if ! echo "$INPUT_MOUNTS_JSON" | jq -e 'type == "object"' >/dev/null 2>&1; then
+          echo "ERROR: mounts_json must be a JSON object." >&2
+          exit 1
+        fi
+
+        compose_stderr=$(mktemp)
+        trap 'rm -f "$compose_stderr"' EXIT
+
+        echo "Rendering compose config from ${INPUT_COMPOSE_FILE} ..."
+        compose_json=""
+        compose_invalid=false
+        compose_json=$(docker compose -f "$INPUT_COMPOSE_FILE" config --format json 2>"$compose_stderr") \
+          || compose_invalid=true
+        compose_error=$(cat "$compose_stderr")
+
+        errors=()
+        service_count=0
+
+        while IFS=$'\t' read -r svc key; do
+          service_count=$((service_count + 1))
+
+          has_mounts=true
+          [[ -n "$key" ]] || has_mounts=false
+
+          if $compose_invalid; then
+            errors+=("$svc: compose config invalid: ${compose_error}")
+            continue
+          fi
+
+          # Verify the key exists in mounts_json
+          if $has_mounts && ! echo "$INPUT_MOUNTS_JSON" | jq -e --arg k "$key" '.[$k]' >/dev/null 2>&1; then
+            errors+=("$svc: key '$key' not found in mounts config")
+            continue
+          fi
+
+          # Check read_only: true
+          read_only=$(echo "$compose_json" | jq -r --arg s "$svc" '.services[$s].read_only // false')
+          [[ "$read_only" == "true" ]] || errors+=("$svc: missing read_only: true")
+
+          if $has_mounts; then
+            # Check each expected path/size from the mounts config
+            while IFS=$'\t' read -r path size_mib; do
+              expected=$(( size_mib * MIB ))
+              actual=$(echo "$compose_json" | jq -r --arg s "$svc" --arg p "$path" \
+                '.services[$s].tmpfs[]? | select(startswith($p + ":")) | split("=")[-1]')
+              if [[ -z "$actual" ]]; then
+                errors+=("$svc: missing tmpfs path $path")
+              elif [[ "$actual" != "$expected" ]]; then
+                errors+=("$svc: $path size ${actual} bytes != expected ${expected} bytes ($((expected / MIB)) MiB)")
+              fi
+            done < <(echo "$INPUT_MOUNTS_JSON" | jq -r --arg k "$key" '.[$k].tmpfs[] | [.containerPath, (.size | tostring)] | @tsv')
+          fi
+
+          # Check for unexpected tmpfs paths in compose
+          while IFS= read -r actual_path; do
+            if $has_mounts; then
+              found=$(echo "$INPUT_MOUNTS_JSON" | jq -r --arg k "$key" --arg p "$actual_path" \
+                'any(.[$k].tmpfs[]; .containerPath == $p) | tostring')
+              [[ "$found" == "true" ]] || errors+=("$svc: unexpected tmpfs path $actual_path (not in mounts config). Update in infrastructure if intended.")
+            else
+              errors+=("$svc: unexpected tmpfs path $actual_path (no tmpfs expected for this service). Update in infrastructure if intended.")
+            fi
+          done < <(echo "$compose_json" | jq -r --arg s "$svc" '.services[$s].tmpfs[]? | split(":")[0]')
+        done < <(echo "$INPUT_SERVICE_JSON" | jq -r 'to_entries[] | [.key, (.value // "")] | @tsv')
+
+        {
+          echo "errors<<EOF"
+          if [[ ${#errors[@]} -gt 0 ]]; then
+            printf '%s\n' "${errors[@]}"
+          fi
+          echo "EOF"
+        } >> "$GITHUB_OUTPUT"
+
+        if [[ ${#errors[@]} -gt 0 ]]; then
+          echo "passed=false" >> "$GITHUB_OUTPUT"
+          echo "FAIL: readonly filesystem config mismatch:"
+          printf '  %s\n' "${errors[@]}"
+          exit 1
+        fi
+
+        echo "passed=true" >> "$GITHUB_OUTPUT"
+        echo "OK: all ${service_count} services have correct read_only and tmpfs config"
