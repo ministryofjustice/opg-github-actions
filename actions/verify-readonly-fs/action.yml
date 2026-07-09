@@ -1,44 +1,15 @@
 name: "Verify Read-only Filesystem"
-description: >
-  Verifies that the read-only filesystem configuration in a docker compose file
-  matches the tmpfs mount configuration used by ECS.
-
-  For each service in the `service_json` mapping it checks that:
-    - the compose service has `read_only: true`
-    - every tmpfs path/size declared in the mounts config is present in compose
-      with the matching byte size
-    - the compose service has no extra tmpfs paths that are missing from the
-      mounts config
-
-  The action fails when any mismatch is found and lists every problem.
-
-  The caller is responsible for fetching the mounts config and passing it in
-  as `mounts_json` (e.g. from SSM or a local file).
+description: >-
+  Verifies that read_only and tmpfs config in a docker compose file matches the
+  ECS mounts config. See actions/verify-readonly-fs/README.md for full usage.
 
 inputs:
   service_json:
-    description: >
-      JSON object mapping each docker compose service name to its key in the
-      mounts config. The key is the basename of the infrastructure mounts JSON
-      file without the .json extension.
-
-      Set the value to null for services that have no tmpfs mounts - only read_only: true will be verified for
-      those services.
-
-        {
-          "api-app": "api-app",
-          "queue": "queue-consumer",
-          "api": "nginx",
-          "frontend": "nginx",
-          "finance-hub": null
-        }
+    description: "JSON object mapping compose service name to its mounts_json key, or null for services with no tmpfs."
     required: true
 
   mounts_json:
-    description: >
-      JSON object containing the ECS tmpfs mount config, keyed by service name.
-      Typically sourced from SSM (`aws ssm get-parameter --query Parameter.Value`)
-      but can come from any source.
+    description: "JSON object containing the ECS tmpfs mount config, keyed by service name."
     required: true
 
   compose_file:
