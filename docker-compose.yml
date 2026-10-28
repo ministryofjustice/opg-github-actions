@@ -1,6 +1,6 @@
 services:
   snyk:
-    image: 311462405659.dkr.ecr.eu-west-1.amazonaws.com/shared/snyk:cli-1.1303.2-v0.3.0
+    image: 311462405659.dkr.ecr.eu-west-1.amazonaws.com/shared/snyk:cli-1.1308.3-v0.3.2
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
