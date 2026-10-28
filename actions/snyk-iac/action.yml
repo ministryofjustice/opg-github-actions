@@ -32,7 +32,7 @@ inputs:
 
   snyk_image_tag:
     description: "The tag of the OPG snyk image to run."
-    required: false
+    required: true
 
   snyk_test_args:
     description: "Additional arguments to pass to snyk test. IAC test commands can be found here https://docs.snyk.io/developer-tools/snyk-cli/commands/iac-test"
