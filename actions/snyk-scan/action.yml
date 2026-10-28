@@ -35,7 +35,6 @@ inputs:
   snyk_image_tag:
     description: "The tag of the OPG snyk image to run."
     required: false
-    default: "cli-1.1308.3-v0.3.2"
 
   snyk_test_args:
     description: "Additional arguments to pass to snyk test. Container test commands can be found here https://docs.snyk.io/developer-tools/snyk-cli/commands/container-test"
