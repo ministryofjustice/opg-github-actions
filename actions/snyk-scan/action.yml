@@ -32,6 +32,11 @@ inputs:
     required: false
     default: "./.snyk"
 
+  snyk_image_tag:
+    description: "The tag of the OPG snyk image to run."
+    required: false
+    default: "cli-1.1308.3-v0.3.2"
+
   snyk_test_args:
     description: "Additional arguments to pass to snyk test. Container test commands can be found here https://docs.snyk.io/developer-tools/snyk-cli/commands/container-test"
     required: false
@@ -45,6 +50,7 @@ runs:
       env:
         SNYK_TEST_IMAGE: ${{ inputs.SNYK_TEST_IMAGE }}
         SNYK_TOKEN: ${{ inputs.SNYK_TOKEN }}
+        SNYK_IMAGE_TAG: ${{ inputs.snyk_image_tag }}
       run: |
         BEFORE="$(${{ github.action_path }}/../../scripts/image-identity.sh ${SNYK_TEST_IMAGE})"
 
