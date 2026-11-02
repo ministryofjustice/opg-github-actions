@@ -30,6 +30,10 @@ inputs:
     required: false
     default: "./.snyk"
 
+  snyk_image_tag:
+    description: "The tag of the OPG snyk image to run."
+    required: true
+
   snyk_test_args:
     description: "Additional arguments to pass to snyk test. IAC test commands can be found here https://docs.snyk.io/developer-tools/snyk-cli/commands/iac-test"
     required: false
@@ -42,6 +46,7 @@ runs:
       shell: bash
       env:
         SNYK_TOKEN: ${{ inputs.SNYK_TOKEN }}
+        SNYK_IMAGE_TAG: ${{ inputs.snyk_image_tag }}
       run: |
         mkdir -p "${{ inputs.sarif_filepath }}"
         docker compose -f "${{ github.action_path }}/../../docker-compose.yml" run --rm \
