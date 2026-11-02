@@ -5,6 +5,7 @@ go 1.27.3
 require (
 	github.com/go-git/go-git/v5 v5.19.2
 	github.com/google/go-github/v74 v74.0.0
+	github.com/google/go-github/v93 v93.0.0
 	github.com/maruel/natural v1.3.0
 )
 
